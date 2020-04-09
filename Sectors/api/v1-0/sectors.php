@@ -66,9 +66,9 @@
                 $id = $_GET['id'];
                 $query = "UPDATE sectors SET SectorName = '$sector' WHERE IdSector = $id;";
                 $dbConnection->beginTransaction();//starts a transaction in the database
-                $insert = $dbConnection->prepare($query);
+                $update = $dbConnection->prepare($query);
                 try {//try to complete the modification
-                    $insert->execute();
+                    $update->execute();
                     $dbConnection->commit();//it's everything ok
                     header("HTTP/1.0 200 Modified"); //this indicates to the client that the reecord was modified
                 }catch (Exception $e) {//the modification fails then
