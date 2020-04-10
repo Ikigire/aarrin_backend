@@ -23,7 +23,7 @@
                 }
             }else{/**Id not exist, then it's a request for the whole information */
 
-                $query = "SELECT IdCompany, IdSector, CompanyName, CompanyRFC, CompanyAddress, CompanyWebsite, AES_DECRYPT(CompanyPassword,'@Compa') FROM companies; ";//it create the query for the server
+                $query = "SELECT IdCompany, IdSector, CompanyName, CompanyRFC, CompanyAddress, CompanyWebsite FROM companies; ";//it create the query for the server
                 $consult = $dbConnection->prepare($query);//this line prepare the query for execute
                 $consult->execute();//execute the query
                 if ($consult->rowCount()) {
