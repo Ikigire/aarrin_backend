@@ -1,5 +1,12 @@
 <?php
     header('Access-Control-Allow-Origin: *');
+    header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
+    header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+    header("Allow: GET, POST, OPTIONS, PUT, DELETE");
+    $method = $_SERVER['REQUEST_METHOD'];
+    if ($method == "OPTIONS") {
+        die();
+    }
     include("../../../Config/Connection.php");
     
     /**Function to create a validation code  */
@@ -27,9 +34,11 @@
             try {//it's all ok
                 $insert->execute();
                 $dbConnection->commit();
+                header("Access-Control-Allow-Origin: *");
                 header("HTTP/1.0 200 Created"); //this indicates to the client that the new record was created
             } catch (Exception $e) {//somthing went wrong
                 $dbConnection->rollBack();
+                header("Access-Control-Allow-Origin: *");
                 header("HTTP/1.0 500 Internal Server Error");//info for the client
                 exit();
             }

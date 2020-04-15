@@ -1,5 +1,8 @@
 <?php
     header('Access-Control-Allow-Origin: *');
+    header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
+    header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+    header("Allow: GET, POST, OPTIONS, PUT, DELETE");
     include("../../../Config/Connection.php");
     //Function to erase a validation code
     function eraseCode(object $connection, int $id){
@@ -35,7 +38,7 @@
                 }elseif ($dif->h) {
                     eraseCode($dbConnection, $validationKey['IdKey']);
                     echo json_encode(createAnswer(false));
-                }elseif ($dif->m > 5) {
+                }elseif ($dif->i > 5) {
                     eraseCode($dbConnection, $validationKey['IdKey']);
                     echo json_encode(createAnswer(false));
                 }else {
