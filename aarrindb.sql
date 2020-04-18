@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 09-04-2020 a las 14:12:13
+-- Tiempo de generación: 18-04-2020 a las 09:53:44
 -- Versión del servidor: 10.4.8-MariaDB
 -- Versión de PHP: 7.3.11
 
@@ -148,6 +148,13 @@ CREATE TABLE `validation_keys` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
+-- Volcado de datos para la tabla `validation_keys`
+--
+
+INSERT INTO `validation_keys` (`IdKey`, `ValidationCode`, `ValidationDate`, `ValidationEmail`) VALUES
+(154, 'Q49I4E', '2020-04-17 20:33:16', 'asm_1995@outlook.com');
+
+--
 -- Índices para tablas volcadas
 --
 
@@ -203,7 +210,7 @@ ALTER TABLE `sectors`
 -- AUTO_INCREMENT de la tabla `validation_keys`
 --
 ALTER TABLE `validation_keys`
-  MODIFY `IdKey` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=110;
+  MODIFY `IdKey` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=163;
 
 --
 -- Restricciones para tablas volcadas
