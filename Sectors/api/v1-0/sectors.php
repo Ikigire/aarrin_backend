@@ -28,7 +28,7 @@
             }
             else{/**the request don't have an Id, then it's a request for the whole information */
                 
-                $query = "SELECT * FROM sectors";//it create the query for the server
+                $query = "SELECT * FROM sectors ORDER BY SectorName";//it create the query for the server
                 $consult = $dbConnection->prepare($query);
                 $consult->execute();
                 $consult->setFetchMode(PDO::FETCH_ASSOC); //this comand sets the fetch mode in association for the best way to put the data

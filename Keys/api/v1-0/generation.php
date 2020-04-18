@@ -25,10 +25,12 @@
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if (isset($_POST['email'])) {
             $to = $_POST['email'];
+            $date = new DateTime("now");
+            $currentDate = $date->format('Y-m-d H:i:s');
             //get a new code
             $code = createCode();
             //Register the code for validation
-            $query = "INSERT INTO validation_keys(ValidationCode, ValidationEmail) VALUES('$code', '$to')";
+            $query = "INSERT INTO validation_keys(ValidationCode, ValidationDate, ValidationEmail) VALUES('$code', '$currentDate', '$to')";
             $dbConnection->beginTransaction();
             $insert = $dbConnection->prepare($query);
             try {//it's all ok
