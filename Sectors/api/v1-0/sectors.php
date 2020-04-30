@@ -41,18 +41,22 @@
 
 /**-----Post request (request for create a new sector; it just needs the sector type) ---------------------------------------------------------------------------------------*/
         case 'POST':
-            if(isset($_POST['sector'])){
-                $sector = $_POST['sector'];//get the sended data
-                $query = "INSERT INTO sectors(SectorName) VALUES ('$sector');";
-                $dbConnection->beginTransaction();//starts a transaction in the database
-                $insert = $dbConnection->prepare($query);//prepare the statement
-                try{//try to complete the insertion
-                    $insert->execute();
-                    $dbConnection->commit();//it's everything ok
-                    header("HTTP/1.0 200 Created"); //this indicates to the client that the new record was created
-                }catch (Exception $e){//the insertion fails then
-                    $dbConnection->rollBack();//make rollback the database
-                    header("HTTP/1.0 500 Internal Server Error");//info for the client
+            if(isset($_POST['sector']) && isset($_POST['t'])){
+                if (TokenTool::isValid($_POST['t'])){
+                    $sector = $_POST['sector'];//get the sended data
+                    $query = "INSERT INTO sectors(SectorName) VALUES ('$sector');";
+                    $dbConnection->beginTransaction();//starts a transaction in the database
+                    $insert = $dbConnection->prepare($query);//prepare the statement
+                    try{//try to complete the insertion
+                        $insert->execute();
+                        $dbConnection->commit();//it's everything ok
+                        header("HTTP/1.0 200 Created"); //this indicates to the client that the new record was created
+                    }catch (Exception $e){//the insertion fails then
+                        $dbConnection->rollBack();//make rollback the database
+                        header("HTTP/1.0 500 Internal Server Error");//info for the client
+                    }
+                }else{
+                    header("HTTP/1.0 401 Unauthorized"); //the request don't complete the preconditions
                 }
                 exit();
             }
@@ -64,19 +68,23 @@
 
 /**-----Put request (request for change information in the table; it needs the new sector type and the Id) ------------------------------------------------------------------*/
         case 'PUT':
-            if(isset($_GET['sector']) && isset($_GET['id'])){
-                $sector = $_GET['sector'];
-                $id = $_GET['id'];
-                $query = "UPDATE sectors SET SectorName = '$sector' WHERE IdSector = $id;";
-                $dbConnection->beginTransaction();//starts a transaction in the database
-                $update = $dbConnection->prepare($query);
-                try {//try to complete the modification
-                    $update->execute();
-                    $dbConnection->commit();//it's everything ok
-                    header("HTTP/1.0 200 Modified"); //this indicates to the client that the reecord was modified
-                }catch (Exception $e) {//the modification fails then
-                    $dbConnection->rollBack();//get rollback the database
-                    header("HTTP/1.0 500 Internal Server Error");//info for the client
+            if(isset($_GET['sector']) && isset($_GET['id']) && isset($_GET['t'])){
+                if (TokenTool::isValid($_GET['t'])){
+                    $sector = $_GET['sector'];
+                    $id = $_GET['id'];
+                    $query = "UPDATE sectors SET SectorName = '$sector' WHERE IdSector = $id;";
+                    $dbConnection->beginTransaction();//starts a transaction in the database
+                    $update = $dbConnection->prepare($query);
+                    try {//try to complete the modification
+                        $update->execute();
+                        $dbConnection->commit();//it's everything ok
+                        header("HTTP/1.0 200 Modified"); //this indicates to the client that the reecord was modified
+                    }catch (Exception $e) {//the modification fails then
+                        $dbConnection->rollBack();//get rollback the database
+                        header("HTTP/1.0 500 Internal Server Error");//info for the client
+                    }
+                }else{
+                    header("HTTP/1.0 401 Unauthorized"); //the request don't complete the preconditions
                 }
                 exit();
             }

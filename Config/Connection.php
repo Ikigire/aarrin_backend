@@ -1,5 +1,7 @@
 <?php
     include("Config.php");
+    //Tools required
+    require_once(__DIR__.'/../Tools/TokenTool.php');
 
     $host = $config['host'];
     $dataBase = $config['dataBase'];

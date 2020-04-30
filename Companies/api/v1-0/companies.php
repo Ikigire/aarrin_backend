@@ -18,27 +18,37 @@
                     $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
                     header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
                     header('Content-Type: application/json'); //now define the content type to get back
-                    echo json_encode($consult->fetchAll()); //to finalize the server return the data
+                    $companyData = $consult->fetchAll()[0];
+                    $dataForToken = array(
+                        'IdCompany' => $companyData['IdCompany'],
+                        'CompanyName' => $companyData['CompanyName'],
+                        'CompanyRFC' => $companyData['CompanyRFC']
+                    );
+                    $companyData['Token'] = TokenTool::createToken($dataForToken);
+                    echo json_encode($companyData); //to finalize the server return the data
                     exit();
                 }else{//if there isn't any result for the query
                     header("HTTP/1.0 404 Not found");//the server advice to not found result
                     exit();
                 }
-            }else{/**Id not exist, then it's a request for the whole information */
-
-                $query = "SELECT IdCompany, IdSector, CompanyName, CompanyRFC, CompanyAddress, CompanyWebsite FROM companies; ";//it create the query for the server
-                $consult = $dbConnection->prepare($query);//this line prepare the query for execute
-                $consult->execute();//execute the query
-                if ($consult->rowCount()) {
-                    $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
-                    header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
-                    header('Content-Type: application/json'); //now define the content type to get back
-                    echo json_encode($consult->fetchAll()); //to finalize the server return the data
-                    exit();
-                }else{
-                    header("HTTP/1.0 500 Internal server error");//the server advice to not found result
-                    exit();
+            }else{/**RFC doesn't exist, then it's a request for the whole information */
+                if (TokenTool::isValid($_GET['t'])){
+                    $query = "SELECT IdCompany, IdSector, CompanyName, CompanyRFC, CompanyAddress, CompanyWebsite FROM companies; ";//it create the query for the server
+                    $consult = $dbConnection->prepare($query);//this line prepare the query for execute
+                    $consult->execute();//execute the query
+                    if ($consult->rowCount()) {
+                        $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
+                        header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
+                        header('Content-Type: application/json'); //now define the content type to get back
+                        echo json_encode($consult->fetchAll()); //to finalize the server return the data
+                    }else{
+                        header("HTTP/1.0 500 Internal server error");//the server advice to not found result
+                    }
                 }
+                else {
+                    header("HTTP/1.0 401 Unauthorized");
+                }
+                exit();
             }
             break;
 
@@ -79,28 +89,33 @@
 
 /**-----Put request (request for change information in the table) -----------------------------------------------------------------------------------------------------------*/
         case 'PUT':
-            if(isset($_GET['id']) && isset($_GET['sector']) && isset($_GET['name']) && isset($_GET['rfc']) && isset($_GET['address'])){
-                //get the sended data
-                $id = $_GET['id'];
-                $sector = $_GET['sector'];
-                $companyName = $_GET['name'];
-                $companyRFC = $_GET['rfc'];
-                $companyAddress = $_GET['address'];
-                if(isset($_GET['website'])){
-                    $companyWebsite = $_GET['website'];
-                    $query = "INSERT INTO companies(IdSector, CompanyName, CompanyRFC, CompanyAddress, CompanyWebsite) VALUES ($sector, '$companyName', '$companyRFC', '$companyAddress', '$companyWebsite');";//prepare the query including the website
-                }else{
-                    $query = "INSERT INTO companies(IdSector, CompanyName, CompanyRFC, CompanyAddress) VALUES ($sector, '$companyName', '$companyRFC', '$companyAddress');";//prepare the query without the website
+            if(isset($_GET['id']) && isset($_GET['sector']) && isset($_GET['name']) && isset($_GET['rfc']) && isset($_GET['address']) && isset($_GET['t'])){
+                if (TokenTool::isValid($_GET['t'])){
+                    //get the sended data
+                    $id = $_GET['id'];
+                    $sector = $_GET['sector'];
+                    $companyName = $_GET['name'];
+                    $companyRFC = $_GET['rfc'];
+                    $companyAddress = $_GET['address'];
+                    if(isset($_GET['website'])){
+                        $companyWebsite = $_GET['website'];
+                        $query = "INSERT INTO companies(IdSector, CompanyName, CompanyRFC, CompanyAddress, CompanyWebsite) VALUES ($sector, '$companyName', '$companyRFC', '$companyAddress', '$companyWebsite');";//prepare the query including the website
+                    }else{
+                        $query = "INSERT INTO companies(IdSector, CompanyName, CompanyRFC, CompanyAddress) VALUES ($sector, '$companyName', '$companyRFC', '$companyAddress');";//prepare the query without the website
+                    }
+                    $dbConnection->beginTransaction();//starts a transaction in the database
+                    $update = $dbConnection->prepare($query);//prepare the statement
+                    try {//try to complete the modification
+                        $update->execute();//execute the statement
+                        $dbConnection->commit();//it's everything ok
+                        header("HTTP/1.0 200 Modified"); //this indicates to the client that the reecord was modified
+                    }catch (Exception $e) {//the modification fails then
+                        $dbConnection->rollBack();//get back the database
+                        header("HTTP/1.0 500 Internal Server Error");//info for the client
+                    }
                 }
-                $dbConnection->beginTransaction();//starts a transaction in the database
-                $update = $dbConnection->prepare($query);//prepare the statement
-                try {//try to complete the modification
-                    $update->execute();//execute the statement
-                    $dbConnection->commit();//it's everything ok
-                    header("HTTP/1.0 200 Modified"); //this indicates to the client that the reecord was modified
-                }catch (Exception $e) {//the modification fails then
-                    $dbConnection->rollBack();//get back the database
-                    header("HTTP/1.0 500 Internal Server Error");//info for the client
+                else{
+                    header("HTTP/1.0 401 Unauthorized");
                 }
                 exit();
             }
@@ -110,12 +125,39 @@
             }
             break;
 
-        /*case '':
-            # code...
+
+/**-----Patch request (request for change company logo in the table) -----------------------------------------------------------------------------------------------------------*/
+        case 'PATCH':
+            if(isset($_GET['t'])){
+                if (TokenTool::isValid($_GET['t'])){
+                    //
+                    //Code for change the company logo
+                    $query = '';
+                    //
+                    $dbConnection->beginTransaction();//starts a transaction in the database
+                    $update = $dbConnection->prepare($query);//prepare the statement
+                    try {//try to complete the modification
+                        $update->execute();//execute the statement
+                        $dbConnection->commit();//it's everything ok
+                        header("HTTP/1.0 200 Modified"); //this indicates to the client that the reecord was modified
+                    }catch (Exception $e) {//the modification fails then
+                        $dbConnection->rollBack();//get back the database
+                        header("HTTP/1.0 500 Internal Server Error");//info for the client
+                    }
+                }
+                else{
+                    header("HTTP/1.0 401 Unauthorized");
+                }
+                exit();
+            }
+            else{
+                header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions
+                exit();
+            }
             break;
-        */
+        
         default:
-            header("HTTP/1.0 405 Allow; GET, POST, PUT");
+            header("HTTP/1.0 405 Allow; GET, POST, PUT, PATCH");
             exit();
             break;
     }
