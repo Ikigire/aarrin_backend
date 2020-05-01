@@ -6,34 +6,44 @@
     include("../../../Config/Connection.php");
 
     switch ($_SERVER['REQUEST_METHOD']) {
-/**-----Get request (request of the whole information or just one of them; all data in the table of Sectors) ----------------------------------------------------------------*/
+/**-----Get request (request of the whole information or just one of them; all data in the table) ----------------------------------------------------------------*/
         case 'GET':
-            if(isset($_GET['rfc']) && isset($_GET['password'])){//If is a request to log-in
-                $companyRFC = $_GET['rfc'];
-                $companyPassword = $_GET['password'];
-                $query = "SELECT IdCompany, IdSector, CompanyName, CompanyRFC, CompanyAddress, CompanyWebsite, AES_DECRYPT(CompanyPassword,'@Company') AS 'CompanyPassword' FROM companies WHERE CompanyRFC='$companyRFC' AND `CompanyPassword`= AES_ENCRYPT('$companyPassword', '@Company')"; //it create the query for the server
+            if(isset($_GET['email']) && isset($_GET['password'])){//If is a request to log-in
+                $employeeEmail = $_GET['email'];
+                $employeePassword = $_GET['password'];
+                $query = "SELECT IdEmployee, EmployeeName, EmployeeLastName, EmployeeDegree, EmployeeBirth, EmployeeContractYear, EmployeeCharge, EmployeeAddress, EmployeePhone, EmployeeEmail, EmployeeInsurance, EmployeeRFC, AES_DECRYPT(EmployeePassword, '@Empleado') AS 'EmployeePassword', EmployeePhoto FROM personal WHERE EmployeeEmail = '$employeeEmail' AND EmployeePassword = AES_ENCRYPT('$employeePassword','@Empleado')";
                 $consult = $dbConnection->prepare($query); //this line prepare the query for execute
-                $consult->execute(); //execute the query
+                $consult->execute();
                 if($consult->rowCount()){//if is there any result for the query then
                     $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
+                    $employeeData = $consult->fetchAll()[0];
+                    $query = "SELECT Role_Type FROM roles WHERE IdEmployee =". $employeeData['IdEmployee'];
+                    $roleSearch = $dbConnection->prepare($query);
+                    $roleSearch->execute();
+                    $roleSearch->setFetchMode(PDO::FETCH_ASSOC);
+                    $availableRoles = $roleSearch->fetchAll();
+                    $dataForToken = array(
+                        'IdEmployee' => $employeeData['IdEmployee'],
+                        'EmployeeName' => $employeeData['EmployeeName'].' '.$employeeData['EmployeeLastName'],
+                        'EmployeeRFC' => $employeeData['EmployeeRFC'],
+                        'EmployeeEmail' => $employeeData['EmployeeEmail']
+                    );
+                    $employeeData['Token'] = TokenTool::createToken($dataForToken);
+                    $loginInfo = array(
+                        'Employee' => $employeeData,
+                        'AvailableRoles' => $availableRoles
+                    );
                     header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
                     header('Content-Type: application/json'); //now define the content type to get back
-                    $companyData = $consult->fetchAll()[0];
-                    $dataForToken = array(
-                        'IdCompany' => $companyData['IdCompany'],
-                        'CompanyName' => $companyData['CompanyName'],
-                        'CompanyRFC' => $companyData['CompanyRFC']
-                    );
-                    $companyData['Token'] = TokenTool::createToken($dataForToken);
-                    echo json_encode($companyData); //to finalize the server return the data
+                    echo json_encode($loginInfo); //to finalize the server return the data
                     exit();
                 }else{//if there isn't any result for the query
                     header("HTTP/1.0 404 Not found");//the server advice to not found result
                     exit();
                 }
-            }else{/**RFC doesn't exist, then it's a request for the whole information */
+            }else{/**email doesn't exist, then it's a request for the whole information */
                 if (isset($_GET['t']) && TokenTool::isValid($_GET['t'])){
-                    $query = "SELECT IdCompany, IdSector, CompanyName, CompanyRFC, CompanyAddress, CompanyWebsite FROM companies; ";//it create the query for the server
+                    $query = "SELECT IdEmployee, EmployeeName, EmployeeLastName, EmployeeDegree, EmployeeBirth, EmployeeContractYear, EmployeeCharge, EmployeeAddress, EmployeePhone, EmployeeEmail, EmployeeInsurance, EmployeeRFC, EmployeePhoto FROM personal;";
                     $consult = $dbConnection->prepare($query);//this line prepare the query for execute
                     $consult->execute();//execute the query
                     if ($consult->rowCount()) {
@@ -53,30 +63,40 @@
             break;
 
 
-/**-----Post request (request for create a new companie) --------------------------------------------------------------------------------------------------------------------*/
+/**-----Post request (request for create a new employee (Admin)) --------------------------------------------------------------------------------------------------------------------*/
         case 'POST':
-            if(isset($_POST['sector']) && isset($_POST['name']) && isset($_POST['rfc']) && isset($_POST['address']) && isset($_POST['password'])){
-                //get the sended data
-                $sector = $_POST['sector'];
-                $companyName = $_POST['name'];
-                $companyRFC = $_POST['rfc'];
-                $companyAddress = $_POST['address'];
-                $companyPassword = $_POST['password'];
-                if(isset($_POST['website'])){
-                    $companyWebsite = $_POST['website'];
-                    $query = "INSERT INTO companies(IdSector, CompanyName, CompanyRFC, CompanyAddress, CompanyWebsite, CompanyPassword) VALUES ($sector, '$companyName', '$companyRFC', '$companyAddress', '$companyWebsite', AES_ENCRYPT('$companyPassword','@Company'));";//prepare the query including the website
-                }else{
-                    $query = "INSERT INTO companies(IdSector, CompanyName, CompanyRFC, CompanyAddress, CompanyPassword) VALUES ($sector, '$companyName', '$companyRFC', '$companyAddress', AES_ENCRYPT('$companyPassword','@Company'));";//prepare the query without the website
+            if(isset($_POST['name']) && isset($_POST['lastname']) && isset($_POST['contract']) && isset($_POST['charge']) && isset($_POST['email']) && isset($_POST['rfc']) && isset($_POST['t'])){
+                if (TokenTool::isValid($_POST['t'])){
+                    //get the sended data
+                    $employeeName = $_POST['name'];
+                    $employeeLastName = $_POST['lastname'];
+                    $employeeContractYear = $_POST['contract'];
+                    $employeeCharge = $_POST['charge'];
+                    $employeeEmail = $_POST['email'];
+                    $employeeRFC = $_POST['rfc'];
+                    
+                    $STR = 'QWERTYUIOPASDFGHJKLZXCVBNM0123456789/*-+.$?';
+                    $employeePassword = '';
+
+                    for ($i=0; $i < 8; $i++) {
+                        $employeePassword .= substr($STR, rand(0,42),1);
+                    }
+
+                    $query = "INSERT INTO personal(EmployeeName, EmployeeLastName, EmployeeDegree, EmployeeBirth, EmployeeContractYear, EmployeeCharge, EmployeeAddress, EmployeePhone, EmployeeEmail, EmployeeInsurance, EmployeeRFC, EmployeePassword) VALUES ('$employeeName', '$employeeLastName', '', '0000-00-00', $employeeContractYear, '$employeeCharge', '', '', '$employeeEmail', '', '$companyRFC', AES_ENCRYPT('$companyPassword','@Empleado'));";
+
+                    $dbConnection->beginTransaction();//starts a transaction in the database
+                    $insert = $dbConnection->prepare($query);//prepare the statement
+                    try{//try to complete the insertion
+                        $insert->execute();//execute the statement
+                        $dbConnection->commit();//it's everything ok
+                        header("HTTP/1.0 200 Created"); //this indicates to the client that the new record
+                    }catch (Exception $e){//the insertion fails then
+                        $dbConnection->rollBack();//get back the database
+                        header("HTTP/1.0 500 Internal Server Error");//info for the client
+                    }
                 }
-                $dbConnection->beginTransaction();//starts a transaction in the database
-                $insert = $dbConnection->prepare($query);//prepare the statement
-                try{//try to complete the insertion
-                    $insert->execute();//execute the statement
-                    $dbConnection->commit();//it's everything ok
-                    header("HTTP/1.0 200 Created"); //this indicates to the client that the new record
-                }catch (Exception $e){//the insertion fails then
-                    $dbConnection->rollBack();//get back the database
-                    header("HTTP/1.0 500 Internal Server Error");//info for the client
+                else{
+                    header("HTTP/1.0 401 Unauthorized");
                 }
                 exit();
             }
@@ -161,4 +181,3 @@
             exit();
             break;
     }
-?>
