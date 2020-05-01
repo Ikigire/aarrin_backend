@@ -2,7 +2,7 @@
     header('Access-Control-Allow-Origin: *');
     header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
     header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
-    header("Allow: GET, POST, OPTIONS, PUT, DELETE");
+    header("Allow: GET, POST, OPTIONS, PUT, PATCH, DELETE");
     include("../../../Config/Connection.php");
 
     switch ($_SERVER['REQUEST_METHOD']) {
@@ -99,9 +99,9 @@
                     $companyAddress = $_GET['address'];
                     if(isset($_GET['website'])){
                         $companyWebsite = $_GET['website'];
-                        $query = "INSERT INTO companies(IdSector, CompanyName, CompanyRFC, CompanyAddress, CompanyWebsite) VALUES ($sector, '$companyName', '$companyRFC', '$companyAddress', '$companyWebsite');";//prepare the query including the website
+                        $query = "UPDATE companies SET IdSector = $sector, CompanyName = '$companyName', CompanyRFC = '$companyRFC', CompanyAddress = '$companyAddress', CompanyWebsite = '$companyWebsite' WHERE IdCompany = $id;";//prepare the query including the website
                     }else{
-                        $query = "INSERT INTO companies(IdSector, CompanyName, CompanyRFC, CompanyAddress) VALUES ($sector, '$companyName', '$companyRFC', '$companyAddress');";//prepare the query without the website
+                        $query = "UPDATE companies SET IdSector = $sector, CompanyName = '$companyName', CompanyRFC = '$companyRFC', CompanyAddress = '$companyAddress' WHERE IdCompany = $id;";//prepare the query without the website
                     }
                     $dbConnection->beginTransaction();//starts a transaction in the database
                     $update = $dbConnection->prepare($query);//prepare the statement

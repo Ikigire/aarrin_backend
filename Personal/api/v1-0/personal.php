@@ -2,7 +2,7 @@
     header('Access-Control-Allow-Origin: *');
     header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
     header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
-    header("Allow: GET, POST, OPTIONS, PUT, DELETE");
+    header("Allow: GET, POST, OPTIONS, PUT, PATCH, DELETE");
     include("../../../Config/Connection.php");
 
     switch ($_SERVER['REQUEST_METHOD']) {
@@ -17,11 +17,7 @@
                 if($consult->rowCount()){//if is there any result for the query then
                     $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
                     $employeeData = $consult->fetchAll()[0];
-                    $query = "SELECT Role_Type FROM roles WHERE IdEmployee =". $employeeData['IdEmployee'];
-                    $roleSearch = $dbConnection->prepare($query);
-                    $roleSearch->execute();
-                    $roleSearch->setFetchMode(PDO::FETCH_ASSOC);
-                    $availableRoles = $roleSearch->fetchAll();
+                    
                     $dataForToken = array(
                         'IdEmployee' => $employeeData['IdEmployee'],
                         'EmployeeName' => $employeeData['EmployeeName'].' '.$employeeData['EmployeeLastName'],
@@ -29,13 +25,9 @@
                         'EmployeeEmail' => $employeeData['EmployeeEmail']
                     );
                     $employeeData['Token'] = TokenTool::createToken($dataForToken);
-                    $loginInfo = array(
-                        'Employee' => $employeeData,
-                        'AvailableRoles' => $availableRoles
-                    );
                     header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
                     header('Content-Type: application/json'); //now define the content type to get back
-                    echo json_encode($loginInfo); //to finalize the server return the data
+                    echo json_encode($employeeData); //to finalize the server return the data
                     exit();
                 }else{//if there isn't any result for the query
                     header("HTTP/1.0 404 Not found");//the server advice to not found result
@@ -109,7 +101,7 @@
 
 /**-----Put request (request for change information in the table) -----------------------------------------------------------------------------------------------------------*/
         case 'PUT':
-            if(isset($_GET['id']) && isset($_GET['sector']) && isset($_GET['name']) && isset($_GET['rfc']) && isset($_GET['address']) && isset($_GET['t'])){
+        if (isset($_POST['name']) && isset($_POST['lastname']) && isset($_POST['contract']) && isset($_POST['charge']) && isset($_POST['email']) && isset($_POST['rfc']) && isset($_POST['t'])) {
                 if (TokenTool::isValid($_GET['t'])){
                     //get the sended data
                     $id = $_GET['id'];
@@ -146,7 +138,7 @@
             break;
 
 
-/**-----Patch request (request for change company logo in the table) -----------------------------------------------------------------------------------------------------------*/
+/**-----Patch request (request for change employee photo in the table) -----------------------------------------------------------------------------------------------------------*/
         case 'PATCH':
             if(isset($_GET['t'])){
                 if (TokenTool::isValid($_GET['t'])){

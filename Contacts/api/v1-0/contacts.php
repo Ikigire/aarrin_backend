@@ -41,39 +41,48 @@
             break;
 
         case 'POST':
-            if(isset($_POST['idCompany']) && isset($_POST['name']) && isset($_POST['phone']) && isset($_POST['email']) && isset($_POST['charge'])){
+            if (isset($_POST['idCompany']) && isset($_POST['name']) && isset($_POST['phone']) && isset($_POST['email']) && isset($_POST['charge']) && isset($_POST['main'])) {
                 //get the sended data
                 $companyId = $_POST['idCompany'];
                 $contactName = $_POST['name'];
                 $contactPhone = $_POST['phone'];
                 $contactEmail = $_POST['email'];
                 $contactCharge = $_POST['charge'];
-                if(isset($_POST['main'])){
-                    $mainContact = $_POST['main'];
-                    $query = "INSERT INTO contacts(IdCompany, MainContact, ContactName, ContactPhone, ContactEmail, ContactCharge) VALUES ($companyId, $mainContact, '$contactName', '$contactPhone', '$contactEmail', '$contactCharge');";//prepare the query including to make this contact the main
-                }else{
-                    $query = "INSERT INTO contacts(IdCompany, ContactName, ContactPhone, ContactEmail, ContactCharge) VALUES ($CompanyId, '$contactName', '$contactPhone', '$contactEmail', '$contactCharge');";//prepare the query without the website
+                $mainContact = $_POST['main'];
+
+                $dbConnection->beginTransaction(); //starts a transaction in the database
+
+                if ($mainContact) {
+                    //to ensure that the new contact will convert in the only main contact of the company
+                    $query = "UPDATE contacts SET MainContact = 0 WHERE IdCompany = $companyId;";
+                    $update = $dbConnection->prepare($query);
+                    try { //try to complete the insertion
+                        $update->execute(); //execute the statement
+                    } catch (Exception $e) { //the insertion fails then
+                        $dbConnection->rollBack(); //get back the database
+                        header("HTTP/1.0 500 Internal Server Error"); //info for the client
+                        exit();
+                    }
                 }
-                $dbConnection->beginTransaction();//starts a transaction in the database
-                $insert = $dbConnection->prepare($query);//prepare the statement
-                try{//try to complete the insertion
-                    $insert->execute();//execute the statement
-                    $dbConnection->commit();//it's everything ok
+                $query = "INSERT INTO contacts(IdCompany, MainContact, ContactName, ContactPhone, ContactEmail, ContactCharge) VALUES ($companyId, $mainContact, '$contactName', '$contactPhone', '$contactEmail', '$contactCharge');"; //prepare the query including to make this contact the main
+                $insert = $dbConnection->prepare($query); //prepare the statement
+                try { //try to complete the insertion
+                    $insert->execute(); //execute the statement
+                    $dbConnection->commit(); //it's everything ok
                     header("HTTP/1.0 200 Created"); //this indicates to the client that the new record
-                }catch (Exception $e){//the insertion fails then
-                    $dbConnection->rollBack();//get back the database
-                    header("HTTP/1.0 500 Internal Server Error");//info for the client
+                } catch (Exception $e) { //the insertion fails then
+                    $dbConnection->rollBack(); //get back the database
+                    header("HTTP/1.0 500 Internal Server Error"); //info for the client
                 }
                 exit();
-            }
-            else{
+            } else {
                 header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions
                 exit();
             }
             break;
 
         case 'PUT':
-        if (isset($_GET['idContact']) && isset($_GET['idCompany']) && isset($_GET['name']) && isset($_GET['phone']) && isset($_GET['email']) && isset($_GET['charge']) && isset($_GET['t'])) {
+        if (isset($_GET['idContact']) && isset($_GET['idCompany']) && isset($_GET['name']) && isset($_GET['phone']) && isset($_GET['email']) && isset($_GET['charge']) && isset($_GET['main']) && isset($_GET['t'])) {
                 if (TokenTool::isValid($_GET['t'])){
                     //get the sended data
                     $IdContact = $_GET['idContact'];
@@ -82,23 +91,32 @@
                     $contactPhone = $_GET['phone'];
                     $contactEmail = $_GET['email'];
                     $contactCharge = $_GET['charge'];
-                    if(isset($_GET['main'])){
-                        $mainContact = $_POST['main'];
-                        $query = "UPDATE contacts SET IdCompany = $companyId, MainContact = $mainContact, ContactName = '$contactName', ContactPhone = '$contactPhone', ContactEmail = '$contactEmail', ContactCharge = '$contactCharge') WHERE IdContact = $IdContact;";//prepare the query including to make this contact the main
-                    }else{
-                        $query = "UPDATE contacts SET IdCompany = $companyId, ContactName = '$contactName', ContactPhone = '$contactPhone', ContactEmail = '$contactEmail', ContactCharge = '$contactCharge') WHERE IdContact = $IdContact;";//prepare the query without the website
+                    $mainContact = $_GET['main'];
+
+                    $dbConnection->beginTransaction(); //starts a transaction in the database
+
+                    if ($mainContact) {
+                        $query = "UPDATE contacts SET MainContact = 0 WHERE IdCompany = $companyId;";
+                        $update = $dbConnection->prepare($query);
+                        try { //try to complete the insertion
+                            $update->execute(); //execute the statement
+                        } catch (Exception $e) { //the insertion fails then
+                            $dbConnection->rollBack(); //get back the database
+                            header("HTTP/1.0 500 Internal Server Error"); //info for the client
+                            exit();
+                        }
                     }
-                    $dbConnection->beginTransaction();//starts a transaction in the database
-                    $update = $dbConnection->prepare($query);//prepare the statement
-                    try {//try to complete the modification
-                        $update->execute();//execute the statement
-                        $dbConnection->commit();//it's everything ok
+                    $query = "UPDATE contacts SET IdCompany = $companyId, MainContact = $mainContact, ContactName = '$contactName', ContactPhone = '$contactPhone', ContactEmail = '$contactEmail', ContactCharge = '$contactCharge' WHERE IdContact = $IdContact;"; //prepare the query including to make this contact the main
+
+                    $update = $dbConnection->prepare($query); //prepare the statement
+                    try { //try to complete the modification
+                        $update->execute(); //execute the statement
+                        $dbConnection->commit(); //it's everything ok
                         header("HTTP/1.0 200 Modified"); //this indicates to the client that the reecord was modified
-                    }catch (Exception $e) {//the modification fails then
-                        $dbConnection->rollBack();//get back the database
-                        header("HTTP/1.0 500 Internal Server Error");//info for the client
+                    } catch (Exception $e) { //the modification fails then
+                        $dbConnection->rollBack(); //get back the database
+                        header("HTTP/1.0 500 Internal Server Error"); //info for the client
                     }
-                    
                 }else {
                     header("HTTP/1.0 401 Unauthorized");
                 }
