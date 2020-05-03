@@ -33,6 +33,23 @@
                     header("HTTP/1.0 404 Not found");//the server advice to not found result
                     exit();
                 }
+            }elseif(isset($_GET['idEmployee']) && isset($_GET['t']) && TokenTool::isValid($_GET['t'])){
+                $idEmployee = $_GET['idEmployee'];
+                $query = "SELECT IdEmployee, EmployeeName, EmployeeLastName, EmployeeDegree, EmployeeBirth, EmployeeContractYear, EmployeeCharge, EmployeeAddress, EmployeePhone, EmployeeEmail, EmployeeInsurance, EmployeeRFC, AES_DECRYPT(EmployeePassword, '@Empleado') AS 'EmployeePassword', EmployeePhoto FROM personal WHERE IdEmployee = $idEmployee";
+                $consult = $dbConnection->prepare($query); //this line prepare the query for execute
+                $consult->execute(); //execute the query
+                $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
+                header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
+                header('Content-Type: application/json'); //now define the content type to get back
+                $employeeData = $consult->fetchAll()[0];
+                $dataForToken = array(
+                    'IdEmployee' => $employeeData['IdEmployee'],
+                    'EmployeeName' => $employeeData['EmployeeName'].' '.$employeeData['EmployeeLastName'],
+                    'EmployeeRFC' => $employeeData['EmployeeRFC'],
+                    'EmployeeEmail' => $employeeData['EmployeeEmail']
+                );
+                $employeeData['Token'] = TokenTool::createToken($dataForToken);
+                echo json_encode($companyData); //to finalize the server return the data
             }else{/**email doesn't exist, then it's a request for the whole information */
                 if (isset($_GET['t']) && TokenTool::isValid($_GET['t'])){
                     $query = "SELECT IdEmployee, EmployeeName, EmployeeLastName, EmployeeDegree, EmployeeBirth, EmployeeContractYear, EmployeeCharge, EmployeeAddress, EmployeePhone, EmployeeEmail, EmployeeInsurance, EmployeeRFC, EmployeePhoto FROM personal;";
