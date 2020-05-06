@@ -8,30 +8,7 @@
     switch ($_SERVER['REQUEST_METHOD']) {
 /**-----Get request (request of the whole information or just one of them; all data in the table of Sectors) ----------------------------------------------------------------*/
         case 'GET':
-            if(isset($_GET['rfc']) && isset($_GET['password'])){//If is a request to log-in
-                $companyRFC = $_GET['rfc'];
-                $companyPassword = $_GET['password'];
-                $query = "SELECT IdCompany, IdSector, CompanyName, CompanyRFC, CompanyAddress, CompanyWebsite, AES_DECRYPT(CompanyPassword,'@Company') AS 'CompanyPassword' FROM companies WHERE CompanyRFC='$companyRFC' AND `CompanyPassword`= AES_ENCRYPT('$companyPassword', '@Company')"; //it create the query for the server
-                $consult = $dbConnection->prepare($query); //this line prepare the query for execute
-                $consult->execute(); //execute the query
-                if($consult->rowCount()){//if is there any result for the query then
-                    $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
-                    header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
-                    header('Content-Type: application/json'); //now define the content type to get back
-                    $companyData = $consult->fetchAll()[0];
-                    $dataForToken = array(
-                        'IdCompany' => $companyData['IdCompany'],
-                        'CompanyName' => $companyData['CompanyName'],
-                        'CompanyRFC' => $companyData['CompanyRFC']
-                    );
-                    $companyData['Token'] = TokenTool::createToken($dataForToken);
-                    echo json_encode($companyData); //to finalize the server return the data
-                    exit();
-                }else{//if there isn't any result for the query
-                    header("HTTP/1.0 404 Not found");//the server advice to not found result
-                    exit();
-                }
-            } else if (isset($_GET['idCompany']) && isset($_GET['t']) && TokenTool::isValid($_GET['t'])) {
+            if (isset($_GET['idCompany']) && isset($_GET['t']) && TokenTool::isValid($_GET['t'])) {
                 $idCompany = intval($_GET['idCompany']);
                 $query = "SELECT IdCompany, IdSector, CompanyName, CompanyRFC, CompanyAddress, CompanyWebsite, AES_DECRYPT(CompanyPassword,'@Company') AS 'CompanyPassword' FROM companies WHERE IdCompany = $idCompany";
                 $consult = $dbConnection->prepare($query); //this line prepare the query for execute
@@ -40,12 +17,6 @@
                 header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
                 header('Content-Type: application/json'); //now define the content type to get back
                 $companyData = $consult->fetchAll()[0];
-                $dataForToken = array(
-                    'IdCompany' => $companyData['IdCompany'],
-                    'CompanyName' => $companyData['CompanyName'],
-                    'CompanyRFC' => $companyData['CompanyRFC']
-                );
-                $companyData['Token'] = TokenTool::createToken($dataForToken);
                 echo json_encode($companyData); //to finalize the server return the data
             }else{/**RFC doesn't exist, then it's a request for the whole information */
                 if (isset($_GET['t']) && TokenTool::isValid($_GET['t'])){
@@ -71,18 +42,17 @@
 
 /**-----Post request (request for create a new companie) --------------------------------------------------------------------------------------------------------------------*/
         case 'POST':
-            if(isset($_POST['sector']) && isset($_POST['name']) && isset($_POST['rfc']) && isset($_POST['address']) && isset($_POST['password'])){
+            if(isset($_POST['sector']) && isset($_POST['name']) && isset($_POST['rfc']) && isset($_POST['address'])){
                 //get the sended data
                 $sector = $_POST['sector'];
                 $companyName = $_POST['name'];
                 $companyRFC = $_POST['rfc'];
                 $companyAddress = $_POST['address'];
-                $companyPassword = $_POST['password'];
                 if(isset($_POST['website'])){
                     $companyWebsite = $_POST['website'];
-                    $query = "INSERT INTO companies(IdSector, CompanyName, CompanyRFC, CompanyAddress, CompanyWebsite, CompanyPassword) VALUES ($sector, '$companyName', '$companyRFC', '$companyAddress', '$companyWebsite', AES_ENCRYPT('$companyPassword','@Company'));";//prepare the query including the website
+                    $query = "INSERT INTO companies(IdSector, CompanyName, CompanyRFC, CompanyAddress, CompanyWebsite) VALUES ($sector, '$companyName', '$companyRFC', '$companyAddress', '$companyWebsite');";//prepare the query including the website
                 }else{
-                    $query = "INSERT INTO companies(IdSector, CompanyName, CompanyRFC, CompanyAddress, CompanyPassword) VALUES ($sector, '$companyName', '$companyRFC', '$companyAddress', AES_ENCRYPT('$companyPassword','@Company'));";//prepare the query without the website
+                    $query = "INSERT INTO companies(IdSector, CompanyName, CompanyRFC, CompanyAddress) VALUES ($sector, '$companyName', '$companyRFC', '$companyAddress');";//prepare the query without the website
                 }
                 $dbConnection->beginTransaction();//starts a transaction in the database
                 $insert = $dbConnection->prepare($query);//prepare the statement
@@ -90,6 +60,11 @@
                     $insert->execute();//execute the statement
                     $dbConnection->commit();//it's everything ok
                     header("HTTP/1.0 200 Created"); //this indicates to the client that the new record
+                    $query = "SELECT IdCompany FROM companies WHERE CompanyRFC='$companyRFC'";
+                    $consult = $dbConnection->prepare($query);
+                    $consult->execute();
+                    $consult->setFetchMode(PDO::FETCH_ASSOC);
+                    echo json_encode($consult->fetchAll()[0]);
                 }catch (Exception $e){//the insertion fails then
                     $dbConnection->rollBack();//get back the database
                     header("HTTP/1.0 500 Internal Server Error");//info for the client

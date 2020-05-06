@@ -6,8 +6,34 @@
     include("../../../Config/Connection.php");
     switch ($_SERVER['REQUEST_METHOD']) {
         case 'GET':
+            /** If it's a login request */
+            if (isset($_GET['email']) && isset($_GET['password'])) {
+                $email = $_GET['email'];
+                $password = $_GET['password'];
+                $query = "SELECT IdContact, IdCompany, MainContact, ContactName, ContactPhone, ContactEmail, ContactCharge, AES_DECRYPT(ContactPassword, '@Company') AS 'ContactPassword', ContactPhoto FROM contacts WHERE ContactEmail = '$email' AND AES_DECRYPT(ContactPassword, '@Company') = '$password';";
+                $consult = $dbConnection->prepare($query);
+                $consult->execute(); //execute the query
+                if ($consult->rowCount()) { //if is there any result for the query then
+                    $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
+                    $contactData = $consult->fetchAll()[0];
+
+                    $dataForToken = array(
+                        'IdContact' => $contactData['IdContact'],
+                        'IdCompany' => $contactData['IdCompany'],
+                        'ContactName' => $contactData['ContactName'],
+                        'ContactEmail' => $contactData['ContactEmail']
+                    );
+                    $contactData['Token'] = TokenTool::createToken($dataForToken);
+                    header("HTTP/1.0 202 Accepted");
+                    header('Content-Type: application/json');
+                    echo json_encode($contactData); //Return the data
+                    exit();
+                } else { //if there isn't any result for the query
+                    header("HTTP/1.0 404 Not found");
+                    exit();
+                }
+            }elseif (isset($_GET['idContact'])) {
             /**If exist and id in the request then search the contact id */
-            if (isset($_GET['idContact'])) {
 
                 $id = $_GET['idContact'];
                 $query = "SELECT * FROM contacts WHERE IdContact = $id"; //it create the query for the server
@@ -23,8 +49,7 @@
                     header("HTTP/1.0 404 Not found");
                     exit();
                 }
-            }
-            elseif(isset($_GET['idCompany'])){/**Id not exist, then it's a request for the whole information */
+            }elseif(isset($_GET['idCompany'])){/**Id not exist, then it's a request for the whole information */
                 $id = $_GET['idCompany'];
                 $query = "SELECT * FROM contacts WHERE IdCompany = $id";
                 $consult = $dbConnection->prepare($query);
@@ -41,7 +66,7 @@
             break;
 
         case 'POST':
-            if (isset($_POST['idCompany']) && isset($_POST['name']) && isset($_POST['phone']) && isset($_POST['email']) && isset($_POST['charge']) && isset($_POST['main'])) {
+            if (isset($_POST['idCompany']) && isset($_POST['name']) && isset($_POST['phone']) && isset($_POST['email']) && isset($_POST['charge']) && isset($_POST['main']) && isset($_POST['password'])) {
                 //get the sended data
                 $companyId = $_POST['idCompany'];
                 $contactName = $_POST['name'];
@@ -49,6 +74,7 @@
                 $contactEmail = $_POST['email'];
                 $contactCharge = $_POST['charge'];
                 $mainContact = $_POST['main'];
+                $contactPassword = $_POST['password'];
 
                 $dbConnection->beginTransaction(); //starts a transaction in the database
 
@@ -64,7 +90,7 @@
                         exit();
                     }
                 }
-                $query = "INSERT INTO contacts(IdCompany, MainContact, ContactName, ContactPhone, ContactEmail, ContactCharge) VALUES ($companyId, $mainContact, '$contactName', '$contactPhone', '$contactEmail', '$contactCharge');"; //prepare the query including to make this contact the main
+                $query = "INSERT INTO contacts(IdCompany, MainContact, ContactName, ContactPhone, ContactEmail, ContactCharge, ContactPassword) VALUES ($companyId, $mainContact, '$contactName', '$contactPhone', '$contactEmail', '$contactCharge', AES_ENCRYPT('$contactPassword', '@Company'));"; //prepare the query including to make this contact the main
                 $insert = $dbConnection->prepare($query); //prepare the statement
                 try { //try to complete the insertion
                     $insert->execute(); //execute the statement
@@ -82,7 +108,7 @@
             break;
 
         case 'PUT':
-        if (isset($_GET['idContact']) && isset($_GET['idCompany']) && isset($_GET['name']) && isset($_GET['phone']) && isset($_GET['email']) && isset($_GET['charge']) && isset($_GET['main']) && isset($_GET['t'])) {
+        if (isset($_GET['idContact']) && isset($_GET['idCompany']) && isset($_GET['name']) && isset($_GET['phone']) && isset($_GET['email']) && isset($_GET['charge']) && isset($_GET['main']) && isset($_GET['password']) && isset($_GET['t'])) {
                 if (TokenTool::isValid($_GET['t'])){
                     //get the sended data
                     $IdContact = $_GET['idContact'];
@@ -92,6 +118,7 @@
                     $contactEmail = $_GET['email'];
                     $contactCharge = $_GET['charge'];
                     $mainContact = $_GET['main'];
+                    $contactPassword = $_GET['password'];
 
                     $dbConnection->beginTransaction(); //starts a transaction in the database
 

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 01-05-2020 a las 17:47:10
+-- Tiempo de generación: 05-05-2020 a las 21:25:55
 -- Versión del servidor: 10.4.8-MariaDB
 -- Versión de PHP: 7.3.11
 
@@ -72,7 +72,6 @@ CREATE TABLE `companies` (
   `CompanyRFC` varchar(20) NOT NULL,
   `CompanyAddress` varchar(500) NOT NULL,
   `CompanyWebsite` varchar(250) DEFAULT NULL,
-  `CompanyPassword` varbinary(20) NOT NULL,
   `CompanyLogo` varchar(250) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -80,9 +79,9 @@ CREATE TABLE `companies` (
 -- Volcado de datos para la tabla `companies`
 --
 
-INSERT INTO `companies` (`IdCompany`, `IdSector`, `CompanyName`, `CompanyRFC`, `CompanyAddress`, `CompanyWebsite`, `CompanyPassword`, `CompanyLogo`) VALUES
-(2, 1001, 'Prueba S.A de C.V.', 'PRUEBA7845', 'Ramón Corona #125', 'https://www.prueba.com.mx', 0x5411a461e39fe28709a073078ffc3e42, NULL),
-(3, 1015, 'Malvados y Asociados S.A de C.V.', 'MALASO4589', 'Independencia #425', 'https://malvados.asociados.mx', 0xdf3e0d5bbde5b0962b47b8b6cca37428, NULL);
+INSERT INTO `companies` (`IdCompany`, `IdSector`, `CompanyName`, `CompanyRFC`, `CompanyAddress`, `CompanyWebsite`, `CompanyLogo`) VALUES
+(2, 1001, 'Prueba S.A de C.V.', 'PRUEBA7845', 'Ramón Corona #125', 'https://www.prueba.com.mx', NULL),
+(3, 1015, 'Malvados y Asociados S.A de C.V.', 'MALASO4589', 'Independencia #425', 'https://malvados.asociados.mx', NULL);
 
 -- --------------------------------------------------------
 
@@ -97,15 +96,17 @@ CREATE TABLE `contacts` (
   `ContactName` varchar(250) NOT NULL,
   `ContactPhone` varchar(15) NOT NULL,
   `ContactEmail` varchar(250) NOT NULL,
-  `ContactCharge` varchar(300) NOT NULL
+  `ContactCharge` varchar(300) NOT NULL,
+  `ContactPassword` varbinary(20) NOT NULL,
+  `ContactPhoto` varchar(500) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Volcado de datos para la tabla `contacts`
 --
 
-INSERT INTO `contacts` (`IdContact`, `IdCompany`, `MainContact`, `ContactName`, `ContactPhone`, `ContactEmail`, `ContactCharge`) VALUES
-(11, 3, 1, 'Heinz Doofenzmirt', '5555555555', 'evil_doof@mermelada.com', 'Genio malvado');
+INSERT INTO `contacts` (`IdContact`, `IdCompany`, `MainContact`, `ContactName`, `ContactPhone`, `ContactEmail`, `ContactCharge`, `ContactPassword`, `ContactPhoto`) VALUES
+(11, 3, 1, 'Heinz Doofenzmirt', '5555555555', 'evil_doof@mermelada.com', 'Genio malvado', 0x2483bb4d9af50039ba5bd69f5a16eeb9, NULL);
 
 -- --------------------------------------------------------
 
