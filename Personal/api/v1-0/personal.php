@@ -118,35 +118,47 @@
 
 /**-----Put request (request for change information in the table) -----------------------------------------------------------------------------------------------------------*/
         case 'PUT':
-        if (isset($_POST['name']) && isset($_POST['lastname']) && isset($_POST['contract']) && isset($_POST['charge']) && isset($_POST['email']) && isset($_POST['rfc']) && isset($_POST['t'])) {
-                if (TokenTool::isValid($_GET['t'])){
-                    //get the sended data
-                    $id = $_GET['id'];
-                    $sector = $_GET['sector'];
-                    $companyName = $_GET['name'];
-                    $companyRFC = $_GET['rfc'];
-                    $companyAddress = $_GET['address'];
-                    if(isset($_GET['website'])){
-                        $companyWebsite = $_GET['website'];
-                        $query = "INSERT INTO companies(IdSector, CompanyName, CompanyRFC, CompanyAddress, CompanyWebsite) VALUES ($sector, '$companyName', '$companyRFC', '$companyAddress', '$companyWebsite');";//prepare the query including the website
-                    }else{
-                        $query = "INSERT INTO companies(IdSector, CompanyName, CompanyRFC, CompanyAddress) VALUES ($sector, '$companyName', '$companyRFC', '$companyAddress');";//prepare the query without the website
-                    }
-                    $dbConnection->beginTransaction();//starts a transaction in the database
-                    $update = $dbConnection->prepare($query);//prepare the statement
-                    try {//try to complete the modification
-                        $update->execute();//execute the statement
-                        $dbConnection->commit();//it's everything ok
-                        header("HTTP/1.0 200 Modified"); //this indicates to the client that the reecord was modified
-                    }catch (Exception $e) {//the modification fails then
-                        $dbConnection->rollBack();//get back the database
-                        header("HTTP/1.0 500 Internal Server Error");//info for the client
+        if (isset($_POST['name']) && isset($_POST['lastname']) && isset($_POST['contract']) && isset($_POST['charge']) && isset($_POST['phone']) && isset($_POST['email']) && isset($_POST['rfc']) && isset($_POST['t'])) {
+            if (TokenTool::isValid($_GET['t'])){
+                echo "<h4>holamundo</h4>";
+                //get the sended data
+                $IdEmployee = $_GET['idCompany'];
+                $EmployeeName = $_GET['name'];
+                $EmployeeLastName = $_GET['lastname'];
+                $employeeContractYear = $_GET['contract'];
+                $EmployeeCharge =  $_GET['charge'];
+                $EmployeePhone = $_GET['phone'];
+                $EmployeeEmail = $_GET['email'];
+                $employeeRFC = $_GET['rfc'];
+
+                $dbConnection->beginTransaction(); //starts a transaction in the database
+
+                if ($mainEmployee) {
+                    $query = "UPDATE Employees SET MainEmployee = 0 WHERE IdCompany = $companyId;";
+                    $update = $dbConnection->prepare($query);
+                    try { //try to complete the insertion
+                        $update->execute(); //execute the statement
+                    } catch (Exception $e) { //the insertion fails then
+                        $dbConnection->rollBack(); //get back the database
+                        header("HTTP/1.0 500 Internal Server Error"); //info for the client
+                        exit();
                     }
                 }
-                else{
-                    header("HTTP/1.0 401 Unauthorized");
+                $query = "UPDATE `personal` SET `EmployeeName`=EmployeeName,`EmployeeLastName`=EmployeeLastName,`EmployeeDegree`=EmployeeDegree,`EmployeeBirth`=[value-5],`EmployeeContractYear`=[value-6],`EmployeeCharge`=[value-7],`EmployeeAddress`=[value-8],`EmployeePhone`=[value-9],`EmployeeEmail`=[value-10],`EmployeeInsurance`=[value-11],`EmployeeRFC`=[value-12],`EmployeePassword`=[value-13] WHERE `IdEmployee`=[value-1]"; //prepare the query including to make this Employee the main
+
+                $update = $dbConnection->prepare($query); //prepare the statement
+                try { //try to complete the modification
+                    $update->execute(); //execute the statement
+                    $dbConnection->commit(); //it's everything ok
+                    header("HTTP/1.0 200 Modified"); //this indicates to the client that the reecord was modified
+                } catch (Exception $e) { //the modification fails then
+                    $dbConnection->rollBack(); //get back the database
+                    header("HTTP/1.0 500 Internal Server Error"); //info for the client
                 }
-                exit();
+            }else {
+                header("HTTP/1.0 401 Unauthorized");
+            }
+            exit();
             }
             else{
                 header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions

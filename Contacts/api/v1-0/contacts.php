@@ -68,6 +68,7 @@
         case 'POST':
             if (isset($_POST['idCompany']) && isset($_POST['name']) && isset($_POST['phone']) && isset($_POST['email']) && isset($_POST['charge']) && isset($_POST['main']) && isset($_POST['password'])) {
                 //get the sended data
+                
                 $companyId = $_POST['idCompany'];
                 $contactName = $_POST['name'];
                 $contactPhone = $_POST['phone'];
@@ -92,6 +93,7 @@
                 }
                 $query = "INSERT INTO contacts(IdCompany, MainContact, ContactName, ContactPhone, ContactEmail, ContactCharge, ContactPassword) VALUES ($companyId, $mainContact, '$contactName', '$contactPhone', '$contactEmail', '$contactCharge', AES_ENCRYPT('$contactPassword', '@Company'));"; //prepare the query including to make this contact the main
                 $insert = $dbConnection->prepare($query); //prepare the statement
+                echo "<h4>ok</h4>";
                 try { //try to complete the insertion
                     $insert->execute(); //execute the statement
                     $dbConnection->commit(); //it's everything ok
@@ -108,8 +110,10 @@
             break;
 
         case 'PUT':
+            
         if (isset($_GET['idContact']) && isset($_GET['idCompany']) && isset($_GET['name']) && isset($_GET['phone']) && isset($_GET['email']) && isset($_GET['charge']) && isset($_GET['main']) && isset($_GET['password']) && isset($_GET['t'])) {
                 if (TokenTool::isValid($_GET['t'])){
+                    echo "<h4>holamundo</h4>";
                     //get the sended data
                     $IdContact = $_GET['idContact'];
                     $companyId = $_GET['idCompany'];
