@@ -10,7 +10,8 @@
         case 'GET':
             if (isset($_GET['idCompany']) && isset($_GET['t']) && TokenTool::isValid($_GET['t'])) {
                 $idCompany = intval($_GET['idCompany']);
-                $query = "SELECT IdCompany, IdSector, CompanyName, CompanyRFC, CompanyAddress, CompanyWebsite, AES_DECRYPT(CompanyPassword,'@Company') AS 'CompanyPassword' FROM companies WHERE IdCompany = $idCompany";
+                echo $idCompany;
+                $query = "SELECT IdCompany, IdSector, CompanyName, CompanyRFC, CompanyAddress, CompanyWebsite AS 'CompanyPassword' FROM companies WHERE IdCompany = $idCompany";
                 $consult = $dbConnection->prepare($query); //this line prepare the query for execute
                 $consult->execute(); //execute the query
                 $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data

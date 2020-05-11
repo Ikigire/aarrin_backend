@@ -155,7 +155,7 @@
 
 /**-----Put request (request for change information in the table) -----------------------------------------------------------------------------------------------------------*/
         case 'PUT':
-        if (isset($_GET['idEmployee']) && isset($_GET['name']) && isset($_GET['lastname']) && isset($_GET['contract']) && isset($_GET['charge']) && isset($_GET['email']) && isset($_GET['rfc']) && isset($_GET['t'])) {
+            if (isset($_GET['idEmployee']) && isset($_GET['name']) && isset($_GET['lastname']) && isset($_GET['contract']) && isset($_GET['charge']) && isset($_GET['email']) && isset($_GET['rfc']) && isset($_GET['t'])) {
                 if (TokenTool::isValid($_GET['t'])){
                     //get the sended data
                     $idEmployee = $_GET['idEmployee'];
@@ -202,16 +202,14 @@
                         $dbConnection->rollBack();//get back the database
                         header("HTTP/1.0 409 Conflict with the Server");//info for the client
                     }
-                }
-                else{
+                }else {
                     header("HTTP/1.0 401 Unauthorized");
                 }
-                exit();
             }
             else{
                 header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions
-                exit();
             }
+            exit();
             break;
 
 
@@ -244,7 +242,6 @@
                 exit();
             }
             break;
-        
         default:
             header("HTTP/1.0 405 Allow; GET, POST, PUT, PATCH");
             exit();
