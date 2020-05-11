@@ -46,11 +46,12 @@
                     $insert = $dbConnection->prepare($query);//prepare the statement
                     try{//try to complete the insertion
                         $insert->execute();
+                        echo $dbConnection->lastInsertId();
                         $dbConnection->commit();//it's everything ok
                         header("HTTP/1.0 200 Created"); //this indicates to the client that the new record was created
                     }catch (Exception $e){//the insertion fails then
                         $dbConnection->rollBack();//make rollback the database
-                        header("HTTP/1.0 500 Internal Server Error");//info for the client
+                        header("HTTP/1.0 409 Conflict with the Server");//info for the client
                     }
                 }else{
                     header("HTTP/1.0 401 Unauthorized"); //the request don't complete the preconditions
@@ -67,18 +68,18 @@
         case "DELETE":
             if (isset($_GET['employee']) && isset($_GET['role']) && isset($_GET['t'])) {
                 if (TokenTool::isValid($_GET['t'])) {
-                    $employee = $_GET['employee']; //get the sended data
+                    $idEmployee = $_GET['employee']; //get the sended data
                     $role = $_GET['role'];
-                    $query = "DELETE FROM roles WHERE IdEmployee = $id AND Role_Type = '$role'";
-                    $roleSearch = $dbConnection->prepare($query);
-                    $roleSearch->execute();
-                    if ($$roleSearch->rowCount()) { //if is there any result for the query then
-                        $roleSearch->setFetchMode(PDO::FETCH_ASSOC);
+                    $query = "DELETE FROM roles WHERE IdEmployee = $idEmployee AND Role_Type = '$role'";
+                    $dbConnection->beginTransaction();
+                    $roleDelete = $dbConnection->prepare($query);
+                    try {
+                        $roleDelete->execute();
+                        $dbConnection->commit();
                         header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
-                        header('Content-Type: application/json'); //now define the content type to get back
-                        echo json_encode($roleSearch->fetchAll()); //to finalize the server return the data
-                    } else { //it there isn't any result for the query
-                        header("HTTP/1.0 404 Not found"); //the server advice to not found result
+                    } catch (\Throwable $th) {
+                        $dbConnection->rollBack();
+                        header("HTTP/1.0 409 Conflict with the Server");//info for the client
                     }
                 } else {
                     header("HTTP/1.0 401 Unauthorized");

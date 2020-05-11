@@ -32,32 +32,33 @@
                     header("HTTP/1.0 404 Not found");
                     exit();
                 }
-            }elseif (isset($_GET['idContact'])) {
+            }elseif (isset($_GET['idContact']) && isset($_GET['t']) && TokenTool::isValid($_GET['t'])) {
             /**If exist and id in the request then search the contact id */
-
                 $id = $_GET['idContact'];
-                $query = "SELECT * FROM contacts WHERE IdContact = $id"; //it create the query for the server
+                $query = "SELECT IdContact, IdCompany, MainContact, ContactName, ContactPhone, ContactEmail, ContactCharge, ContactPhoto FROM contacts WHERE IdContact = $id"; //it create the query for the server
                 $consult = $dbConnection->prepare($query);
                 $consult->execute(); //execute the query
                 if($consult->rowCount()){//if is there any result for the query then
                     $consult->setFetchMode(PDO::FETCH_ASSOC);
                     header("HTTP/1.0 202 Accepted");
                     header('Content-Type: application/json');
-                    echo json_encode($consult->fetchAll()[0]);//Return the data
+                    $contactData = $consult->fetch();
+                    echo json_encode($contactData);//Return the data
                     exit();
                 }else{//if there isn't any result for the query
                     header("HTTP/1.0 404 Not found");
                     exit();
                 }
-            }elseif(isset($_GET['idCompany'])){/**Id not exist, then it's a request for the whole information */
+            }elseif(isset($_GET['idCompany'])  && isset($_GET['t']) && TokenTool::isValid($_GET['t'])){/**Id not exist, then it's a request for the whole information */
                 $id = $_GET['idCompany'];
-                $query = "SELECT * FROM contacts WHERE IdCompany = $id";
+                $query = "SELECT IdContact, IdCompany, MainContact, ContactName, ContactPhone, ContactEmail, ContactCharge, ContactPhoto FROM contacts WHERE IdCompany = $id";
                 $consult = $dbConnection->prepare($query);
                 $consult->execute();//execute the query
                 $consult->setFetchMode(PDO::FETCH_ASSOC);
                 header("HTTP/1.0 202 Accepted");
                 header('Content-Type: application/json');
-                echo json_encode($consult->fetchAll());//Return the data
+                $companyContacts = $consult->fetchAll();
+                echo json_encode($companyContacts);//Return the data
                 exit();
             }else {
                 header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions
@@ -75,6 +76,7 @@
                 $contactCharge = $_POST['charge'];
                 $mainContact = $_POST['main'];
                 $contactPassword = $_POST['password'];
+                
 
                 $dbConnection->beginTransaction(); //starts a transaction in the database
 
@@ -86,7 +88,7 @@
                         $update->execute(); //execute the statement
                     } catch (Exception $e) { //the insertion fails then
                         $dbConnection->rollBack(); //get back the database
-                        header("HTTP/1.0 500 Internal Server Error"); //info for the client
+                        header("HTTP/1.0 409 Conflict with the Server"); //info for the client
                         exit();
                     }
                 }
@@ -98,7 +100,7 @@
                     header("HTTP/1.0 200 Created"); //this indicates to the client that the new record
                 } catch (Exception $e) { //the insertion fails then
                     $dbConnection->rollBack(); //get back the database
-                    header("HTTP/1.0 500 Internal Server Error"); //info for the client
+                    header("HTTP/1.0 409 Conflict with the Server"); //info for the client
                 }
                 exit();
             } else {
@@ -108,17 +110,26 @@
             break;
 
         case 'PUT':
-        if (isset($_GET['idContact']) && isset($_GET['idCompany']) && isset($_GET['name']) && isset($_GET['phone']) && isset($_GET['email']) && isset($_GET['charge']) && isset($_GET['main']) && isset($_GET['password']) && isset($_GET['t'])) {
+        if (isset($_GET['idContact']) && isset($_GET['idCompany']) && isset($_GET['name']) && isset($_GET['phone']) && isset($_GET['email']) && isset($_GET['charge']) && isset($_GET['t'])) {
                 if (TokenTool::isValid($_GET['t'])){
                     //get the sended data
-                    $IdContact = $_GET['idContact'];
-                    $companyId = $_GET['idCompany'];
+                    $idContact = $_GET['idContact'];
                     $contactName = $_GET['name'];
                     $contactPhone = $_GET['phone'];
                     $contactEmail = $_GET['email'];
                     $contactCharge = $_GET['charge'];
-                    $mainContact = $_GET['main'];
-                    $contactPassword = $_GET['password'];
+                    $companyId = $_GET['idCompany'];
+                    $updateQuery = "UPDATE contacts SET ContactName = '$contactName', ContactPhone = '$contactPhone', ContactEmail = '$contactEmail', ContactCharge = '$contactCharge'";
+
+                    $mainContact = false;
+                    if (isset($_GET['main'])) {
+                        $mainContact = $_GET['main'];
+                        $updateQuery = $updateQuery. ", MainContact = 1";
+                    }
+                    if (isset($_GET['password'])) {
+                        $contactPassword = $_GET['password'];
+                        $updateQuery = $updateQuery. ", ContactPassword = AES_ENCRYPT('$contactPassword', '@Company')";
+                    }
 
                     $dbConnection->beginTransaction(); //starts a transaction in the database
 
@@ -129,20 +140,20 @@
                             $update->execute(); //execute the statement
                         } catch (Exception $e) { //the insertion fails then
                             $dbConnection->rollBack(); //get back the database
-                            header("HTTP/1.0 500 Internal Server Error"); //info for the client
+                            header("HTTP/1.0 409 Conflict"); //info for the client
                             exit();
                         }
                     }
-                    $query = "UPDATE contacts SET IdCompany = $companyId, MainContact = $mainContact, ContactName = '$contactName', ContactPhone = '$contactPhone', ContactEmail = '$contactEmail', ContactCharge = '$contactCharge' WHERE IdContact = $IdContact;"; //prepare the query including to make this contact the main
+                    $updateQuery = $updateQuery. " WHERE IdContact = $idContact;";
 
-                    $update = $dbConnection->prepare($query); //prepare the statement
+                    $update = $dbConnection->prepare($updateQuery); //prepare the statement
                     try { //try to complete the modification
                         $update->execute(); //execute the statement
                         $dbConnection->commit(); //it's everything ok
                         header("HTTP/1.0 200 Modified"); //this indicates to the client that the reecord was modified
                     } catch (Exception $e) { //the modification fails then
                         $dbConnection->rollBack(); //get back the database
-                        header("HTTP/1.0 500 Internal Server Error"); //info for the client
+                        header("HTTP/1.0 409 Conflict"); //info for the client
                     }
                 }else {
                     header("HTTP/1.0 401 Unauthorized");

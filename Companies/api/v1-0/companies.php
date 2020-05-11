@@ -29,7 +29,7 @@
                         header('Content-Type: application/json'); //now define the content type to get back
                         echo json_encode($consult->fetchAll()); //to finalize the server return the data
                     }else{
-                        header("HTTP/1.0 500 Internal server error");//the server advice to not found result
+                        header("HTTP/1.0 409 Conflict with the Server");//the server advice to not found result
                     }
                 }
                 else {
@@ -67,7 +67,7 @@
                     echo json_encode($consult->fetchAll()[0]);
                 }catch (Exception $e){//the insertion fails then
                     $dbConnection->rollBack();//get back the database
-                    header("HTTP/1.0 500 Internal Server Error");//info for the client
+                    header("HTTP/1.0 409 Conflict with the Server");//info for the client
                 }
                 exit();
             }
@@ -102,7 +102,7 @@
                         header("HTTP/1.0 200 Modified"); //this indicates to the client that the reecord was modified
                     }catch (Exception $e) {//the modification fails then
                         $dbConnection->rollBack();//get back the database
-                        header("HTTP/1.0 500 Internal Server Error");//info for the client
+                        header("HTTP/1.0 409 Conflict with the Server");//info for the client
                     }
                 }
                 else{
@@ -133,7 +133,7 @@
                         header("HTTP/1.0 200 Modified"); //this indicates to the client that the reecord was modified
                     }catch (Exception $e) {//the modification fails then
                         $dbConnection->rollBack();//get back the database
-                        header("HTTP/1.0 500 Internal Server Error");//info for the client
+                        header("HTTP/1.0 409 Conflict with the Server");//info for the client
                     }
                 }
                 else{
