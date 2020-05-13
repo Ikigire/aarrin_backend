@@ -61,11 +61,7 @@
                     $insert->execute();//execute the statement
                     $dbConnection->commit();//it's everything ok
                     header("HTTP/1.0 200 Created"); //this indicates to the client that the new record
-                    $query = "SELECT IdCompany FROM companies WHERE CompanyRFC='$companyRFC'";
-                    $consult = $dbConnection->prepare($query);
-                    $consult->execute();
-                    $consult->setFetchMode(PDO::FETCH_ASSOC);
-                    echo json_encode($consult->fetchAll()[0]);
+                    echo json_encode(array('IdCompany' => $dbConnection->lastInsertId()));
                 }catch (Exception $e){//the insertion fails then
                     $dbConnection->rollBack();//get back the database
                     header("HTTP/1.0 409 Conflict with the Server");//info for the client

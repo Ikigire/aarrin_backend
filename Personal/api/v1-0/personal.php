@@ -130,12 +130,8 @@
                         </html>";
                         mail($employeeEmail, $subject, $message, $headers);
                         header("HTTP/1.0 200 Created"); //this indicates to the client that the new record
-                        $query = "SELECT IdEmployee FROM personal WHERE EmployeeEmail = '$employeeEmail'";
-                        $consult = $dbConnection->prepare($query);
-                        $consult->execute();
-                        $consult->setFetchMode(PDO::FETCH_ASSOC);
                         header('Content-Type: application/json');
-                        echo json_encode($consult->fetchAll());
+                        echo json_encode(array('IdEmployee' => $dbConnection->lastInsertId()));
                     }catch (Exception $e){//the insertion fails then
                         $dbConnection->rollBack();//get back the database
                         header("HTTP/1.0 409 Conflict with the Server");//info for the client

@@ -114,7 +114,6 @@
         case 'PUT':
         if (isset($_GET['idContact']) && isset($_GET['idCompany']) && isset($_GET['name']) && isset($_GET['phone']) && isset($_GET['email']) && isset($_GET['charge']) && isset($_GET['t'])) {
                 if (TokenTool::isValid($_GET['t'])){
-                    echo "<h4>holamundo</h4>";
                     //get the sended data
                     $idContact = $_GET['idContact'];
                     $contactName = $_GET['name'];

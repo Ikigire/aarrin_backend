@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 05-05-2020 a las 21:25:55
+-- Tiempo de generación: 13-05-2020 a las 15:07:57
 -- Versión del servidor: 10.4.8-MariaDB
 -- Versión de PHP: 7.3.11
 
@@ -106,7 +106,8 @@ CREATE TABLE `contacts` (
 --
 
 INSERT INTO `contacts` (`IdContact`, `IdCompany`, `MainContact`, `ContactName`, `ContactPhone`, `ContactEmail`, `ContactCharge`, `ContactPassword`, `ContactPhoto`) VALUES
-(11, 3, 1, 'Heinz Doofenzmirt', '5555555555', 'evil_doof@mermelada.com', 'Genio malvado', 0x2483bb4d9af50039ba5bd69f5a16eeb9, NULL);
+(11, 3, 1, 'Heinz Doofmenshmirtz', '5555555555', 'evil_doof@mermelada.com', 'Genio Malvado', 0x2483bb4d9af50039ba5bd69f5a16eeb9, NULL),
+(12, 3, 0, 'Alois Everard Elizabeth Otto Wolfgang Hypatia Gunter Geilen Gary Cooper Von Rodenstein', '5555555555', 'evil_rodney@mermelada.com', 'Doctor del Mal', 0x2483bb4d9af50039ba5bd69f5a16eeb9, NULL);
 
 -- --------------------------------------------------------
 
@@ -149,7 +150,8 @@ CREATE TABLE `personal` (
 --
 
 INSERT INTO `personal` (`IdEmployee`, `EmployeeName`, `EmployeeLastName`, `EmployeeDegree`, `EmployeeBirth`, `EmployeeContractYear`, `EmployeeCharge`, `EmployeeAddress`, `EmployeePhone`, `EmployeeEmail`, `EmployeeInsurance`, `EmployeeRFC`, `EmployeePassword`, `EmployeePhoto`) VALUES
-(1, 'Adrian', 'Casillas', 'Lic. Informático', '1985-01-01', 2000, 'Representante LATAM', 'Domicilio Particular #12', '5555555555', 'ya_el1995@hotmail.com', 'KIAS5849a8', 'CASA850101PL5', 0x066cff26d5e35df5ee74a9f26ff64f93, NULL);
+(1, 'Yael Alejandro', 'Santana', 'Ingeniero Infórmatico', '1995-11-23', 2020, 'Programador', 'Pánfilo Natera #20-H', '3421006559', 'ya_el1995@hotmail.com', 'KIAS5849a8', 'SAMY951123KU8', 0x066cff26d5e35df5ee74a9f26ff64f93, NULL),
+(5, 'Adrian', 'Casillas', '', '0000-00-00', 2005, 'Representante LATAM', '', '', 'adn@prueba.com', '', 'CASA900909PI9', 0xaa235da8368163fbdbde2dd718035e17, NULL);
 
 -- --------------------------------------------------------
 
@@ -168,7 +170,8 @@ CREATE TABLE `roles` (
 --
 
 INSERT INTO `roles` (`IdRole`, `IdEmployee`, `Role_Type`) VALUES
-(100, 1, 'ADMIN_ROLE');
+(100, 1, 'ADMIN_ROLE'),
+(101, 5, 'ADMIN_ROLE');
 
 -- --------------------------------------------------------
 
@@ -178,53 +181,55 @@ INSERT INTO `roles` (`IdRole`, `IdEmployee`, `Role_Type`) VALUES
 
 CREATE TABLE `sectors` (
   `IdSector` int(11) NOT NULL,
-  `SectorName` varchar(120) NOT NULL
+  `SectorName` varchar(120) NOT NULL,
+  `SectorStatus` varchar(15) DEFAULT 'Active'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Volcado de datos para la tabla `sectors`
 --
 
-INSERT INTO `sectors` (`IdSector`, `SectorName`) VALUES
-(1001, 'Agriculture, forestry and fishing\r\n'),
-(1002, 'Mining and quarrying'),
-(1003, 'Food products, beverages and tobacco'),
-(1004, 'Textiles and textile products'),
-(1005, 'Leather and leather products'),
-(1006, 'Wood and wood products'),
-(1007, 'Pulp, paper and paper products'),
-(1008, 'Publishing companies'),
-(1009, 'Printing companies'),
-(1010, 'Manufacture of coke and refined petroleum products'),
-(1011, 'Nuclear fuel'),
-(1012, 'Chemicals, chemical products and fibres'),
-(1013, 'Pharmaceuticals'),
-(1014, 'Rubber and plastic products'),
-(1015, 'Non-metallic mineral products'),
-(1016, 'Concrete, cement, lime, plaster etc'),
-(1017, 'Basic metals and fabricated metal products'),
-(1018, 'Machinery and equipment'),
-(1019, 'Electrical and optical equipment'),
-(1020, 'Shipbuilding'),
-(1021, 'Aerospace'),
-(1022, 'Other transport equipment'),
-(1023, 'Manufacturing not elsewhere classified'),
-(1024, 'Recycling'),
-(1025, 'Electricity supply'),
-(1026, 'Gas supply'),
-(1027, 'Water supply'),
-(1028, 'Construction'),
-(1029, 'Wholesale and retail trade; Repair of motor vehicles, motorcycles and personal and household goods'),
-(1030, 'Hotels and restaurants'),
-(1031, 'Transport, storage and communication'),
-(1032, 'Financial intermediation; real estate; renting'),
-(1033, 'Information technology'),
-(1034, 'Engineering services'),
-(1035, 'Other services '),
-(1036, 'Public administration'),
-(1037, 'Education'),
-(1038, 'Health and social work'),
-(1039, 'Other social services');
+INSERT INTO `sectors` (`IdSector`, `SectorName`, `SectorStatus`) VALUES
+(1001, 'Agriculture, forestry and fishing\r\n', 'Active'),
+(1002, 'Mining and quarrying', 'Active'),
+(1003, 'Food products, beverages and tobacco', 'Active'),
+(1004, 'Textiles and textile products', 'Active'),
+(1005, 'Leather and leather products', 'Active'),
+(1006, 'Wood and wood products', 'Active'),
+(1007, 'Pulp, paper and paper products', 'Active'),
+(1008, 'Publishing companies', 'Active'),
+(1009, 'Printing companies', 'Active'),
+(1010, 'Manufacture of coke and refined petroleum products', 'Active'),
+(1011, 'Nuclear fuel', 'Active'),
+(1012, 'Chemicals, chemical products and fibres', 'Active'),
+(1013, 'Pharmaceuticals', 'Active'),
+(1014, 'Rubber and plastic products', 'Active'),
+(1015, 'Non-metallic mineral products', 'Active'),
+(1016, 'Concrete, cement, lime, plaster etc', 'Active'),
+(1017, 'Basic metals and fabricated metal products', 'Active'),
+(1018, 'Machinery and equipment', 'Active'),
+(1019, 'Electrical and optical equipment', 'Active'),
+(1020, 'Shipbuilding', 'Active'),
+(1021, 'Aerospace', 'Active'),
+(1022, 'Other transport equipment', 'Active'),
+(1023, 'Manufacturing not elsewhere classified', 'Active'),
+(1024, 'Recycling', 'Active'),
+(1025, 'Electricity supply', 'Active'),
+(1026, 'Gas supply', 'Active'),
+(1027, 'Water supply', 'Active'),
+(1028, 'Construction', 'Active'),
+(1029, 'Wholesale and retail trade; Repair of motor vehicles, motorcycles and personal and household goods', 'Active'),
+(1030, 'Hotels and restaurants', 'Active'),
+(1031, 'Transport, storage and communication', 'Active'),
+(1032, 'Financial intermediation; real estate; renting', 'Active'),
+(1033, 'Information technology', 'Active'),
+(1034, 'Engineering services', 'Active'),
+(1035, 'Other services ', 'Active'),
+(1036, 'Public administration', 'Active'),
+(1037, 'Education', 'Active'),
+(1038, 'Health and social work', 'Active'),
+(1039, 'Other social services', 'Active'),
+(1043, 'Sector de Prueba', 'Inactive');
 
 -- --------------------------------------------------------
 
@@ -234,8 +239,20 @@ INSERT INTO `sectors` (`IdSector`, `SectorName`) VALUES
 
 CREATE TABLE `services` (
   `IdService` int(11) NOT NULL,
-  `ServiceStandard` varchar(250) NOT NULL
+  `ServiceStandard` varchar(250) NOT NULL,
+  `ServiceShortName` varchar(10) NOT NULL,
+  `ServiceStatus` varchar(15) DEFAULT 'Available'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Volcado de datos para la tabla `services`
+--
+
+INSERT INTO `services` (`IdService`, `ServiceStandard`, `ServiceShortName`, `ServiceStatus`) VALUES
+(1, 'ISO 9001:2015', '9K', 'Available'),
+(2, 'ISO 14001:2015', '14k', 'Available'),
+(3, 'ISO 50001:2011', '50k', 'Available'),
+(4, 'ISO 27001:2015', '27K', 'Available');
 
 -- --------------------------------------------------------
 
@@ -353,7 +370,7 @@ ALTER TABLE `companies`
 -- AUTO_INCREMENT de la tabla `contacts`
 --
 ALTER TABLE `contacts`
-  MODIFY `IdContact` int(100) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `IdContact` int(100) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT de la tabla `master_list`
@@ -365,25 +382,25 @@ ALTER TABLE `master_list`
 -- AUTO_INCREMENT de la tabla `personal`
 --
 ALTER TABLE `personal`
-  MODIFY `IdEmployee` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `IdEmployee` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT de la tabla `roles`
 --
 ALTER TABLE `roles`
-  MODIFY `IdRole` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=101;
+  MODIFY `IdRole` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=104;
 
 --
 -- AUTO_INCREMENT de la tabla `sectors`
 --
 ALTER TABLE `sectors`
-  MODIFY `IdSector` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1043;
+  MODIFY `IdSector` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1044;
 
 --
 -- AUTO_INCREMENT de la tabla `services`
 --
 ALTER TABLE `services`
-  MODIFY `IdService` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `IdService` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `validation_keys`

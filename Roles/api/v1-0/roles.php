@@ -46,7 +46,6 @@
                     $insert = $dbConnection->prepare($query);//prepare the statement
                     try{//try to complete the insertion
                         $insert->execute();
-                        echo $dbConnection->lastInsertId();
                         $dbConnection->commit();//it's everything ok
                         header("HTTP/1.0 200 Created"); //this indicates to the client that the new record was created
                     }catch (Exception $e){//the insertion fails then
