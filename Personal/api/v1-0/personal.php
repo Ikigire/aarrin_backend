@@ -97,6 +97,7 @@
                     $insert = $dbConnection->prepare($query);//prepare the statement
                     try{//try to complete the insertion
                         $insert->execute();//execute the statement
+                        $array = array('IdEmployee' => $dbConnection->lastInsertId());
                         $dbConnection->commit(); //it's everything ok
                         $subject = "Now you are a part of us";
                         $headers = "MIME-Version: 1.0 \r\nContent-type: text/html; charset-utf-8\r\n From: no-reply@aarrin.com";
@@ -131,7 +132,7 @@
                         mail($employeeEmail, $subject, $message, $headers);
                         header("HTTP/1.0 200 Created"); //this indicates to the client that the new record
                         header('Content-Type: application/json');
-                        echo json_encode(array('IdEmployee' => $dbConnection->lastInsertId()));
+                        echo json_encode($array);
                     }catch (Exception $e){//the insertion fails then
                         $dbConnection->rollBack();//get back the database
                         header("HTTP/1.0 409 Conflict with the Server");//info for the client

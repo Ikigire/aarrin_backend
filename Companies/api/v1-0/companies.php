@@ -59,9 +59,10 @@
                 $insert = $dbConnection->prepare($query);//prepare the statement
                 try{//try to complete the insertion
                     $insert->execute();//execute the statement
+                    $array = array('IdCompany' => $dbConnection->lastInsertId());
                     $dbConnection->commit();//it's everything ok
                     header("HTTP/1.0 200 Created"); //this indicates to the client that the new record
-                    echo json_encode(array('IdCompany' => $dbConnection->lastInsertId()));
+                    echo json_encode($array);
                 }catch (Exception $e){//the insertion fails then
                     $dbConnection->rollBack();//get back the database
                     header("HTTP/1.0 409 Conflict with the Server");//info for the client
