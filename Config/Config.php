@@ -1,4 +1,6 @@
-<?php //Config require for the connection
+<?php //Configuration  to work
+
+    //Connfiguration of db connection
     $config = [
         'host' => 'localhost',
         'userName' => 'root',

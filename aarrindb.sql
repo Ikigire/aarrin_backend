@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 18-04-2020 a las 09:53:44
+-- Tiempo de generación: 13-05-2020 a las 15:07:57
 -- Versión del servidor: 10.4.8-MariaDB
 -- Versión de PHP: 7.3.11
 
@@ -25,6 +25,43 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `applications`
+--
+
+CREATE TABLE `applications` (
+  `IdApp` int(11) NOT NULL,
+  `IdCompany` int(11) NOT NULL,
+  `IdService` int(11) NOT NULL,
+  `AppLenguage` int(11) NOT NULL,
+  `LastCertificateExpiration` date DEFAULT NULL,
+  `LastCertificateCertifier` varchar(250) DEFAULT NULL,
+  `LastCertificateResults` varchar(1500) DEFAULT NULL,
+  `NumberEmployees` int(11) NOT NULL,
+  `ExternalServicesProvider` varchar(500) DEFAULT NULL,
+  `ReceiveConsultancy` tinyint(1) DEFAULT NULL,
+  `ConsultantName` varchar(500) DEFAULT NULL,
+  `AppDate` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `app_detail`
+--
+
+CREATE TABLE `app_detail` (
+  `IdAppDetail` int(11) NOT NULL,
+  `IdApp` int(11) NOT NULL,
+  `Address` varchar(500) NOT NULL,
+  `ShiftEmployees1` int(11) NOT NULL,
+  `ShiftEmployees2` int(11) NOT NULL,
+  `ShiftEmployees3` int(11) NOT NULL,
+  `Activities` varchar(500) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `companies`
 --
 
@@ -35,16 +72,16 @@ CREATE TABLE `companies` (
   `CompanyRFC` varchar(20) NOT NULL,
   `CompanyAddress` varchar(500) NOT NULL,
   `CompanyWebsite` varchar(250) DEFAULT NULL,
-  `CompanyPassword` varbinary(20) NOT NULL
+  `CompanyLogo` varchar(250) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Volcado de datos para la tabla `companies`
 --
 
-INSERT INTO `companies` (`IdCompany`, `IdSector`, `CompanyName`, `CompanyRFC`, `CompanyAddress`, `CompanyWebsite`, `CompanyPassword`) VALUES
-(2, 1001, 'Prueba S.A de C.V.', 'PRUEBA7845', 'Ramón Corona #125', 'https://www.prueba.com.mx', 0x5411a461e39fe28709a073078ffc3e42),
-(3, 1015, 'Malvados y Asociados S.A de C.V.', 'MALASO4589', 'Independencia #425', 'https://malvados.asociados.mx', 0xdf3e0d5bbde5b0962b47b8b6cca37428);
+INSERT INTO `companies` (`IdCompany`, `IdSector`, `CompanyName`, `CompanyRFC`, `CompanyAddress`, `CompanyWebsite`, `CompanyLogo`) VALUES
+(2, 1001, 'Prueba S.A de C.V.', 'PRUEBA7845', 'Ramón Corona #125', 'https://www.prueba.com.mx', NULL),
+(3, 1015, 'Malvados y Asociados S.A de C.V.', 'MALASO4589', 'Independencia #425', 'https://malvados.asociados.mx', NULL);
 
 -- --------------------------------------------------------
 
@@ -59,24 +96,82 @@ CREATE TABLE `contacts` (
   `ContactName` varchar(250) NOT NULL,
   `ContactPhone` varchar(15) NOT NULL,
   `ContactEmail` varchar(250) NOT NULL,
-  `ContactCharge` varchar(300) NOT NULL
+  `ContactCharge` varchar(300) NOT NULL,
+  `ContactPassword` varbinary(20) NOT NULL,
+  `ContactPhoto` varchar(500) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
--- Disparadores `contacts`
+-- Volcado de datos para la tabla `contacts`
 --
-DELIMITER $$
-CREATE TRIGGER `unique_main_contact_insert` AFTER INSERT ON `contacts` FOR EACH ROW IF (NEW.MainContact = 1) THEN BEGIN
-UPDATE contacts SET MainContact = 0 WHERE IdCompany = NEW.IdCompany AND IdContact <> NEW.IdContact;
-END; END IF
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `unique_main_contact_update` AFTER UPDATE ON `contacts` FOR EACH ROW IF(NEW.MainContact = 1) THEN BEGIN
-UPDATE contacts SET MainContact = 0 WHERE IdCompany = NEW.IdCompany AND IdContact <> NEW.IdContact;
-END; END IF
-$$
-DELIMITER ;
+
+INSERT INTO `contacts` (`IdContact`, `IdCompany`, `MainContact`, `ContactName`, `ContactPhone`, `ContactEmail`, `ContactCharge`, `ContactPassword`, `ContactPhoto`) VALUES
+(11, 3, 1, 'Heinz Doofmenshmirtz', '5555555555', 'evil_doof@mermelada.com', 'Genio Malvado', 0x2483bb4d9af50039ba5bd69f5a16eeb9, NULL),
+(12, 3, 0, 'Alois Everard Elizabeth Otto Wolfgang Hypatia Gunter Geilen Gary Cooper Von Rodenstein', '5555555555', 'evil_rodney@mermelada.com', 'Doctor del Mal', 0x2483bb4d9af50039ba5bd69f5a16eeb9, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `master_list`
+--
+
+CREATE TABLE `master_list` (
+  `IdMasterList` int(11) NOT NULL,
+  `IdService` int(11) NOT NULL,
+  `IdSector` int(11) NOT NULL,
+  `IdEmployee` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `personal`
+--
+
+CREATE TABLE `personal` (
+  `IdEmployee` int(11) NOT NULL,
+  `EmployeeName` varchar(75) NOT NULL,
+  `EmployeeLastName` varchar(75) NOT NULL,
+  `EmployeeDegree` varchar(200) NOT NULL,
+  `EmployeeBirth` date NOT NULL,
+  `EmployeeContractYear` year(4) NOT NULL,
+  `EmployeeCharge` varchar(150) NOT NULL,
+  `EmployeeAddress` varchar(500) NOT NULL,
+  `EmployeePhone` varchar(25) NOT NULL,
+  `EmployeeEmail` varchar(200) NOT NULL,
+  `EmployeeInsurance` varchar(30) NOT NULL,
+  `EmployeeRFC` varchar(25) NOT NULL,
+  `EmployeePassword` varbinary(20) NOT NULL,
+  `EmployeePhoto` varchar(250) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Volcado de datos para la tabla `personal`
+--
+
+INSERT INTO `personal` (`IdEmployee`, `EmployeeName`, `EmployeeLastName`, `EmployeeDegree`, `EmployeeBirth`, `EmployeeContractYear`, `EmployeeCharge`, `EmployeeAddress`, `EmployeePhone`, `EmployeeEmail`, `EmployeeInsurance`, `EmployeeRFC`, `EmployeePassword`, `EmployeePhoto`) VALUES
+(1, 'Yael Alejandro', 'Santana', 'Ingeniero Infórmatico', '1995-11-23', 2020, 'Programador', 'Pánfilo Natera #20-H', '3421006559', 'ya_el1995@hotmail.com', 'KIAS5849a8', 'SAMY951123KU8', 0x066cff26d5e35df5ee74a9f26ff64f93, NULL),
+(5, 'Adrian', 'Casillas', '', '0000-00-00', 2005, 'Representante LATAM', '', '', 'adn@prueba.com', '', 'CASA900909PI9', 0xaa235da8368163fbdbde2dd718035e17, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `roles`
+--
+
+CREATE TABLE `roles` (
+  `IdRole` int(11) NOT NULL,
+  `IdEmployee` int(11) NOT NULL,
+  `Role_Type` varchar(250) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Volcado de datos para la tabla `roles`
+--
+
+INSERT INTO `roles` (`IdRole`, `IdEmployee`, `Role_Type`) VALUES
+(100, 1, 'ADMIN_ROLE'),
+(101, 5, 'ADMIN_ROLE');
 
 -- --------------------------------------------------------
 
@@ -85,54 +180,79 @@ DELIMITER ;
 --
 
 CREATE TABLE `sectors` (
-  `IdSector` int(10) NOT NULL,
-  `SectorName` varchar(120) NOT NULL
+  `IdSector` int(11) NOT NULL,
+  `SectorName` varchar(120) NOT NULL,
+  `SectorStatus` varchar(15) DEFAULT 'Active'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Volcado de datos para la tabla `sectors`
 --
 
-INSERT INTO `sectors` (`IdSector`, `SectorName`) VALUES
-(1001, 'Agriculture, forestry and fishing\r\n'),
-(1002, 'Mining and quarrying'),
-(1003, 'Food products, beverages and tobacco'),
-(1004, 'Textiles and textile products'),
-(1005, 'Leather and leather products'),
-(1006, 'Wood and wood products'),
-(1007, 'Pulp, paper and paper products'),
-(1008, 'Publishing companies'),
-(1009, 'Printing companies'),
-(1010, 'Manufacture of coke and refined petroleum products'),
-(1011, 'Nuclear fuel'),
-(1012, 'Chemicals, chemical products and fibres'),
-(1013, 'Pharmaceuticals'),
-(1014, 'Rubber and plastic products'),
-(1015, 'Non-metallic mineral products'),
-(1016, 'Concrete, cement, lime, plaster etc'),
-(1017, 'Basic metals and fabricated metal products'),
-(1018, 'Machinery and equipment'),
-(1019, 'Electrical and optical equipment'),
-(1020, 'Shipbuilding'),
-(1021, 'Aerospace'),
-(1022, 'Other transport equipment'),
-(1023, 'Manufacturing not elsewhere classified'),
-(1024, 'Recycling'),
-(1025, 'Electricity supply'),
-(1026, 'Gas supply'),
-(1027, 'Water supply'),
-(1028, 'Construction'),
-(1029, 'Wholesale and retail trade; Repair of motor vehicles, motorcycles and personal and household goods'),
-(1030, 'Hotels and restaurants'),
-(1031, 'Transport, storage and communication'),
-(1032, 'Financial intermediation; real estate; renting'),
-(1033, 'Information technology'),
-(1034, 'Engineering services'),
-(1035, 'Other services '),
-(1036, 'Public administration'),
-(1037, 'Education'),
-(1038, 'Health and social work'),
-(1039, 'Other social services');
+INSERT INTO `sectors` (`IdSector`, `SectorName`, `SectorStatus`) VALUES
+(1001, 'Agriculture, forestry and fishing\r\n', 'Active'),
+(1002, 'Mining and quarrying', 'Active'),
+(1003, 'Food products, beverages and tobacco', 'Active'),
+(1004, 'Textiles and textile products', 'Active'),
+(1005, 'Leather and leather products', 'Active'),
+(1006, 'Wood and wood products', 'Active'),
+(1007, 'Pulp, paper and paper products', 'Active'),
+(1008, 'Publishing companies', 'Active'),
+(1009, 'Printing companies', 'Active'),
+(1010, 'Manufacture of coke and refined petroleum products', 'Active'),
+(1011, 'Nuclear fuel', 'Active'),
+(1012, 'Chemicals, chemical products and fibres', 'Active'),
+(1013, 'Pharmaceuticals', 'Active'),
+(1014, 'Rubber and plastic products', 'Active'),
+(1015, 'Non-metallic mineral products', 'Active'),
+(1016, 'Concrete, cement, lime, plaster etc', 'Active'),
+(1017, 'Basic metals and fabricated metal products', 'Active'),
+(1018, 'Machinery and equipment', 'Active'),
+(1019, 'Electrical and optical equipment', 'Active'),
+(1020, 'Shipbuilding', 'Active'),
+(1021, 'Aerospace', 'Active'),
+(1022, 'Other transport equipment', 'Active'),
+(1023, 'Manufacturing not elsewhere classified', 'Active'),
+(1024, 'Recycling', 'Active'),
+(1025, 'Electricity supply', 'Active'),
+(1026, 'Gas supply', 'Active'),
+(1027, 'Water supply', 'Active'),
+(1028, 'Construction', 'Active'),
+(1029, 'Wholesale and retail trade; Repair of motor vehicles, motorcycles and personal and household goods', 'Active'),
+(1030, 'Hotels and restaurants', 'Active'),
+(1031, 'Transport, storage and communication', 'Active'),
+(1032, 'Financial intermediation; real estate; renting', 'Active'),
+(1033, 'Information technology', 'Active'),
+(1034, 'Engineering services', 'Active'),
+(1035, 'Other services ', 'Active'),
+(1036, 'Public administration', 'Active'),
+(1037, 'Education', 'Active'),
+(1038, 'Health and social work', 'Active'),
+(1039, 'Other social services', 'Active'),
+(1043, 'Sector de Prueba', 'Inactive');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `services`
+--
+
+CREATE TABLE `services` (
+  `IdService` int(11) NOT NULL,
+  `ServiceStandard` varchar(250) NOT NULL,
+  `ServiceShortName` varchar(10) NOT NULL,
+  `ServiceStatus` varchar(15) DEFAULT 'Available'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Volcado de datos para la tabla `services`
+--
+
+INSERT INTO `services` (`IdService`, `ServiceStandard`, `ServiceShortName`, `ServiceStatus`) VALUES
+(1, 'ISO 9001:2015', '9K', 'Available'),
+(2, 'ISO 14001:2015', '14k', 'Available'),
+(3, 'ISO 50001:2011', '50k', 'Available'),
+(4, 'ISO 27001:2015', '27K', 'Available');
 
 -- --------------------------------------------------------
 
@@ -159,10 +279,24 @@ INSERT INTO `validation_keys` (`IdKey`, `ValidationCode`, `ValidationDate`, `Val
 --
 
 --
+-- Indices de la tabla `applications`
+--
+ALTER TABLE `applications`
+  ADD PRIMARY KEY (`IdApp`),
+  ADD KEY `fk_services` (`IdService`);
+
+--
+-- Indices de la tabla `app_detail`
+--
+ALTER TABLE `app_detail`
+  ADD PRIMARY KEY (`IdAppDetail`);
+
+--
 -- Indices de la tabla `companies`
 --
 ALTER TABLE `companies`
   ADD PRIMARY KEY (`IdCompany`),
+  ADD UNIQUE KEY `CompanyRFC` (`CompanyRFC`),
   ADD KEY `fk_sectors` (`IdSector`);
 
 --
@@ -173,10 +307,36 @@ ALTER TABLE `contacts`
   ADD KEY `fk_companies` (`IdCompany`);
 
 --
+-- Indices de la tabla `master_list`
+--
+ALTER TABLE `master_list`
+  ADD PRIMARY KEY (`IdMasterList`);
+
+--
+-- Indices de la tabla `personal`
+--
+ALTER TABLE `personal`
+  ADD PRIMARY KEY (`IdEmployee`),
+  ADD UNIQUE KEY `unique_email` (`EmployeeEmail`);
+
+--
+-- Indices de la tabla `roles`
+--
+ALTER TABLE `roles`
+  ADD PRIMARY KEY (`IdRole`),
+  ADD KEY `fk_personal` (`IdEmployee`);
+
+--
 -- Indices de la tabla `sectors`
 --
 ALTER TABLE `sectors`
   ADD PRIMARY KEY (`IdSector`);
+
+--
+-- Indices de la tabla `services`
+--
+ALTER TABLE `services`
+  ADD PRIMARY KEY (`IdService`);
 
 --
 -- Indices de la tabla `validation_keys`
@@ -189,6 +349,18 @@ ALTER TABLE `validation_keys`
 --
 
 --
+-- AUTO_INCREMENT de la tabla `applications`
+--
+ALTER TABLE `applications`
+  MODIFY `IdApp` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `app_detail`
+--
+ALTER TABLE `app_detail`
+  MODIFY `IdAppDetail` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `companies`
 --
 ALTER TABLE `companies`
@@ -198,13 +370,37 @@ ALTER TABLE `companies`
 -- AUTO_INCREMENT de la tabla `contacts`
 --
 ALTER TABLE `contacts`
-  MODIFY `IdContact` int(100) NOT NULL AUTO_INCREMENT;
+  MODIFY `IdContact` int(100) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT de la tabla `master_list`
+--
+ALTER TABLE `master_list`
+  MODIFY `IdMasterList` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `personal`
+--
+ALTER TABLE `personal`
+  MODIFY `IdEmployee` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT de la tabla `roles`
+--
+ALTER TABLE `roles`
+  MODIFY `IdRole` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=104;
 
 --
 -- AUTO_INCREMENT de la tabla `sectors`
 --
 ALTER TABLE `sectors`
-  MODIFY `IdSector` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1043;
+  MODIFY `IdSector` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1044;
+
+--
+-- AUTO_INCREMENT de la tabla `services`
+--
+ALTER TABLE `services`
+  MODIFY `IdService` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `validation_keys`
@@ -217,6 +413,12 @@ ALTER TABLE `validation_keys`
 --
 
 --
+-- Filtros para la tabla `applications`
+--
+ALTER TABLE `applications`
+  ADD CONSTRAINT `fk_services` FOREIGN KEY (`IdService`) REFERENCES `services` (`IdService`) ON UPDATE NO ACTION;
+
+--
 -- Filtros para la tabla `companies`
 --
 ALTER TABLE `companies`
@@ -227,6 +429,12 @@ ALTER TABLE `companies`
 --
 ALTER TABLE `contacts`
   ADD CONSTRAINT `fk_companies` FOREIGN KEY (`IdCompany`) REFERENCES `companies` (`IdCompany`) ON UPDATE NO ACTION;
+
+--
+-- Filtros para la tabla `roles`
+--
+ALTER TABLE `roles`
+  ADD CONSTRAINT `fk_personal` FOREIGN KEY (`IdEmployee`) REFERENCES `personal` (`IdEmployee`) ON UPDATE NO ACTION;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
