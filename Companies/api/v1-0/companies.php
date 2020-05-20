@@ -9,7 +9,7 @@
 /**-----Get request (request of the whole information or just one of them; all data in the table of Sectors) ----------------------------------------------------------------*/
         case 'GET':
             if(isset($_GET['rfc']) && isset($_GET['password'])){//If is a request to log-in
-                $companyRFC = $_GET['rfc'];
+                $companyRFC = strtoupper($_GET['rfc']);
                 $companyPassword = $_GET['password'];
                 $query = "SELECT IdCompany, IdSector, CompanyName, CompanyRFC, CompanyAddress, CompanyWebsite, AES_DECRYPT(CompanyPassword,'@Company') AS 'CompanyPassword' FROM companies WHERE CompanyRFC='$companyRFC' AND `CompanyPassword`= AES_ENCRYPT('$companyPassword', '@Company')"; //it create the query for the server
                 $consult = $dbConnection->prepare($query); //this line prepare the query for execute
@@ -49,7 +49,7 @@
                 //get the sended data
                 $sector = $_POST['sector'];
                 $companyName = $_POST['name'];
-                $companyRFC = $_POST['rfc'];
+                $companyRFC = strtoupper($_POST['rfc']);
                 $companyAddress = $_POST['address'];
                 $companyPassword = $_POST['password'];
                 if(isset($_POST['website'])){
@@ -62,11 +62,14 @@
                 $insert = $dbConnection->prepare($query);//prepare the statement
                 try{//try to complete the insertion
                     $insert->execute();//execute the statement
+                    if ($insert->errorCode()) {
+                        header("HTTP/1.0 409 Conflict");//info for the client
+                    }
                     $dbConnection->commit();//it's everything ok
                     header("HTTP/1.0 200 Created"); //this indicates to the client that the new record
                 }catch (Exception $e){//the insertion fails then
+                    header("HTTP/1.0 409 Conflict");//info for the client
                     $dbConnection->rollBack();//get back the database
-                    header("HTTP/1.0 500 Internal Server Error");//info for the client
                 }
                 exit();
             }
@@ -84,7 +87,7 @@
                 $id = $_GET['id'];
                 $sector = $_GET['sector'];
                 $companyName = $_GET['name'];
-                $companyRFC = $_GET['rfc'];
+                $companyRFC = strtoupper($_GET['rfc']);
                 $companyAddress = $_GET['address'];
                 if(isset($_GET['website'])){
                     $companyWebsite = $_GET['website'];
