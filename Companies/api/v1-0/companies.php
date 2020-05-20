@@ -10,7 +10,6 @@
         case 'GET':
             if (isset($_GET['idCompany']) && isset($_GET['t']) && TokenTool::isValid($_GET['t'])) {
                 $idCompany = intval($_GET['idCompany']);
-                echo $idCompany;
                 $query = "SELECT IdCompany, IdSector, CompanyName, CompanyRFC, CompanyAddress, CompanyWebsite AS 'CompanyPassword' FROM companies WHERE IdCompany = $idCompany";
                 $consult = $dbConnection->prepare($query); //this line prepare the query for execute
                 $consult->execute(); //execute the query
@@ -64,7 +63,6 @@
                     header("HTTP/1.0 200 Created"); //this indicates to the client that the new record
                     echo json_encode($array);
                 }catch (Exception $e){//the insertion fails then
-                    header("HTTP/1.0 409 Conflict");//info for the client
                     $dbConnection->rollBack();//get back the database
                     header("HTTP/1.0 409 Conflict with the Server");//info for the client
                 }
@@ -85,7 +83,7 @@
                     $id = $_GET['id'];
                     $sector = $_GET['sector'];
                     $companyName = $_GET['name'];
-                    $companyRFC = $_GET['rfc'];
+                    $companyRFC = strtoupper($_GET['rfc']);
                     $companyAddress = $_GET['address'];
                     if(isset($_GET['website'])){
                         $companyWebsite = $_GET['website'];
