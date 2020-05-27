@@ -11,7 +11,7 @@
             if(isset($_GET['email']) && isset($_GET['password'])){//If is a request to log-in
                 $employeeEmail = $_GET['email'];
                 $employeePassword = $_GET['password'];
-                $query = "SELECT IdEmployee, EmployeeName, EmployeeLastName, EmployeeDegree, EmployeeBirth, EmployeeContractYear, EmployeeCharge, EmployeeAddress, EmployeePhone, EmployeeEmail, EmployeeInsurance, EmployeeRFC, AES_DECRYPT(EmployeePassword, '@Empleado') AS 'EmployeePassword', EmployeePhoto FROM personal WHERE EmployeeEmail = '$employeeEmail' AND EmployeePassword = AES_ENCRYPT('$employeePassword','@Empleado');";
+                $query = "SELECT IdEmployee, EmployeeName, EmployeeLastName, EmployeeDegree, EmployeeBirth, EmployeeContractYear, EmployeeCharge, EmployeeAddress, EmployeePhone, EmployeeEmail, EmployeeInsurance, EmployeeRFC, AES_DECRYPT(EmployeePassword, '@Empleado') AS 'EmployeePassword', EmployeePhoto, EmployeeStatus FROM personal WHERE EmployeeEmail = '$employeeEmail' AND EmployeePassword = AES_ENCRYPT('$employeePassword','@Empleado');";
                 $consult = $dbConnection->prepare($query); //this line prepare the query for execute
                 $consult->execute();
                 if($consult->rowCount()){//if is there any result for the query then
@@ -25,9 +25,10 @@
                         'EmployeeEmail' => $employeeData['EmployeeEmail']
                     );
                     $employeeData['Token'] = TokenTool::createToken($dataForToken);
+                    echo $employeeData['EmployeeStatus'];
                     if ($employeeData['EmployeeStatus'] == 'Active'){
                         header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
-                        header('Content-Type: application/json'); //now define the content type to get back
+                        //header('Content-Type: application/json'); //now define the content type to get back
                         echo json_encode($employeeData); //to finalize the server return the data
                     } else {
                         header("HTTP/1.0 403 Forbidden");
