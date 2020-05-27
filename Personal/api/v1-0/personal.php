@@ -11,7 +11,7 @@
             if(isset($_GET['email']) && isset($_GET['password'])){//If is a request to log-in
                 $employeeEmail = $_GET['email'];
                 $employeePassword = $_GET['password'];
-                $query = "SELECT IdEmployee, EmployeeName, EmployeeLastName, EmployeeDegree, EmployeeBirth, EmployeeContractYear, EmployeeCharge, EmployeeAddress, EmployeePhone, EmployeeEmail, EmployeeInsurance, EmployeeRFC, AES_DECRYPT(EmployeePassword, '@Empleado') AS 'EmployeePassword', EmployeePhoto FROM personal WHERE EmployeeEmail = '$employeeEmail' AND EmployeePassword = AES_ENCRYPT('$employeePassword','@Empleado')";
+                $query = "SELECT IdEmployee, EmployeeName, EmployeeLastName, EmployeeDegree, EmployeeBirth, EmployeeContractYear, EmployeeCharge, EmployeeAddress, EmployeePhone, EmployeeEmail, EmployeeInsurance, EmployeeRFC, AES_DECRYPT(EmployeePassword, '@Empleado') AS 'EmployeePassword', EmployeePhoto FROM personal WHERE EmployeeEmail = '$employeeEmail' AND EmployeePassword = AES_ENCRYPT('$employeePassword','@Empleado') AND EmployeeStatus = 'Active'";
                 $consult = $dbConnection->prepare($query); //this line prepare the query for execute
                 $consult->execute();
                 if($consult->rowCount()){//if is there any result for the query then
@@ -36,7 +36,7 @@
             }elseif(isset($_GET['idEmployee']) && isset($_GET['t'])){
                 if (TokenTool::isValid($_GET['t'])) {
                     $idEmployee = $_GET['idEmployee'];
-                    $query = "SELECT IdEmployee, EmployeeName, EmployeeLastName, EmployeeDegree, EmployeeBirth, EmployeeContractYear, EmployeeCharge, EmployeeAddress, EmployeePhone, EmployeeEmail, EmployeeInsurance, EmployeeRFC, AES_DECRYPT(EmployeePassword, '@Empleado') AS 'EmployeePassword', EmployeePhoto FROM personal WHERE IdEmployee = $idEmployee";
+                    $query = "SELECT IdEmployee, EmployeeName, EmployeeLastName, EmployeeDegree, EmployeeBirth, EmployeeContractYear, EmployeeCharge, EmployeeAddress, EmployeePhone, EmployeeEmail, EmployeeInsurance, EmployeeRFC, AES_DECRYPT(EmployeePassword, '@Empleado') AS 'EmployeePassword', EmployeePhoto, EmployeeStatus FROM personal WHERE IdEmployee = $idEmployee";
                     $consult = $dbConnection->prepare($query); //this line prepare the query for execute
                     $consult->execute(); //execute the query
                     if ($consult->rowCount()) {
@@ -60,7 +60,7 @@
                 }
             }else{/**email doesn't exist, then it's a request for the whole information */
                 if (isset($_GET['t']) && TokenTool::isValid($_GET['t'])){
-                    $query = "SELECT IdEmployee, EmployeeName, EmployeeLastName, EmployeeDegree, EmployeeBirth, EmployeeContractYear, EmployeeCharge, EmployeeAddress, EmployeePhone, EmployeeEmail, EmployeeInsurance, EmployeeRFC, EmployeePhoto FROM personal ORDER BY EmployeeLastName, EmployeeName;";
+                    $query = "SELECT IdEmployee, EmployeeName, EmployeeLastName, EmployeeDegree, EmployeeBirth, EmployeeContractYear, EmployeeCharge, EmployeeAddress, EmployeePhone, EmployeeEmail, EmployeeInsurance, EmployeeRFC, EmployeePhoto, EmployeeStatus FROM personal ORDER BY EmployeeLastName, EmployeeName;";
                     $consult = $dbConnection->prepare($query);//this line prepare the query for execute
                     $consult->execute();//execute the query
                     if ($consult->rowCount()) {
@@ -232,37 +232,31 @@
             break;
 
 
-/**-----Patch request (request for change employee photo in the table) -----------------------------------------------------------------------------------------------------------*/
+/**-----Patch request (request for change employee status in the table) -----------------------------------------------------------------------------------------------------------*/
         case 'PATCH':
-            if(isset($_GET['employee']) && isset($_GET['file']) && isset($_GET['t'])){
+            if(isset($_GET['employee']) && isset($_GET['t'])){
                 if (TokenTool::isValid($_GET['t'])){
                     header('Content-Type: application/json');
                     $idEmployee = $_GET['employee'];
-                    $file = false;
-                    if (isset($_FILES['imagen'])){
-                        $file = true;
-                    }
-                    $receivedData = array(
-                        'employee' => $idEmployee,
-                        'file' => $file
-                    );
-                    echo json_encode($receivedData);
-                    //
-                    //Code for change the company logo
-                    $query = '';
-                    //
-                    /*
+                    
+                    //Code for change the employee status
+                    $query = "UPDATE personal SET EmployeeStatus = 'Inactive' WHERE IdEmployee = $idEmployee";
                     $dbConnection->beginTransaction();//starts a transaction in the database
                     $update = $dbConnection->prepare($query);//prepare the statement
                     try {//try to complete the modification
                         $update->execute();//execute the statement
                         $dbConnection->commit();//it's everything ok
                         header("HTTP/1.0 200 Modified"); //this indicates to the client that the reecord was modified
+                        $query = "SELECT IdEmployee, EmployeeName, EmployeeLastName, EmployeeDegree, EmployeeBirth, EmployeeContractYear, EmployeeCharge, EmployeeAddress, EmployeePhone, EmployeeEmail, EmployeeInsurance, EmployeeRFC, AES_DECRYPT(EmployeePassword, '@Empleado') AS 'EmployeePassword', EmployeePhoto, EmployeeStatus FROM personal WHERE IdEmployee = $idEmployee";
+                        $consult = $dbConnection->prepare($query); //this line prepare the query for execute
+                        $consult->execute();
+                        $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
+                        $employeeData = $consult->fetchAll()[0];
+                        echo json_encode($employeeData);
                     }catch (Exception $e) {//the modification fails then
                         $dbConnection->rollBack();//get back the database
                         header("HTTP/1.0 409 Conflict with the Server");//info for the client
                     }
-                    */
                 }
                 else{
                     header("HTTP/1.0 401 Unauthorized");

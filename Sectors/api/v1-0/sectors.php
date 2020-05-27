@@ -25,7 +25,20 @@
                     header("HTTP/1.0 404 Not found");//the server advice to not found result
 
                 }
-            }elseif (isset($_GET['t'])) { /** Admin information request */
+            }elseif (isset($_GET['iso']) && isset($_GET['t'])) { /** Admin information request */
+                if (TokenTool::isValid($_GET['t'])){
+                    $sectorISO = $_GET['iso'];
+                    $query = "SELECT IdSector, SectorISO, IAF_MD5, SectorCluster, SectorCategory, SectorSubcategory, SectorRiskLevel FROM sectors WHERE SectorStatus = 'Active' AND SectorISO = '$sectorISO'";
+                    $consult = $dbConnection->prepare($query);
+                    $consult->execute();
+                    $consult->setFetchMode(PDO::FETCH_ASSOC); //this comand sets the fetch mode in association for the best way to put the data
+                    header("HTTP/1.0 202 Accepted");//this indicates to the client that the request was accepted
+                    header('Content-Type: application/json');//now define the content type to get back
+                    echo json_encode($consult->fetchAll());//to finalize the server return the data
+                } else {
+                    header("HTTP/1.0 401 Unauthorized");
+                }
+            }elseif (isset($_GET['t'])) {/**Get sector for an application*/
                 if (TokenTool::isValid($_GET['t'])){
                     $query = "SELECT IdSector, SectorName, SectorStatus FROM sectors ORDER BY SectorName"; //it create the query for the server
                     $consult = $dbConnection->prepare($query);
@@ -37,15 +50,8 @@
                 }else {
                     header("HTTP/1.0 401 Unauthorized");
                 }
-            }else{/**the request don't have an Id, then it's a request for the whole information */
-
-                $query = "SELECT IdSector, SectorName FROM sectors WHERE SectorStatus = 'Active' ORDER BY SectorName";//it create the query for the server
-                $consult = $dbConnection->prepare($query);
-                $consult->execute();
-                $consult->setFetchMode(PDO::FETCH_ASSOC); //this comand sets the fetch mode in association for the best way to put the data
-                header("HTTP/1.0 202 Accepted");//this indicates to the client that the request was accepted
-                header('Content-Type: application/json');//now define the content type to get back
-                echo json_encode($consult->fetchAll());//to finalize the server return the data
+            } else {
+                header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions
             }
             exit();
             break;

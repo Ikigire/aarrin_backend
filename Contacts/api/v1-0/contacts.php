@@ -10,7 +10,7 @@
             if (isset($_GET['email']) && isset($_GET['password'])) {
                 $email = $_GET['email'];
                 $password = $_GET['password'];
-                $query = "SELECT IdContact, IdCompany, MainContact, ContactName, ContactPhone, ContactEmail, ContactCharge, AES_DECRYPT(ContactPassword, '@Company') AS 'ContactPassword', ContactPhoto FROM contacts WHERE ContactEmail = '$email' AND AES_DECRYPT(ContactPassword, '@Company') = '$password';";
+                $query = "SELECT IdContact, IdCompany, MainContact, ContactName, ContactPhone, ContactEmail, ContactCharge, AES_DECRYPT(ContactPassword, '@Company') AS 'ContactPassword', ContactPhoto FROM contacts WHERE ContactEmail = '$email' AND AES_DECRYPT(ContactPassword, '@Company') = '$password' AND ContactStatus = 'Active';";
                 $consult = $dbConnection->prepare($query);
                 $consult->execute(); //execute the query
                 if ($consult->rowCount()) { //if is there any result for the query then
