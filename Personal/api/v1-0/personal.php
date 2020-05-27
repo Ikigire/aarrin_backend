@@ -25,10 +25,9 @@
                         'EmployeeEmail' => $employeeData['EmployeeEmail']
                     );
                     $employeeData['Token'] = TokenTool::createToken($dataForToken);
-                    echo $employeeData['EmployeeStatus'];
                     if ($employeeData['EmployeeStatus'] == 'Active'){
                         header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
-                        //header('Content-Type: application/json'); //now define the content type to get back
+                        header('Content-Type: application/json'); //now define the content type to get back
                         echo json_encode($employeeData); //to finalize the server return the data
                     } else {
                         header("HTTP/1.0 403 Forbidden");
