@@ -88,7 +88,7 @@
                     $serviceShortName = $_GET['shortname'];
 
                     $query = "UPDATE services SET ServiceStandard = '$serviceStandard', ServiceShortName = '$serviceShortName'";
-                    if(isset($_GET['status'])){
+                    if(isset($_GET['status']) && trim($_GET['status']) !== ''){
                         $serviceStatus = $_GET['status'];
                         $query .= ", ServiceStatus = '$serviceStatus'";
                     }
@@ -113,7 +113,11 @@
                 exit();
             }
             break;
-
+        case 'OPTIONS':
+            header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
+            header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+            header("Allow: GET, POST, OPTIONS, PUT, PATCH, DELETE");
+            break;
         /**Any other request type will be refuse for the server */
         default:
             header("HTTP/1.0 405 Allow; GET, POST, PUT");

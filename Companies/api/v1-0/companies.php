@@ -10,7 +10,7 @@
         case 'GET':
             if (isset($_GET['idCompany']) && isset($_GET['t']) && TokenTool::isValid($_GET['t'])) {
                 $idCompany = intval($_GET['idCompany']);
-                $query = "SELECT IdCompany, IdSector, CompanyName, CompanyRFC, CompanyAddress, CompanyWebsite AS 'CompanyPassword' FROM companies WHERE IdCompany = $idCompany";
+                $query = "SELECT IdCompany, IdSector, CompanyName, CompanyRFC, CompanyAddress, CompanyWebsite FROM companies WHERE IdCompany = $idCompany";
                 $consult = $dbConnection->prepare($query); //this line prepare the query for execute
                 $consult->execute(); //execute the query
                 $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
@@ -85,7 +85,7 @@
                     $companyName = $_GET['name'];
                     $companyRFC = strtoupper($_GET['rfc']);
                     $companyAddress = $_GET['address'];
-                    if(isset($_GET['website'])){
+                    if(isset($_GET['website']) && trim($_GET['website']) !== ''){
                         $companyWebsite = $_GET['website'];
                         $query = "UPDATE companies SET IdSector = $sector, CompanyName = '$companyName', CompanyRFC = '$companyRFC', CompanyAddress = '$companyAddress', CompanyWebsite = '$companyWebsite' WHERE IdCompany = $id;";//prepare the query including the website
                     }else{
@@ -96,6 +96,14 @@
                     try {//try to complete the modification
                         $update->execute();//execute the statement
                         $dbConnection->commit();//it's everything ok
+                        $query = "SELECT IdCompany, IdSector, CompanyName, CompanyRFC, CompanyAddress, CompanyWebsite FROM companies WHERE IdCompany = $id";
+                        $consult = $dbConnection->prepare($query); //this line prepare the query for execute
+                        $consult->execute(); //execute the query
+                        $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
+                        header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
+                        header('Content-Type: application/json'); //now define the content type to get back
+                        $companyData = $consult->fetchAll()[0];
+                        echo json_encode($companyData);
                         header("HTTP/1.0 200 Modified"); //this indicates to the client that the reecord was modified
                     }catch (Exception $e) {//the modification fails then
                         $dbConnection->rollBack();//get back the database
@@ -142,6 +150,12 @@
                 header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions
                 exit();
             }
+            break;
+
+        case 'OPTIONS':
+            header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
+            header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+            header("Allow: GET, POST, OPTIONS, PUT, PATCH, DELETE");
             break;
         
         default:

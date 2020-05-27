@@ -67,15 +67,20 @@
         case "DELETE":
             if (isset($_GET['employee']) && isset($_GET['role']) && isset($_GET['t'])) {
                 if (TokenTool::isValid($_GET['t'])) {
-                    $idEmployee = $_GET['employee']; //get the sended data
+                    //get the sended data
+                    $idEmployee = $_GET['employee'];
                     $role = $_GET['role'];
-                    $query = "DELETE FROM roles WHERE IdEmployee = $idEmployee AND Role_Type = '$role'";
+                    $query = "DELETE FROM roles WHERE IdEmployee = $idEmployee And Role_Type = '$role'";
                     $dbConnection->beginTransaction();
                     $roleDelete = $dbConnection->prepare($query);
                     try {
                         $roleDelete->execute();
+                        if ($roleDelete->rowCount()){
+                            header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
+                        } else {
+                            header("HTTP/1.0 400 Bad request");
+                        }
                         $dbConnection->commit();
-                        header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
                     } catch (\Throwable $th) {
                         $dbConnection->rollBack();
                         header("HTTP/1.0 409 Conflict with the Server");//info for the client
@@ -88,7 +93,11 @@
             }
             exit();
             break;
-
+        case 'OPTIONS':
+            header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
+            header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+            header("Allow: GET, POST, OPTIONS, PUT, PATCH, DELETE");
+            break;
         /**Any other request type will be refuse for the server */
         default:
             header("HTTP/1.0 405 Allow; GET, POST, DELETE");

@@ -33,26 +33,34 @@
                     header("HTTP/1.0 404 Not found");//the server advice to not found result
                     exit();
                 }
-            }elseif(isset($_GET['idEmployee']) && isset($_GET['t']) && TokenTool::isValid($_GET['t'])){
-                $idEmployee = $_GET['idEmployee'];
-                $query = "SELECT IdEmployee, EmployeeName, EmployeeLastName, EmployeeDegree, EmployeeBirth, EmployeeContractYear, EmployeeCharge, EmployeeAddress, EmployeePhone, EmployeeEmail, EmployeeInsurance, EmployeeRFC, AES_DECRYPT(EmployeePassword, '@Empleado') AS 'EmployeePassword', EmployeePhoto FROM personal WHERE IdEmployee = $idEmployee";
-                $consult = $dbConnection->prepare($query); //this line prepare the query for execute
-                $consult->execute(); //execute the query
-                $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
-                header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
-                header('Content-Type: application/json'); //now define the content type to get back
-                $employeeData = $consult->fetchAll()[0];
-                $dataForToken = array(
-                    'IdEmployee' => $employeeData['IdEmployee'],
-                    'EmployeeName' => $employeeData['EmployeeName'].' '.$employeeData['EmployeeLastName'],
-                    'EmployeeRFC' => $employeeData['EmployeeRFC'],
-                    'EmployeeEmail' => $employeeData['EmployeeEmail']
-                );
-                $employeeData['Token'] = TokenTool::createToken($dataForToken);
-                echo json_encode($employeeData); //to finalize the server return the data
+            }elseif(isset($_GET['idEmployee']) && isset($_GET['t'])){
+                if (TokenTool::isValid($_GET['t'])) {
+                    $idEmployee = $_GET['idEmployee'];
+                    $query = "SELECT IdEmployee, EmployeeName, EmployeeLastName, EmployeeDegree, EmployeeBirth, EmployeeContractYear, EmployeeCharge, EmployeeAddress, EmployeePhone, EmployeeEmail, EmployeeInsurance, EmployeeRFC, AES_DECRYPT(EmployeePassword, '@Empleado') AS 'EmployeePassword', EmployeePhoto FROM personal WHERE IdEmployee = $idEmployee";
+                    $consult = $dbConnection->prepare($query); //this line prepare the query for execute
+                    $consult->execute(); //execute the query
+                    if ($consult->rowCount()) {
+                        $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
+                        header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
+                        header('Content-Type: application/json'); //now define the content type to get back
+                        $employeeData = $consult->fetchAll()[0];
+                        $dataForToken = array(
+                            'IdEmployee' => $employeeData['IdEmployee'],
+                            'EmployeeName' => $employeeData['EmployeeName'].' '.$employeeData['EmployeeLastName'],
+                            'EmployeeRFC' => $employeeData['EmployeeRFC'],
+                            'EmployeeEmail' => $employeeData['EmployeeEmail']
+                        );
+                        $employeeData['Token'] = TokenTool::createToken($dataForToken);
+                        echo json_encode($employeeData); //to finalize the server return the data
+                    } else {
+                        header("HTTP/1.0 404 Not found");
+                    }
+                } else {
+                    header("HTTP/1.0 401 Unauthorized");
+                }
             }else{/**email doesn't exist, then it's a request for the whole information */
                 if (isset($_GET['t']) && TokenTool::isValid($_GET['t'])){
-                    $query = "SELECT IdEmployee, EmployeeName, EmployeeLastName, EmployeeDegree, EmployeeBirth, EmployeeContractYear, EmployeeCharge, EmployeeAddress, EmployeePhone, EmployeeEmail, EmployeeInsurance, EmployeeRFC, EmployeePhoto FROM personal;";
+                    $query = "SELECT IdEmployee, EmployeeName, EmployeeLastName, EmployeeDegree, EmployeeBirth, EmployeeContractYear, EmployeeCharge, EmployeeAddress, EmployeePhone, EmployeeEmail, EmployeeInsurance, EmployeeRFC, EmployeePhoto FROM personal ORDER BY EmployeeLastName, EmployeeName;";
                     $consult = $dbConnection->prepare($query);//this line prepare the query for execute
                     $consult->execute();//execute the query
                     if ($consult->rowCount()) {
@@ -164,27 +172,27 @@
                     $employeeRFC = $_GET['rfc'];
 
                     $query = "UPDATE personal SET EmployeeName = '$employeeName', EmployeeLastName = '$employeeLastName', EmployeeContractYear = $employeeContractYear, EmployeeCharge = '$employeeCharge', EmployeeEmail = '$employeeEmail', EmployeeRFC = '$employeeRFC'";
-                    if (isset($_GET['degree'])) {
+                    if (isset($_GET['degree']) && trim($_GET['degree']) !== '') {
                         $employeeDegree = $_GET['degree'];
                         $query .= ", EmployeeDegree = '$employeeDegree'";
                     }
-                    if (isset($_GET['birth'])) {
+                    if (isset($_GET['birth']) && trim($_GET['birth']) !== '') {
                         $employeeBirth = $_GET['birth'];
                         $query .= ", EmployeeBirth = '$employeeBirth'";
                     }
-                    if (isset($_GET['address'])) {
+                    if (isset($_GET['address']) && trim($_GET['address']) !== '') {
                         $employeeAddress = $_GET['address'];
                         $query .= ", EmployeeAddress = '$employeeAddress'";
                     }
-                    if (isset($_GET['phone'])) {
+                    if (isset($_GET['phone']) && trim($_GET['phone']) !== '') {
                         $employeePhone = $_GET['phone'];
                         $query .= ", EmployeePhone = '$employeePhone'";
                     }
-                    if (isset($_GET['password'])) {
+                    if (isset($_GET['password']) && trim($_GET['password']) !== '') {
                         $employeePassword = $_GET['password'];
                         $query .= ", EmployeePassword = AES_ENCRYPT('$employeePassword','@Empleado')";
                     }
-                    if (isset($_GET['insurance'])) {
+                    if (isset($_GET['insurance']) && trim($_GET['insurance']) !== '') {
                         $employeeInsurance = $_GET['insurance'];
                         $query .= ", EmployeeInsurance = '$employeeInsurance'";
                     }
@@ -194,6 +202,20 @@
                     try {//try to complete the modification
                         $update->execute();//execute the statement
                         $dbConnection->commit();//it's everything ok
+                        $query = "SELECT IdEmployee, EmployeeName, EmployeeLastName, EmployeeDegree, EmployeeBirth, EmployeeContractYear, EmployeeCharge, EmployeeAddress, EmployeePhone, EmployeeEmail, EmployeeInsurance, EmployeeRFC, AES_DECRYPT(EmployeePassword, '@Empleado') AS 'EmployeePassword', EmployeePhoto FROM personal WHERE IdEmployee = $idEmployee";
+                        $consult = $dbConnection->prepare($query); //this line prepare the query for execute
+                        $consult->execute(); //execute the query
+                        $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
+                        header('Content-Type: application/json'); //now define the content type to get back
+                        $employeeData = $consult->fetchAll()[0];
+                        $dataForToken = array(
+                            'IdEmployee' => $employeeData['IdEmployee'],
+                            'EmployeeName' => $employeeData['EmployeeName'].' '.$employeeData['EmployeeLastName'],
+                            'EmployeeRFC' => $employeeData['EmployeeRFC'],
+                            'EmployeeEmail' => $employeeData['EmployeeEmail']
+                        );
+                        $employeeData['Token'] = TokenTool::createToken($dataForToken);
+                        echo json_encode($employeeData);
                         header("HTTP/1.0 200 Modified"); //this indicates to the client that the reecord was modified
                     }catch (Exception $e) {//the modification fails then
                         $dbConnection->rollBack();//get back the database
@@ -212,12 +234,24 @@
 
 /**-----Patch request (request for change employee photo in the table) -----------------------------------------------------------------------------------------------------------*/
         case 'PATCH':
-            if(isset($_GET['t'])){
+            if(isset($_GET['employee']) && isset($_GET['file']) && isset($_GET['t'])){
                 if (TokenTool::isValid($_GET['t'])){
+                    header('Content-Type: application/json');
+                    $idEmployee = $_GET['employee'];
+                    $file = false;
+                    if (isset($_FILES['imagen'])){
+                        $file = true;
+                    }
+                    $receivedData = array(
+                        'employee' => $idEmployee,
+                        'file' => $file
+                    );
+                    echo json_encode($receivedData);
                     //
                     //Code for change the company logo
                     $query = '';
                     //
+                    /*
                     $dbConnection->beginTransaction();//starts a transaction in the database
                     $update = $dbConnection->prepare($query);//prepare the statement
                     try {//try to complete the modification
@@ -228,6 +262,7 @@
                         $dbConnection->rollBack();//get back the database
                         header("HTTP/1.0 409 Conflict with the Server");//info for the client
                     }
+                    */
                 }
                 else{
                     header("HTTP/1.0 401 Unauthorized");
@@ -239,6 +274,13 @@
                 exit();
             }
             break;
+
+        case 'OPTIONS':
+            header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
+            header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, PATCH, DELETE");
+            header("Allow: GET, POST, OPTIONS, PUT, PATCH, DELETE");
+            break;
+        
         default:
             header("HTTP/1.0 405 Allow; GET, POST, PUT, PATCH");
             exit();

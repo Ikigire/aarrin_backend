@@ -128,7 +128,7 @@
                         $mainContact = $_GET['main'];
                         $updateQuery = $updateQuery. ", MainContact = 1";
                     }
-                    if (isset($_GET['password'])) {
+                    if (isset($_GET['password']) && trim($_GET['password']) !== '') {
                         $contactPassword = $_GET['password'];
                         $updateQuery = $updateQuery. ", ContactPassword = AES_ENCRYPT('$contactPassword', '@Company')";
                     }
@@ -152,6 +152,23 @@
                     try { //try to complete the modification
                         $update->execute(); //execute the statement
                         $dbConnection->commit(); //it's everything ok
+                        $query = "SELECT IdContact, IdCompany, MainContact, ContactName, ContactPhone, ContactEmail, ContactCharge, AES_DECRYPT(ContactPassword, '@Company') AS 'ContactPassword', ContactPhoto FROM contacts WHERE IdContact = $idContact"; //it create the query for the server
+                        $consult = $dbConnection->prepare($query);
+                        $consult->execute(); //execute the query
+                        if($consult->rowCount()){//if is there any result for the query then
+                            $consult->setFetchMode(PDO::FETCH_ASSOC);
+                            $contactData = $consult->fetchAll()[0];
+                            $dataForToken = array(
+                                'IdContact' => $contactData['IdContact'],
+                                'IdCompany' => $contactData['IdCompany'],
+                                'ContactName' => $contactData['ContactName'],
+                                'ContactEmail' => $contactData['ContactEmail']
+                            );
+                            $contactData['Token'] = TokenTool::createToken($dataForToken);
+                            header("HTTP/1.0 202 Modified");
+                            header('Content-Type: application/json');
+                            echo json_encode($contactData); //Return the data
+                        }
                         header("HTTP/1.0 200 Modified"); //this indicates to the client that the reecord was modified
                     } catch (Exception $e) { //the modification fails then
                         $dbConnection->rollBack(); //get back the database
@@ -167,7 +184,13 @@
                 exit();
             }
             break;
-        
+
+        case 'OPTIONS':
+            header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
+            header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+            header("Allow: GET, POST, OPTIONS, PUT, PATCH, DELETE");
+            break;
+
         default:
             header("HTTP/1.0 405 Allow; GET, POST, PUT");
             exit();
