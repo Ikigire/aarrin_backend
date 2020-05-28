@@ -9,21 +9,25 @@
     switch ($_SERVER['REQUEST_METHOD']) {
         case 'GET':
             /**If exist and id in the request then search the id on the table */
-            if (isset($_GET['idService'])) {
-                $id = $_GET['idService'];
-                $query = "SELECT IdService, ServiceStandard FROM services WHERE IdService = $id";
-                $consult = $dbConnection->prepare($query); //this line prepare the query for execute
-                $consult->execute();
-                if($consult->rowCount()){//if is there any result for the query then
-                    $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
-                    header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
-                    header('Content-Type: application/json'); //now define the content type to get back
-                    $service = $consult->fetch();
-                    echo json_encode($service); //to finalize the server return the data
+            if (isset($_GET['idService']) && isset($_GET['t'])) {
+                if (TokenTool::isValid($_GET['t'])) {
+                    $id = $_GET['idService'];
+                    $query = "SELECT IdService, ServiceStandard, ServiceShortName, ServiceStatus FROM services WHERE IdService = $id";
+                    $consult = $dbConnection->prepare($query); //this line prepare the query for execute
+                    $consult->execute();
+                    if($consult->rowCount()){//if is there any result for the query then
+                        $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
+                        header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
+                        header('Content-Type: application/json'); //now define the content type to get back
+                        $service = $consult->fetch();
+                        echo json_encode($service); //to finalize the server return the data
 
-                }else{//it there isn't any result for the query
-                    header("HTTP/1.0 404 Not found");//the server advice to not found result
+                    }else{//it there isn't any result for the query
+                        header("HTTP/1.0 404 Not found");//the server advice to not found result
 
+                    }
+                } else {
+                    header("HTTP/1.0 401 Unhautorized");
                 }
             }elseif (isset($_GET['t'])) { /** Admin information request */
                 if (TokenTool::isValid($_GET['t'])){
@@ -39,7 +43,7 @@
                 }
             }else{/**the request don't have an Id, then it's a request for the whole information */
 
-                $query = "SELECT IdService, ServiceStandard FROM services WHERE ServiceStatus = 'Available' ORDER BY ServiceStandard";//it create the query for the server
+                $query = "SELECT IdService, ServiceStandard FROM services WHERE ServiceStatus = 1 ORDER BY ServiceStandard";//it create the query for the server
                 $consult = $dbConnection->prepare($query);
                 $consult->execute();
                 $consult->setFetchMode(PDO::FETCH_ASSOC); //this comand sets the fetch mode in association for the best way to put the data
@@ -55,7 +59,7 @@
             if(isset($_POST['standard']) && isset($_POST['shortname']) && isset($_POST['t'])){
                 if (TokenTool::isValid($_POST['t'])){
                     $serviceStandard = $_POST['standard'];//get the sended data
-                    $serviceShortName = $_POST['shortname'];
+                    $serviceShortName = trim($_POST['shortname']);
                     $query = "INSERT INTO services(IdService, ServiceStandard, ServiceShortName) VALUES (null,'$serviceStandard', '$serviceShortName');";
                     $dbConnection->beginTransaction();//starts a transaction in the database
                     $insert = $dbConnection->prepare($query);//prepare the statement
@@ -85,10 +89,10 @@
                 if (TokenTool::isValid($_GET['t'])){
                     $serviceId = $_GET['idService'];
                     $serviceStandard = $_GET['standard'];
-                    $serviceShortName = $_GET['shortname'];
+                    $serviceShortName = trim($_GET['shortname']);
 
                     $query = "UPDATE services SET ServiceStandard = '$serviceStandard', ServiceShortName = '$serviceShortName'";
-                    if(isset($_GET['status']) && trim($_GET['status']) !== ''){
+                    if(isset($_GET['status'])){
                         $serviceStatus = $_GET['status'];
                         $query .= ", ServiceStatus = '$serviceStatus'";
                     }
