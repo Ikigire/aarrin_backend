@@ -17,25 +17,16 @@
         case 'POST':
             if(isset($_POST['IdCompany']) && isset($_POST['IdContact']) && isset($_POST['IdService']) && isset($_POST['IdSector']) && isset($_POST['AppLenguage']) && isset($_POST['NumberEmployees']) && isset($_POST['AppDetail']) && isset($_POST['AppComplement']) && isset($_POST['t'])){
                 if (($_POST['t'])){
-                    $someJSON = '[{"name":"Jonathan Suh","gender":"male"},{"name":"William Philbin","gender":"male"},{"name":"Allison McKinnery","gender":"female"}]';
-
-                    // Convert JSON string to Array
-                    $someArray = json_decode($someJSON, true);
-                    print_r($someArray);        // Dump all data of the Array
-                    echo $someArray[0]["name"]; // Access Array data
-
-                    // Convert JSON string to Object
-                    $someObject = json_decode($someJSON);
-                    print_r($someObject);      // Dump all data of the Object
-                    echo $someObject[0]->name; // Access Object data
                     $idCompany = $_POST['IdCompany'];
                     $idContact = $_POST['IdContact'];
                     $idService = $_POST['IdService'];
                     $idSector = $_POST['IdSector'];
                     $appLenguage = $_POST['AppLenguage'];
                     $numberEmployees = $_POST['NumberEmployees'];
-                    $appDetail = json_encode($_POST['AppDetail'], true); echo json_last_error_msg();
-                    $appComplement = json_decode($_POST['AppComplement'], true); echo json_last_error_msg();
+                    $appDetail = json_encode($_POST['AppDetail'], true);
+                    $appDetail = json_decode($_POST['AppDetail'], true);
+                    //$array = json_decode($_POST['AppDetail'], true);
+                    $appComplement = json_decode($_POST['AppComplement'], true);
                     $initialPart = "INSERT INTO applications (IdCompany, IdContact, IdService, IdSector, AppLenguage, NumberEmployees";
                     $values = "VALUES ($idCompany, $idContact, $idService, $idSector, '$appLenguage', $numberEmployees";
                     echo `weas "raras"`;
@@ -74,7 +65,7 @@
                     echo "<h3>Inicia Transaccion</h3><br>";
                     echo $query."<br>Guardando Detalle<br>";
                     $idApp = 0;
-                    /*
+                    
                     for ($i=0; $i < count($appDetail); $i++) { 
                         $detail = $appDetail[$i];
                         $address = $detail['Address'];
@@ -116,8 +107,8 @@
                         $query = $initialPart. ") ". $values. ");";
 
                         echo $query."<br>";
-                    }*/
-                    echo "<br>$appDetail<br>";
+                    }
+                    
                     var_dump($appDetail);
                     echo "<br><br>";
                     var_dump($appComplement);

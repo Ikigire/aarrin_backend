@@ -103,6 +103,13 @@
                         $update->execute();
                         $dbConnection->commit();//it's everything ok
                         header("HTTP/1.0 200 Modified"); //this indicates to the client that the reecord was modified
+                        $query = "SELECT IdService, ServiceStandard, ServiceShortName, ServiceStatus FROM services WHERE IdService = $serviceId";
+                        $consult = $dbConnection->prepare($query); //this line prepare the query for execute
+                        $consult->execute();
+                        $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
+                        header('Content-Type: application/json'); //now define the content type to get back
+                        $service = $consult->fetch();
+                        echo json_encode($service);
                     }catch (Exception $e) {//the modification fails then
                         $dbConnection->rollBack();//get rollback the database
                         header("HTTP/1.0 409 Conflict with the Server");//info for the client
