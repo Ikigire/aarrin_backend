@@ -8,24 +8,54 @@
     switch ($_SERVER['REQUEST_METHOD']) {
 /**-----Get request (request of the whole information or just one of them; all data in the table) ----------------------------------------------------------------*/
         case 'GET':
+            if (isset($_GET['t']) && isset($_GET['IdApplication'])) {
+                if (TokenTool::isValid($_GET['t'])) {
+                    $idApplication = $_GET['IdApplication'];
+                } else {
+                    header("HTTP/1.0 401 Unhautorized");
+                }
+            } elseif (isset($_GET['t']) && isset($_GET['IdCompany'])) {
+                if (TokenTool::isValid($_GET['t'])) {
+                    $idCompany = $_GET['IdCompany'];
+                } else {
+                    header("HTTP/1.0 401 Unhautorized");
+                }
+            } elseif (isset($_GET['t'])) {
+                if (TokenTool::isValid($_GET['t'])) {
+                    $query = "SELECT app.IdApp, c.CompanyName, c.CompanyLogo, co.ContactName, co.ContactPhone, co.ContactEmail, co.ContactCharge, co.ContactPhoto, s.ServiceShortName, app.IdSector, app.AppLenguage, app.LastCertificateExpiration, app.LastCertificateCertifier, app.LastCertificateResults, app.NumberEmployees, app.ExternalServicesProvider, app.ReceiveConsultancy, app.ConsultantName, app.AppDate, app.AppStatus FROM applications AS app JOIN companies AS c ON app.IdCompany = c.IdCompany JOIN contacts AS co on app.IdContact = co.IdContact JOIN services as s ON app.IdService = s.IdService;";
+                    $consult = $dbConnection->prepare($query);
+                    $consult->execute();
+                    $consult->setFetchMode(PDO::FETCH_ASSOC);
+                    header("HTTP/1.0 200 OK");
+                    header("Content-Type: application/json");
+                    echo json_encode($consult->fetchAll());
+                } else {
+                    header("HTTP/1.0 401 Unhautorized");
+                }
+            } else {
+                header("HTTP/1.0 412 Precondition Failed");
+            }
+            exit();
             break;
 
 
 /**-----Post request (request for create a new employee (Admin)) --------------------------------------------------------------------------------------------------------------------*/
         case 'POST':
             if(isset($_POST['IdCompany']) && isset($_POST['IdContact']) && isset($_POST['IdService']) && isset($_POST['IdSector']) && isset($_POST['AppLenguage']) && isset($_POST['NumberEmployees']) && isset($_POST['AppDetail']) && isset($_POST['AppComplement']) && isset($_POST['t'])){
-                if (($_POST['t'])){
+                if (TokenTool::isValid($_POST['t'])){
                     $idCompany = $_POST['IdCompany'];
                     $idContact = $_POST['IdContact'];
                     $idService = $_POST['IdService'];
                     $idSector = $_POST['IdSector'];
                     $appLenguage = $_POST['AppLenguage'];
                     $numberEmployees = $_POST['NumberEmployees'];
+                    $date = new DateTime("now");
+                    $currentDate = $date->format('Y-m-d H:i:s');
                     $appDetail = json_encode($_POST['AppDetail'], true);
                     $appDetail = json_decode($_POST['AppDetail'], true);
                     $appComplement = json_decode($_POST['AppComplement'], true);
-                    $initialPart = "INSERT INTO applications (IdCompany, IdContact, IdService, IdSector, AppLenguage, NumberEmployees";
-                    $values = "VALUES ($idCompany, $idContact, $idService, $idSector, '$appLenguage', $numberEmployees";
+                    $initialPart = "INSERT INTO applications (IdCompany, IdContact, IdService, IdSector, AppLenguage, NumberEmployees, AppDate";
+                    $values = "VALUES ($idCompany, $idContact, $idService, $idSector, '$appLenguage', $numberEmployees, '$currentDate'";
                     if (isset($_POST['LastCertificationExpire'])) {
                         $lastCertificationExpire = $_POST['LastCertificationExpire'];
                         $initialPart .= ", LastCertificationExpire";

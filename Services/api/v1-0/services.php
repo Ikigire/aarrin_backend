@@ -43,7 +43,7 @@
                 }
             }else{/**the request don't have an Id, then it's a request for the whole information */
 
-                $query = "SELECT IdService, ServiceStandard, ServiceDescription FROM services WHERE ServiceStatus = 1 ORDER BY ServiceStandard";//it create the query for the server
+                $query = "SELECT IdService, ServiceStandard, ServiceDescription FROM services WHERE ServiceStatus = 'Active' ORDER BY ServiceStandard";//it create the query for the server
                 $consult = $dbConnection->prepare($query);
                 $consult->execute();
                 $consult->setFetchMode(PDO::FETCH_ASSOC); //this comand sets the fetch mode in association for the best way to put the data
@@ -86,12 +86,12 @@
 
 /**-----Put request (request for change information in the table; it needs the new sector type and the Id) ------------------------------------------------------------------*/
         case 'PUT':
-            if (isset($_GET['idService']) && isset($_GET['standard']) && isset($_GET['shortname']) && isset($_GET['status']) && isset($_GET['description']) && isset($_GET['t'])) {
+            if (isset($_GET['idService']) && isset($_GET['standard']) && isset($_GET['shortname']) && isset($_GET['description']) && isset($_GET['t'])) {
                 if (TokenTool::isValid($_GET['t'])){
                     $serviceId = $_GET['idService'];
                     $serviceStandard = $_GET['standard'];
                     $serviceShortName = trim($_GET['shortname']);
-                    $description = trim($_GET['description']);
+                    $description = $_GET['description'];
                     $query = "UPDATE services SET ServiceStandard = '$serviceStandard', ServiceShortName = '$serviceShortName', ServiceDescription = '$description'";
                     if(isset($_GET['status'])){
                         $serviceStatus = $_GET['status'];
@@ -104,7 +104,7 @@
                         $update->execute();
                         $dbConnection->commit();//it's everything ok
                         header("HTTP/1.0 200 Modified"); //this indicates to the client that the reecord was modified
-                        $query = "SELECT IdService, ServiceStandard, ServiceShortName, ServiceStatus, ServicesDescription FROM services WHERE IdService = $serviceId";
+                        $query = "SELECT IdService, ServiceStandard, ServiceShortName, ServiceStatus, ServiceDescription FROM services WHERE IdService = $serviceId";
                         $consult = $dbConnection->prepare($query); //this line prepare the query for execute
                         $consult->execute();
                         $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
