@@ -10,7 +10,7 @@
             break;
 
         case 'POST':
-            if((isset($_POST['contact']) && $_POST['email'] && isset($_FILES['photo']) && isset($_POST['t'])){
+            if(isset($_POST['contact']) && $_POST['email'] && isset($_FILES['photo']) && isset($_POST['t'])){
                 if (TokenTool::isValid($_POST['t'])) {
                     $contactId = $_POST['contact'];
                     $contactEmail = $_POST['email'];

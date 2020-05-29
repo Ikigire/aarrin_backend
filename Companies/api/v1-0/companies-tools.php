@@ -14,7 +14,7 @@
 
 /**-----Post request (request for add a company logo) --------------------------------------------------------------------------------------------------------------------*/
         case 'POST':
-            if(isset(isset($_POST['company']) && $_POST['rfc'] && isset($_FILES['logo']) && isset($_POST['t'])){
+            if(isset($_POST['company']) && $_POST['rfc'] && isset($_FILES['logo']) && isset($_POST['t'])){
                 if (TokenTool::isValid($_POST['t'])) {
                     $companyId = $_POST['company'];
                     $companyRFC = $_POST['rfc'];
@@ -55,19 +55,7 @@
 
 /**-----Put request (request for change information in the table) -----------------------------------------------------------------------------------------------------------*/
         case 'PUT':
-            if(isset($_GET['id']) && isset($_GET['name']) && isset($_GET['rfc']) && isset($_GET['address']) && isset($_GET['t'])){
-                if (TokenTool::isValid($_GET['t'])){
-                    
-                }
-                else{
-                    header("HTTP/1.0 401 Unauthorized");
-                }
-                exit();
-            }
-            else{
-                header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions
-                exit();
-            }
+            
             break;
 
         case 'OPTIONS':
