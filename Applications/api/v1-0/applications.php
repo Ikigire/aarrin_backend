@@ -11,18 +11,88 @@
             if (isset($_GET['t']) && isset($_GET['IdApplication'])) {
                 if (TokenTool::isValid($_GET['t'])) {
                     $idApplication = $_GET['IdApplication'];
+                    $query ="SELECT IdApp, IdCompany, IdContact, IdService, IdSector, AppLenguage, LastCertificateExpiration, LastCertificateCertifier, LastCertificateResults, NumberEmployees, ExternalServicesProvider, ReceiveConsultancy, ConsultantName, AppDate, AppStatus FROM applications WHERE IdApp = $idApplication;";
+                    $consult = $dbConnection->prepare($query);
+                    $consult->execute();
+                    if ($consult->rowCount()) {
+                        $consult->SetFetchMode(PDO::FETCH_ASSOC);
+                        $appData = $consult->fetchAll()[0];
+                        $query = "SELECT IdAppDetail, IdApp, Address, Shift1, Shift1Employees, Shift2, Shift2Employees, Shift3, Shift3Employees, Activities FROM app_detail WHERE IdApp = $idApplication;";
+                        $consult = $dbConnection->prepare($query);
+                        $consult->execute();
+                        $consult->SetFetchMode(PDO::FETCH_ASSOC);
+                        $appData['AppDetail'] = $consult->fetchAll();
+
+                        $serviceRequest = $dbConnection->prepare("SELECT ServiceShortName FROM services WHERE IdService = ". $appData['IdService']);
+                        $serviceRequest->execute();
+                        $serviceRequest->setFetchMode(PDO::FETCH_ASSOC);
+                        $serviceShortName = $serviceRequest->fetchAll()[0]['ServiceShortName'];
+
+                        switch (strtolower($serviceShortName)) {
+                            case '9k':
+                                $query = "SELECT IdApp, ScopeActivities, NumberProcesses, LegalRequirements, CriticalComplaint, ProcessAutomationLevel, DesignResponsability, Justification FROM iso9kcomplement WHERE IdApp = $idApplication;";
+                                $consult = $dbConnection->prepare($query);
+                                $consult->execute();
+                                $consult->SetFetchMode(PDO::FETCH_ASSOC);
+                                $appData['AppComplement'] = $consult->fetchAll();
+                                break;
+
+                            case '14k':
+                                $query = "SELECT IdApp, ScopeActivities, NumberProcesses, LegalRequirements, OperationalControls, CriticalComplaint FROM iso14kcomplement WHERE IdApp = $idApplication;";
+                                $consult = $dbConnection->prepare($query);
+                                $consult->execute();
+                                $consult->SetFetchMode(PDO::FETCH_ASSOC);
+                                $appData['AppComplement'] = $consult->fetchAll();
+                                break;
+
+                            case '22k':
+                                $query = "SELECT IdApp, NumberHACCP, GeneralDescription, NumberLinesProducts, Seasonality, LegalRequirements FROM iso22kcomplement WHERE IdApp = $idApplication;";
+                                $consult = $dbConnection->prepare($query);
+                                $consult->execute();
+                                $consult->SetFetchMode(PDO::FETCH_ASSOC);
+                                $appData['AppComplement'] = $consult->fetchAll();
+                                break;
+                            
+                            case '45k':
+                                $query = "SELECT IdApp, ScopeActivities, NumberProcesses, LegalRequirements, FatalitiesRate, AccidentsRate, InjuriesRate, NearMissRate, OHSMSAudit, HighLevelRisks FROM iso45kcomplement WHERE IdApp = $idApplication;";
+                                $consult = $dbConnection->prepare($query);
+                                $consult->execute();
+                                $consult->SetFetchMode(PDO::FETCH_ASSOC);
+                                $appData['AppComplement'] = $consult->fetchAll();
+                                break;
+                            
+                            default:
+                                $dbConnection->rollBack();
+                                header("HTTP/1.0 409 Conflict");
+                                exit();
+                                break;
+                        }
+                        header("HTTP/1.0 200 Ok");
+                        header("Content-Type: application/json");
+                        echo json_encode($appData);
+                    } else {
+                        header("HTTP/1.0 404 Not Found");
+                        exit();
+                    }
                 } else {
                     header("HTTP/1.0 401 Unhautorized");
                 }
             } elseif (isset($_GET['t']) && isset($_GET['IdCompany'])) {
                 if (TokenTool::isValid($_GET['t'])) {
                     $idCompany = $_GET['IdCompany'];
+                    $query = "SELECT app.IdApp, c.CompanyName, c.CompanyLogo, co.ContactName, co.ContactPhone, co.ContactEmail, co.ContactCharge, co.ContactPhoto, s.ServiceShortName, sec.IAF_MD5, sec.SectorCluster, sec.SectorCategory, sec.SectorSubcategory, sec.SectorRiskLevel, app.AppLenguage, app.LastCertificateExpiration, app.LastCertificateCertifier, app.LastCertificateResults, app.NumberEmployees, app.ExternalServicesProvider, app.ReceiveConsultancy, app.ConsultantName, app.AppDate, app.AppStatus FROM applications AS app JOIN companies AS c ON app.IdCompany = c.IdCompany JOIN contacts AS co on app.IdContact = co.IdContact JOIN services as s ON app.IdService = s.IdService JOIN sectors As sec ON app.IdSector = sec.IdSector WHERE app.IdCompany = $idCompany;";
+                    $consult = $dbConnection->prepare($query);
+                    $consult->execute();
+                    $consult->setFetchMode(PDO::FETCH_ASSOC);
+                    header("HTTP/1.0 200 OK");
+                    header("Content-Type: application/json");
+                    echo json_encode($consult->fetchAll());
                 } else {
                     header("HTTP/1.0 401 Unhautorized");
                 }
             } elseif (isset($_GET['t'])) {
                 if (TokenTool::isValid($_GET['t'])) {
-                    $query = "SELECT app.IdApp, c.CompanyName, c.CompanyLogo, co.ContactName, co.ContactPhone, co.ContactEmail, co.ContactCharge, co.ContactPhoto, s.ServiceShortName, app.IdSector, app.AppLenguage, app.LastCertificateExpiration, app.LastCertificateCertifier, app.LastCertificateResults, app.NumberEmployees, app.ExternalServicesProvider, app.ReceiveConsultancy, app.ConsultantName, app.AppDate, app.AppStatus FROM applications AS app JOIN companies AS c ON app.IdCompany = c.IdCompany JOIN contacts AS co on app.IdContact = co.IdContact JOIN services as s ON app.IdService = s.IdService;";
+                    $query = "SELECT app.IdApp, c.CompanyName, c.CompanyLogo, co.ContactName, co.ContactPhone, co.ContactEmail, co.ContactCharge, co.ContactPhoto, s.ServiceShortName, sec.IAF_MD5, sec.SectorCluster, sec.SectorCategory, sec.SectorSubcategory, sec.SectorRiskLevel, app.AppLenguage, app.LastCertificateExpiration, app.LastCertificateCertifier, app.LastCertificateResults, app.NumberEmployees, app.ExternalServicesProvider, app.ReceiveConsultancy, app.ConsultantName, app.AppDate, app.AppStatus FROM applications AS app JOIN companies AS c ON app.IdCompany = c.IdCompany JOIN contacts AS co on app.IdContact = co.IdContact JOIN services as s ON app.IdService = s.IdService JOIN sectors As sec ON app.IdSector = sec.IdSector;";
                     $consult = $dbConnection->prepare($query);
                     $consult->execute();
                     $consult->setFetchMode(PDO::FETCH_ASSOC);
@@ -253,10 +323,10 @@
                             $accidents = $appComplement['AccidentsRate'];
                             $injuries = $appComplement['InjuriesRate'];
                             $nearMiss = $appComplement['NearMissRate'];
-                            $ohsmsAudit = $appComplement['OH&SMSAudit'];
+                            $ohsmsAudit = $appComplement['OHSMSAudit'];
                             $risksList = $appComplement['HighLevelRisks'];
                             $query = "INSERT INTO iso45kcomplement (IdApp, ScopeActivities, NumberProcesses, LegalRequirements, FatalitiesRate,
-                            AccidentsRate, InjuriesRate, NearMissRate, OH&SMSAudit, HighLevelRisks) VALUES ($idApp, '$scopeActivities', $numberProcesses,
+                            AccidentsRate, InjuriesRate, NearMissRate, OHSMSAudit, HighLevelRisks) VALUES ($idApp, '$scopeActivities', $numberProcesses,
                             '$legalRequirements', $fatalities, $accidents, $injuries, $nearMiss, '$ohsmsAudit', '$risksList')";
                             $saveAppComplement = $dbConnection->prepare($query);
                             try {
