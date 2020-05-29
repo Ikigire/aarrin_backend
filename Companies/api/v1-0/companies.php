@@ -42,7 +42,7 @@
 
 /**-----Post request (request for create a new companie) --------------------------------------------------------------------------------------------------------------------*/
         case 'POST':
-            if(isset(isset($_POST['name']) && isset($_POST['rfc']) && isset($_POST['address'])){
+            if(isset($_POST['name']) && isset($_POST['rfc']) && isset($_POST['address'])){
                 //get the sended data
                 $companyName = $_POST['name'];
                 $companyRFC = strtoupper($_POST['rfc']);
