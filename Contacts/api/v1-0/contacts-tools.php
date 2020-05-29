@@ -24,14 +24,22 @@
                         try{//try to complete the insertion
                             $update->execute();//execute the statement
                             $dbConnection->commit();//it's everything ok
-                            header("HTTP/1.0 200 Uploaded"); //this indicates to the client that the new record
                             $query = "SELECT IdContact, IdCompany, MainContact, ContactName, ContactPhone, ContactEmail, ContactCharge, AES_DECRYPT(ContactPassword, '@Company') AS 'ContactPassword', ContactPhoto FROM contacts WHERE IdContact = $contactId;";
                             $consult = $dbConnection->prepare($query); //this line prepare the query for execute
                             $consult->execute(); //execute the query
                             $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
-                            header('Content-Type: application/json'); //now define the content type to get back
                             $contactData = $consult->fetchAll()[0];
-                            echo json_encode($contactData);
+
+                            $dataForToken = array(
+                                'IdContact' => $contactData['IdContact'],
+                                'IdCompany' => $contactData['IdCompany'],
+                                'ContactName' => $contactData['ContactName'],
+                                'ContactEmail' => $contactData['ContactEmail']
+                            );
+                            $contactData['Token'] = TokenTool::createToken($dataForToken);
+                            header("HTTP/1.0 202 Uploaded");
+                            header('Content-Type: application/json');
+                            echo json_encode($contactData); //Return the data
                         }catch (Exception $e){//the insertion fails then
                             $dbConnection->rollBack();//get back the database
                             header("HTTP/1.0 409 Conflict with the Server");//info for the client
