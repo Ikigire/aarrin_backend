@@ -14,7 +14,7 @@
 
 /**-----Post request (request for add a company logo) --------------------------------------------------------------------------------------------------------------------*/
         case 'POST':
-            if(isset($_POST['company']) && $_POST['rfc'] && isset($_FILES['logo']) && isset($_POST['t'])){
+            if(isset($_POST['company']) && isset($_POST['rfc']) && isset($_FILES['logo']) && isset($_POST['t'])){
                 if (TokenTool::isValid($_POST['t'])) {
                     $companyId = $_POST['company'];
                     $companyRFC = $_POST['rfc'];
