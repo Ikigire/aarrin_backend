@@ -10,7 +10,7 @@
             break;
 
         case 'POST':
-            if(isset(isset($_POST['contact']) && $_POST['email'] && isset($_FILES['photo']) && isset($_POST['t'])){
+            if((isset($_POST['contact']) && $_POST['email'] && isset($_FILES['photo']) && isset($_POST['t'])){
                 if (TokenTool::isValid($_POST['t'])) {
                     $contactId = $_POST['contact'];
                     $contactEmail = $_POST['email'];
@@ -49,77 +49,7 @@
             break;
 
         case 'PUT':
-        if (isset($_GET['idContact']) && isset($_GET['idCompany']) && isset($_GET['name']) && isset($_GET['phone']) && isset($_GET['email']) && isset($_GET['charge']) && isset($_GET['t'])) {
-                if (TokenTool::isValid($_GET['t'])){
-                    //get the sended data
-                    $idContact = $_GET['idContact'];
-                    $contactName = $_GET['name'];
-                    $contactPhone = $_GET['phone'];
-                    $contactEmail = $_GET['email'];
-                    $contactCharge = $_GET['charge'];
-                    $companyId = $_GET['idCompany'];
-                    $updateQuery = "UPDATE contacts SET ContactName = '$contactName', ContactPhone = '$contactPhone', ContactEmail = '$contactEmail', ContactCharge = '$contactCharge'";
-
-                    $mainContact = false;
-                    if (isset($_GET['main'])) {
-                        $mainContact = $_GET['main'];
-                        $updateQuery = $updateQuery. ", MainContact = 1";
-                    }
-                    if (isset($_GET['password']) && trim($_GET['password']) !== '') {
-                        $contactPassword = $_GET['password'];
-                        $updateQuery = $updateQuery. ", ContactPassword = AES_ENCRYPT('$contactPassword', '@Company')";
-                    }
-
-                    $dbConnection->beginTransaction(); //starts a transaction in the database
-
-                    if ($mainContact) {
-                        $query = "UPDATE contacts SET MainContact = 0 WHERE IdCompany = $companyId;";
-                        $update = $dbConnection->prepare($query);
-                        try { //try to complete the insertion
-                            $update->execute(); //execute the statement
-                        } catch (Exception $e) { //the insertion fails then
-                            $dbConnection->rollBack(); //get back the database
-                            header("HTTP/1.0 409 Conflict"); //info for the client
-                            exit();
-                        }
-                    }
-                    $updateQuery = $updateQuery. " WHERE IdContact = $idContact;";
-
-                    $update = $dbConnection->prepare($updateQuery); //prepare the statement
-                    try { //try to complete the modification
-                        $update->execute(); //execute the statement
-                        $dbConnection->commit(); //it's everything ok
-                        $query = "SELECT IdContact, IdCompany, MainContact, ContactName, ContactPhone, ContactEmail, ContactCharge, AES_DECRYPT(ContactPassword, '@Company') AS 'ContactPassword', ContactPhoto FROM contacts WHERE IdContact = $idContact"; //it create the query for the server
-                        $consult = $dbConnection->prepare($query);
-                        $consult->execute(); //execute the query
-                        if($consult->rowCount()){//if is there any result for the query then
-                            $consult->setFetchMode(PDO::FETCH_ASSOC);
-                            $contactData = $consult->fetchAll()[0];
-                            $dataForToken = array(
-                                'IdContact' => $contactData['IdContact'],
-                                'IdCompany' => $contactData['IdCompany'],
-                                'ContactName' => $contactData['ContactName'],
-                                'ContactEmail' => $contactData['ContactEmail']
-                            );
-                            $contactData['Token'] = TokenTool::createToken($dataForToken);
-                            header("HTTP/1.0 202 Modified");
-                            header('Content-Type: application/json');
-                            echo json_encode($contactData); //Return the data
-                        }
-                        header("HTTP/1.0 200 Modified"); //this indicates to the client that the reecord was modified
-                    } catch (Exception $e) { //the modification fails then
-                        $dbConnection->rollBack(); //get back the database
-                        header("HTTP/1.0 409 Conflict"); //info for the client
-                    }
-                }else {
-                    header("HTTP/1.0 401 Unauthorized");
-                }
-                exit();
-            }
-            else{
-                header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions
-                exit();
-            }
+        
             break;
 
         case 'OPTIONS':
