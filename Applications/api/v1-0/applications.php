@@ -8,8 +8,6 @@
     switch ($_SERVER['REQUEST_METHOD']) {
 /**-----Get request (request of the whole information or just one of them; all data in the table) ----------------------------------------------------------------*/
         case 'GET':
-            $appDetail = json_encode($_GET['AppDetail']); echo json_last_error_msg();
-            var_dump($appDetail);
             break;
 
 
@@ -25,11 +23,9 @@
                     $numberEmployees = $_POST['NumberEmployees'];
                     $appDetail = json_encode($_POST['AppDetail'], true);
                     $appDetail = json_decode($_POST['AppDetail'], true);
-                    //$array = json_decode($_POST['AppDetail'], true);
                     $appComplement = json_decode($_POST['AppComplement'], true);
                     $initialPart = "INSERT INTO applications (IdCompany, IdContact, IdService, IdSector, AppLenguage, NumberEmployees";
                     $values = "VALUES ($idCompany, $idContact, $idService, $idSector, '$appLenguage', $numberEmployees";
-                    echo `weas "raras"`;
                     if (isset($_POST['LastCertificationExpire'])) {
                         $lastCertificationExpire = $_POST['LastCertificationExpire'];
                         $initialPart .= ", LastCertificationExpire";
@@ -62,9 +58,16 @@
                     }
 
                     $query = $initialPart . ") " . $values . ");";
-                    echo "<h3>Inicia Transaccion</h3><br>";
-                    echo $query."<br>Guardando Detalle<br>";
-                    $idApp = 0;
+                    $dbConnection->beginTransaction();//starts a transaction in the database
+                    $createApp = $dbConnection->prepare($query);
+                    try {
+                        $createApp->execute();
+                        $idApp = $dbConnection->lastInsertId();
+                    } catch (\Throwable $th) {
+                        $dbConnection->rollBack();
+                        header("HTTP/1.0 409 Conflict");
+                        exit();
+                    }
                     
                     for ($i=0; $i < count($appDetail); $i++) { 
                         $detail = $appDetail[$i];
@@ -105,13 +108,148 @@
                         }
 
                         $query = $initialPart. ") ". $values. ");";
-
-                        echo $query."<br>";
+                        $saveAppDetail = $dbConnection->prepare($query);
+                        try {
+                            $saveAppDetail->execute();
+                        } catch (\Throwable $th) {
+                            $dbConnection->rollBack();
+                            header("HTTP/1.0 409 Conflict");
+                            exit();
+                        }
                     }
                     
-                    var_dump($appDetail);
-                    echo "<br><br>";
-                    var_dump($appComplement);
+                    $serviceRequest = $dbConnection->prepare("SELECT ServiceShortName FROM services WHERE IdService = $idService");
+                    $serviceRequest->execute();
+                    $serviceRequest->setFetchMode(PDO::FETCH_ASSOC);
+                    $serviceShortName = $serviceRequest->fetchAll()[0]['ServiceShortName'];
+
+                    switch (strtolower($serviceShortName)) {
+                        case '9k':
+                            $scopeActivities = $appComplement['ScopeActivities'];
+                            $numberProcesses = $appComplement['NumberProcesses'];
+                            $legalRequirements = $appComplement['LegalRequirements'];
+                            $automationLevel = $appComplement['ProcessAutomationLevel'];
+                            $justification = $appComplement['Justification'];
+
+                            $initialPart = "INSERT INTO iso9kcomplement (IdApp, ScopeActivities, NumberProcesses, LegalRequirements, ProcessAutomationLevel, Justification";
+                            $values = "VALUES ($idApp, '$scopeActivities', $numberProcesses, '$legalRequirements', '$automationLevel', '$justification'";
+
+                            if (isset($appComplement['CriticalComplaint'])) {
+                                $criticalComplaint = $appComplement['CriticalComplaint'];
+                                $initialPart .= ", CriticalComplaint";
+                                $values .= ", '$criticalComplaint'";
+                            }
+                            if (isset($appComplement['DesignResponsability'])) {
+                                $designResponsability = $appComplement['DesignResponsability'];
+                                $initialPart .= ", DesignResponsability";
+                                $values .= ", '$designResponsability'";
+                            }
+                            $query = $initialPart. ") ". $values. ")";
+                            $saveAppComplement = $dbConnection->prepare($query);
+                            try {
+                                $saveAppComplement->execute();
+                                $dbConnection->commit();
+                                header('Content-Type: application/json');
+                                echo json_encode(array(
+                                    'Request-Status' => 'Saved',
+                                    'Request-Message' => 'Application Saved'
+                                ));
+                            } catch (\Throwable $th) {
+                                $dbConnection->rollBack();
+                                header("HTTP/1.0 409 Conflict");
+                                exit();
+                            }
+                            break;
+
+                        case '14k':
+                            $scopeActivities = $appComplement['ScopeActivities'];
+                            $numberProcesses = $appComplement['NumberProcesses'];
+                            $legalRequirements = $appComplement['LegalRequirements'];
+                            $operationalControls = $appComplement['OperationalControls'];
+
+                            $initialPart = "INSERT INTO iso14kcomplement (IdApp, ScopeActivities, NumberProcesses, LegalRequirements, OperationalControls";
+                            $values = "VALUES ($idApp, '$scopeActivities', $numberProcesses, '$legalRequirements', '$operationalControls'";
+
+                            if (isset($appComplement['CriticalComplaint'])) {
+                                $criticalComplaint = $appComplement['CriticalComplaint'];
+                                $initialPart .= ", CriticalComplaint";
+                                $values .= ", '$criticalComplaint'";
+                            }
+                            $query = $initialPart. ") ". $values. ")";
+                            $saveAppComplement = $dbConnection->prepare($query);
+                            try {
+                                $saveAppComplement->execute();
+                                $dbConnection->commit();
+                                header('Content-Type: application/json');
+                                echo json_encode(array(
+                                    'Request-Status' => 'Saved',
+                                    'Request-Message' => 'Application Saved'
+                                ));
+                            } catch (\Throwable $th) {
+                                $dbConnection->rollBack();
+                                header("HTTP/1.0 409 Conflict");
+                                exit();
+                            }
+                            break;
+
+                        case '22k':
+                            $numberHACCP = $appComplement['NumberHACCP'];
+                            $generalDescription = $appComplement['GeneralDescription'];
+                            $linesProduts = $appComplement['NumberLinesProducts'];
+                            $seasonality = $appComplement['Seasonality'];
+                            $legalRequirements = $appComplement['LegalRequirements'];
+                            $query = "INSERT INTO iso22kcomplement (IdApp, NumberHACCP, GeneralDescription, NumberLinesProducts, Seasonality, LegalRequirements) VALUES ($idApp, $numberHACCP, '$generalDescription', $linesProduts, '$seasonality', '$legalRequirements');";
+                            $saveAppComplement = $dbConnection->prepare($query);
+                            try {
+                                $saveAppComplement->execute();
+                                $dbConnection->commit();
+                                header('Content-Type: application/json');
+                                echo json_encode(array(
+                                    'Request-Status' => 'Saved',
+                                    'Request-Message' => 'Application Saved'
+                                ));
+                            } catch (\Throwable $th) {
+                                $dbConnection->rollBack();
+                                header("HTTP/1.0 409 Conflict");
+                                exit();
+                            }
+                            break;
+                        
+                        case '45k':
+                            $scopeActivities = $appComplement['ScopeActivities'];
+                            $numberProcesses = $appComplement['NumberProcesses'];
+                            $legalRequirements = $appComplement['LegalRequirements'];
+                            $fatalities = $appComplement['FatalitiesRate'];
+                            $accidents = $appComplement['AccidentsRate'];
+                            $injuries = $appComplement['InjuriesRate'];
+                            $nearMiss = $appComplement['NearMissRate'];
+                            $ohsmsAudit = $appComplement['OH&SMSAudit'];
+                            $risksList = $appComplement['HighLevelRisks'];
+                            $query = "INSERT INTO iso45kcomplement (IdApp, ScopeActivities, NumberProcesses, LegalRequirements, FatalitiesRate,
+                            AccidentsRate, InjuriesRate, NearMissRate, OH&SMSAudit, HighLevelRisks) VALUES ($idApp, '$scopeActivities', $numberProcesses,
+                            '$legalRequirements', $fatalities, $accidents, $injuries, $nearMiss, '$ohsmsAudit', '$risksList')";
+                            $saveAppComplement = $dbConnection->prepare($query);
+                            try {
+                                $saveAppComplement->execute();
+                                $dbConnection->commit();
+                                header('Content-Type: application/json');
+                                echo json_encode(array(
+                                    'Request-Status' => 'Saved',
+                                    'Request-Message' => 'Application Saved'
+                                ));
+                            } catch (\Throwable $th) {
+                                $dbConnection->rollBack();
+                                header("HTTP/1.0 409 Conflict");
+                                exit();
+                            }
+                            break;
+                        
+                        default:
+                            $dbConnection->rollBack();
+                            header("HTTP/1.0 409 Conflict");
+                            exit();
+                            break;
+                    }
 
                 }
                 else{
