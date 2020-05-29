@@ -12,7 +12,7 @@
             if (isset($_GET['idService']) && isset($_GET['t'])) {
                 if (TokenTool::isValid($_GET['t'])) {
                     $id = $_GET['idService'];
-                    $query = "SELECT IdService, ServiceStandard, ServiceShortName, ServiceStatus FROM services WHERE IdService = $id";
+                    $query = "SELECT IdService, ServiceStandard, ServiceShortName, ServiceStatus, ServiceDescription FROM services WHERE IdService = $id";
                     $consult = $dbConnection->prepare($query); //this line prepare the query for execute
                     $consult->execute();
                     if($consult->rowCount()){//if is there any result for the query then
@@ -31,7 +31,7 @@
                 }
             }elseif (isset($_GET['t'])) { /** Admin information request */
                 if (TokenTool::isValid($_GET['t'])){
-                    $query = "SELECT IdService, ServiceStandard, ServiceShortName, ServiceStatus FROM services ORDER BY ServiceStandard"; //it create the query for the server
+                    $query = "SELECT IdService, ServiceStandard, ServiceShortName, ServiceStatus, ServiceDescription FROM services ORDER BY ServiceStandard"; //it create the query for the server
                     $consult = $dbConnection->prepare($query);
                     $consult->execute();
                     $consult->setFetchMode(PDO::FETCH_ASSOC); //this comand sets the fetch mode in association for the best way to put the data
@@ -43,7 +43,7 @@
                 }
             }else{/**the request don't have an Id, then it's a request for the whole information */
 
-                $query = "SELECT IdService, ServiceStandard FROM services WHERE ServiceStatus = 1 ORDER BY ServiceStandard";//it create the query for the server
+                $query = "SELECT IdService, ServiceStandard, ServiceDescription FROM services WHERE ServiceStatus = 1 ORDER BY ServiceStandard";//it create the query for the server
                 $consult = $dbConnection->prepare($query);
                 $consult->execute();
                 $consult->setFetchMode(PDO::FETCH_ASSOC); //this comand sets the fetch mode in association for the best way to put the data
@@ -56,11 +56,12 @@
 
 /**-----Post request (request for create a new sector; it just needs the sector type) ---------------------------------------------------------------------------------------*/
         case 'POST':
-            if(isset($_POST['standard']) && isset($_POST['shortname']) && isset($_POST['t'])){
+            if(isset($_POST['standard']) && isset($_POST['shortname']) && isset($_POST['description'])  && isset($_POST['t'])){
                 if (TokenTool::isValid($_POST['t'])){
                     $serviceStandard = $_POST['standard'];//get the sended data
+                    $serviceDescription = $_POST['description'];//get the sended data
                     $serviceShortName = trim($_POST['shortname']);
-                    $query = "INSERT INTO services(IdService, ServiceStandard, ServiceShortName) VALUES (null,'$serviceStandard', '$serviceShortName');";
+                    $query = "INSERT INTO services(IdService, ServiceStandard, ServiceShortName, ServiceDescription) VALUES (null,'$serviceStandard', '$serviceShortName', $serviceDescription);";
                     $dbConnection->beginTransaction();//starts a transaction in the database
                     $insert = $dbConnection->prepare($query);//prepare the statement
                     try{//try to complete the insertion
@@ -85,13 +86,13 @@
 
 /**-----Put request (request for change information in the table; it needs the new sector type and the Id) ------------------------------------------------------------------*/
         case 'PUT':
-            if (isset($_GET['idService']) && isset($_GET['standard']) && isset($_GET['shortname']) && isset($_GET['status']) && isset($_GET['t'])) {
+            if (isset($_GET['idService']) && isset($_GET['standard']) && isset($_GET['shortname']) && isset($_GET['status']) && isset($_GET['description']) && isset($_GET['t'])) {
                 if (TokenTool::isValid($_GET['t'])){
                     $serviceId = $_GET['idService'];
                     $serviceStandard = $_GET['standard'];
                     $serviceShortName = trim($_GET['shortname']);
-
-                    $query = "UPDATE services SET ServiceStandard = '$serviceStandard', ServiceShortName = '$serviceShortName'";
+                    $description = trim($_GET['description']);
+                    $query = "UPDATE services SET ServiceStandard = '$serviceStandard', ServiceShortName = '$serviceShortName', ServiceDescription = '$description'";
                     if(isset($_GET['status'])){
                         $serviceStatus = $_GET['status'];
                         $query .= ", ServiceStatus = '$serviceStatus'";
@@ -103,7 +104,7 @@
                         $update->execute();
                         $dbConnection->commit();//it's everything ok
                         header("HTTP/1.0 200 Modified"); //this indicates to the client that the reecord was modified
-                        $query = "SELECT IdService, ServiceStandard, ServiceShortName, ServiceStatus FROM services WHERE IdService = $serviceId";
+                        $query = "SELECT IdService, ServiceStandard, ServiceShortName, ServiceStatus, ServicesDescription FROM services WHERE IdService = $serviceId";
                         $consult = $dbConnection->prepare($query); //this line prepare the query for execute
                         $consult->execute();
                         $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
