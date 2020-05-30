@@ -14,7 +14,7 @@
                 $consult = $dbConnection->prepare($query); //this line prepare the query for execute
                 $consult->execute(); //execute the query
                 $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
-                header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
+                header("HTTP/1.1 202 Accepted"); //this indicates to the client that the request was accepted
                 header('Content-Type: application/json'); //now define the content type to get back
                 $companyData = $consult->fetchAll()[0];
                 echo json_encode($companyData); //to finalize the server return the data
@@ -25,15 +25,15 @@
                     $consult->execute();//execute the query
                     if ($consult->rowCount()) {
                         $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
-                        header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
+                        header("HTTP/1.1 202 Accepted"); //this indicates to the client that the request was accepted
                         header('Content-Type: application/json'); //now define the content type to get back
                         echo json_encode($consult->fetchAll()); //to finalize the server return the data
                     }else{
-                        header("HTTP/1.0 409 Conflict with the Server");//the server advice to not found result
+                        header("HTTP/1.1 409 Conflict with the Server");//the server advice to not found result
                     }
                 }
                 else {
-                    header("HTTP/1.0 401 Unauthorized");
+                    header("HTTP/1.1 401 Unauthorized");
                 }
                 exit();
             }
@@ -59,16 +59,16 @@
                     $insert->execute();//execute the statement
                     $array = array('IdCompany' => $dbConnection->lastInsertId());
                     $dbConnection->commit();//it's everything ok
-                    header("HTTP/1.0 200 Created"); //this indicates to the client that the new record
+                    header("HTTP/1.1 200 Created"); //this indicates to the client that the new record
                     echo json_encode($array);
                 }catch (Exception $e){//the insertion fails then
                     $dbConnection->rollBack();//get back the database
-                    header("HTTP/1.0 409 Conflict with the Server");//info for the client
+                    header("HTTP/1.1 409 Conflict with the Server");//info for the client
                 }
                 exit();
             }
             else{
-                header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions
+                header("HTTP/1.1 412 Precondition Failed"); //the request don't complete the preconditions
                 exit();
             }
             break;
@@ -98,23 +98,23 @@
                         $consult = $dbConnection->prepare($query); //this line prepare the query for execute
                         $consult->execute(); //execute the query
                         $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
-                        header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
+                        header("HTTP/1.1 202 Accepted"); //this indicates to the client that the request was accepted
                         header('Content-Type: application/json'); //now define the content type to get back
                         $companyData = $consult->fetchAll()[0];
                         echo json_encode($companyData);
-                        header("HTTP/1.0 200 Modified"); //this indicates to the client that the reecord was modified
+                        header("HTTP/1.1 200 Modified"); //this indicates to the client that the reecord was modified
                     }catch (Exception $e) {//the modification fails then
                         $dbConnection->rollBack();//get back the database
-                        header("HTTP/1.0 409 Conflict with the Server");//info for the client
+                        header("HTTP/1.1 409 Conflict with the Server");//info for the client
                     }
                 }
                 else{
-                    header("HTTP/1.0 401 Unauthorized");
+                    header("HTTP/1.1 401 Unauthorized");
                 }
                 exit();
             }
             else{
-                header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions
+                header("HTTP/1.1 412 Precondition Failed"); //the request don't complete the preconditions
                 exit();
             }
             break;
@@ -126,7 +126,7 @@
             break;
         
         default:
-            header("HTTP/1.0 405 Allow; GET, POST, PUT, PATCH");
+            header("HTTP/1.1 405 Allow; GET, POST, PUT, PATCH");
             exit();
             break;
     }

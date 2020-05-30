@@ -26,15 +26,15 @@
                     );
                     $employeeData['Token'] = TokenTool::createToken($dataForToken);
                     if ($employeeData['EmployeeStatus'] == 'Active'){
-                        header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
+                        header("HTTP/1.1 202 Accepted"); //this indicates to the client that the request was accepted
                         header('Content-Type: application/json'); //now define the content type to get back
                         echo json_encode($employeeData); //to finalize the server return the data
                     } else {
-                        header("HTTP/1.0 403 Forbidden");
+                        header("HTTP/1.1 403 Forbidden");
                     }
                     exit();
                 }else{//if there isn't any result for the query
-                    header("HTTP/1.0 404 Not found");//the server advice to not found result
+                    header("HTTP/1.1 404 Not found");//the server advice to not found result
                     exit();
                 }
             }elseif(isset($_GET['idEmployee']) && isset($_GET['t'])){
@@ -45,7 +45,7 @@
                     $consult->execute(); //execute the query
                     if ($consult->rowCount()) {
                         $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
-                        header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
+                        header("HTTP/1.1 202 Accepted"); //this indicates to the client that the request was accepted
                         header('Content-Type: application/json'); //now define the content type to get back
                         $employeeData = $consult->fetchAll()[0];
                         $dataForToken = array(
@@ -57,10 +57,10 @@
                         $employeeData['Token'] = TokenTool::createToken($dataForToken);
                         echo json_encode($employeeData); //to finalize the server return the data
                     } else {
-                        header("HTTP/1.0 404 Not found");
+                        header("HTTP/1.1 404 Not found");
                     }
                 } else {
-                    header("HTTP/1.0 401 Unauthorized");
+                    header("HTTP/1.1 401 Unauthorized");
                 }
             }else{/**email doesn't exist, then it's a request for the whole information */
                 if (isset($_GET['t']) && TokenTool::isValid($_GET['t'])){
@@ -69,15 +69,15 @@
                     $consult->execute();//execute the query
                     if ($consult->rowCount()) {
                         $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
-                        header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
+                        header("HTTP/1.1 202 Accepted"); //this indicates to the client that the request was accepted
                         header('Content-Type: application/json'); //now define the content type to get back
                         echo json_encode($consult->fetchAll()); //to finalize the server return the data
                     }else{
-                        header("HTTP/1.0 409 Conflict with the Server");//the server advice to not found result
+                        header("HTTP/1.1 409 Conflict with the Server");//the server advice to not found result
                     }
                 }
                 else {
-                    header("HTTP/1.0 401 Unauthorized");
+                    header("HTTP/1.1 401 Unauthorized");
                 }
                 exit();
             }
@@ -142,21 +142,21 @@
                         <img src='https://fqehjo.stripocdn.email/content/guids/95820a7c-b5c9-40db-b28f-2db8ff838956/images/66451586029405480.png' alt style='display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;' width='125' height='89'></a></td></tr></table></td></tr></table></td></tr></table></td></tr></table></td></tr></table></div></body>
                         </html>";
                         mail($employeeEmail, $subject, $message, $headers);
-                        header("HTTP/1.0 200 Created"); //this indicates to the client that the new record
+                        header("HTTP/1.1 200 Created"); //this indicates to the client that the new record
                         header('Content-Type: application/json');
                         echo json_encode($array);
                     }catch (Exception $e){//the insertion fails then
                         $dbConnection->rollBack();//get back the database
-                        header("HTTP/1.0 409 Conflict with the Server");//info for the client
+                        header("HTTP/1.1 409 Conflict with the Server");//info for the client
                     }
                 }
                 else{
-                    header("HTTP/1.0 401 Unauthorized");
+                    header("HTTP/1.1 401 Unauthorized");
                 }
                 exit();
             }
             else{
-                header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions
+                header("HTTP/1.1 412 Precondition Failed"); //the request don't complete the preconditions
                 exit();
             }
             break;
@@ -220,17 +220,17 @@
                         );
                         $employeeData['Token'] = TokenTool::createToken($dataForToken);
                         echo json_encode($employeeData);
-                        header("HTTP/1.0 200 Modified"); //this indicates to the client that the reecord was modified
+                        header("HTTP/1.1 200 Modified"); //this indicates to the client that the reecord was modified
                     }catch (Exception $e) {//the modification fails then
                         $dbConnection->rollBack();//get back the database
-                        header("HTTP/1.0 409 Conflict with the Server");//info for the client
+                        header("HTTP/1.1 409 Conflict with the Server");//info for the client
                     }
                 }else {
-                    header("HTTP/1.0 401 Unauthorized");
+                    header("HTTP/1.1 401 Unauthorized");
                 }
             }
             else{
-                header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions
+                header("HTTP/1.1 412 Precondition Failed"); //the request don't complete the preconditions
             }
             exit();
             break;
@@ -250,7 +250,7 @@
                     try {//try to complete the modification
                         $update->execute();//execute the statement
                         $dbConnection->commit();//it's everything ok
-                        header("HTTP/1.0 200 Modified"); //this indicates to the client that the reecord was modified
+                        header("HTTP/1.1 200 Modified"); //this indicates to the client that the reecord was modified
                         $query = "SELECT IdEmployee, EmployeeName, EmployeeLastName, EmployeeDegree, EmployeeBirth, EmployeeContractYear, EmployeeCharge, EmployeeAddress, EmployeePhone, EmployeeEmail, EmployeeInsurance, EmployeeRFC, AES_DECRYPT(EmployeePassword, '@Empleado') AS 'EmployeePassword', EmployeePhoto, EmployeeStatus FROM personal WHERE IdEmployee = $idEmployee";
                         $consult = $dbConnection->prepare($query); //this line prepare the query for execute
                         $consult->execute();
@@ -259,16 +259,16 @@
                         echo json_encode($employeeData);
                     }catch (Exception $e) {//the modification fails then
                         $dbConnection->rollBack();//get back the database
-                        header("HTTP/1.0 409 Conflict with the Server");//info for the client
+                        header("HTTP/1.1 409 Conflict with the Server");//info for the client
                     }
                 }
                 else{
-                    header("HTTP/1.0 401 Unauthorized");
+                    header("HTTP/1.1 401 Unauthorized");
                 }
                 exit();
             }
             else{
-                header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions
+                header("HTTP/1.1 412 Precondition Failed"); //the request don't complete the preconditions
                 exit();
             }
             break;
@@ -280,7 +280,7 @@
             break;
         
         default:
-            header("HTTP/1.0 405 Allow; GET, POST, PUT, PATCH");
+            header("HTTP/1.1 405 Allow; GET, POST, PUT, PATCH");
             exit();
             break;
     }

@@ -47,15 +47,15 @@
                 }
             }
             else {
-                header("HTTP/1.0 404 Not Found");
+                header("HTTP/1.1 404 Not Found");
                 exit();
             }
         }
         else{
-            header("HTTP/1.0 412 Precondition Failed");//the request don't complete the preconditions
+            header("HTTP/1.1 412 Precondition Failed");//the request don't complete the preconditions
             exit();
         }
     } else {
-        header("HTTP/1.0 405 Allow; POST");
+        header("HTTP/1.1 405 Allow; POST");
             exit();
     }

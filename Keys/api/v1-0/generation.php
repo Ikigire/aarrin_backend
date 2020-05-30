@@ -37,11 +37,11 @@
                 $insert->execute();
                 $dbConnection->commit();
                 header("Access-Control-Allow-Origin: *");
-                header("HTTP/1.0 200 Created"); //this indicates to the client that the new record was created
+                header("HTTP/1.1 200 Created"); //this indicates to the client that the new record was created
             } catch (Exception $e) {//somthing went wrong
                 $dbConnection->rollBack();
                 header("Access-Control-Allow-Origin: *");
-                header("HTTP/1.0 409 Conflict with the Server");//info for the client
+                header("HTTP/1.1 409 Conflict with the Server");//info for the client
                 exit();
             }
             //Configuring the email to be sended
@@ -79,11 +79,11 @@
             //echo $message;
         }
         else{
-            header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions
+            header("HTTP/1.1 412 Precondition Failed"); //the request don't complete the preconditions
             exit();
         }
     } else {
-        header("HTTP/1.0 405 Allow; POST");
+        header("HTTP/1.1 405 Allow; POST");
             exit();
     }
     

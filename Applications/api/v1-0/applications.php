@@ -63,19 +63,19 @@
                             
                             default:
                                 $dbConnection->rollBack();
-                                header("HTTP/1.0 409 Conflict");
+                                header("HTTP/1.1 409 Conflict");
                                 exit();
                                 break;
                         }
-                        header("HTTP/1.0 200 Ok");
+                        header("HTTP/1.1 200 Ok");
                         header("Content-Type: application/json");
                         echo json_encode($appData);
                     } else {
-                        header("HTTP/1.0 404 Not Found");
+                        header("HTTP/1.1 404 Not Found");
                         exit();
                     }
                 } else {
-                    header("HTTP/1.0 401 Unhautorized");
+                    header("HTTP/1.1 401 Unhautorized");
                 }
             } elseif (isset($_GET['t']) && isset($_GET['IdCompany'])) {
                 if (TokenTool::isValid($_GET['t'])) {
@@ -84,11 +84,11 @@
                     $consult = $dbConnection->prepare($query);
                     $consult->execute();
                     $consult->setFetchMode(PDO::FETCH_ASSOC);
-                    header("HTTP/1.0 200 OK");
+                    header("HTTP/1.1 200 OK");
                     header("Content-Type: application/json");
                     echo json_encode($consult->fetchAll());
                 } else {
-                    header("HTTP/1.0 401 Unhautorized");
+                    header("HTTP/1.1 401 Unhautorized");
                 }
             } elseif (isset($_GET['t'])) {
                 if (TokenTool::isValid($_GET['t'])) {
@@ -96,14 +96,14 @@
                     $consult = $dbConnection->prepare($query);
                     $consult->execute();
                     $consult->setFetchMode(PDO::FETCH_ASSOC);
-                    header("HTTP/1.0 200 OK");
+                    header("HTTP/1.1 200 OK");
                     header("Content-Type: application/json");
                     echo json_encode($consult->fetchAll());
                 } else {
-                    header("HTTP/1.0 401 Unhautorized");
+                    header("HTTP/1.1 401 Unhautorized");
                 }
             } else {
-                header("HTTP/1.0 412 Precondition Failed");
+                header("HTTP/1.1 412 Precondition Failed");
             }
             exit();
             break;
@@ -165,7 +165,7 @@
                         $idApp = $dbConnection->lastInsertId();
                     } catch (\Throwable $th) {
                         $dbConnection->rollBack();
-                        header("HTTP/1.0 409 Conflict");
+                        header("HTTP/1.1 409 Conflict");
                         exit();
                     }
                     
@@ -213,7 +213,7 @@
                             $saveAppDetail->execute();
                         } catch (\Throwable $th) {
                             $dbConnection->rollBack();
-                            header("HTTP/1.0 409 Conflict");
+                            header("HTTP/1.1 409 Conflict");
                             exit();
                         }
                     }
@@ -256,7 +256,7 @@
                                 ));
                             } catch (\Throwable $th) {
                                 $dbConnection->rollBack();
-                                header("HTTP/1.0 409 Conflict");
+                                header("HTTP/1.1 409 Conflict");
                                 exit();
                             }
                             break;
@@ -287,7 +287,7 @@
                                 ));
                             } catch (\Throwable $th) {
                                 $dbConnection->rollBack();
-                                header("HTTP/1.0 409 Conflict");
+                                header("HTTP/1.1 409 Conflict");
                                 exit();
                             }
                             break;
@@ -310,7 +310,7 @@
                                 ));
                             } catch (\Throwable $th) {
                                 $dbConnection->rollBack();
-                                header("HTTP/1.0 409 Conflict");
+                                header("HTTP/1.1 409 Conflict");
                                 exit();
                             }
                             break;
@@ -339,26 +339,26 @@
                                 ));
                             } catch (\Throwable $th) {
                                 $dbConnection->rollBack();
-                                header("HTTP/1.0 409 Conflict");
+                                header("HTTP/1.1 409 Conflict");
                                 exit();
                             }
                             break;
                         
                         default:
                             $dbConnection->rollBack();
-                            header("HTTP/1.0 409 Conflict");
+                            header("HTTP/1.1 409 Conflict");
                             exit();
                             break;
                     }
 
                 }
                 else{
-                    header("HTTP/1.0 401 Unauthorized");
+                    header("HTTP/1.1 401 Unauthorized");
                 }
                 exit();
             }
             else{
-                header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions
+                header("HTTP/1.1 412 Precondition Failed"); //the request don't complete the preconditions
                 exit();
             }
             break;
@@ -383,7 +383,7 @@
             break;
         
         default:
-            header("HTTP/1.0 405 Allow; GET, POST, PUT, PATCH");
+            header("HTTP/1.1 405 Allow; GET, POST, PUT, PATCH");
             exit();
             break;
     }

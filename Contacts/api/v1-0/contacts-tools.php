@@ -37,21 +37,21 @@
                                 'ContactEmail' => $contactData['ContactEmail']
                             );
                             $contactData['Token'] = TokenTool::createToken($dataForToken);
-                            header("HTTP/1.0 202 Uploaded");
+                            header("HTTP/1.1 202 Uploaded");
                             header('Content-Type: application/json');
                             echo json_encode($contactData); //Return the data
                         }catch (Exception $e){//the insertion fails then
                             $dbConnection->rollBack();//get back the database
-                            header("HTTP/1.0 409 Conflict with the Server");//info for the client
+                            header("HTTP/1.1 409 Conflict with the Server");//info for the client
                         }
                     }
                     exit();
                 } else {
-                    header("HTTP/1.0 401 Unauthorized");
+                    header("HTTP/1.1 401 Unauthorized");
                 }
             }
             else{
-                header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions
+                header("HTTP/1.1 412 Precondition Failed"); //the request don't complete the preconditions
                 exit();
             }
             break;
@@ -67,7 +67,7 @@
             break;
 
         default:
-            header("HTTP/1.0 405 Allow; GET, POST, PUT");
+            header("HTTP/1.1 405 Allow; GET, POST, PUT");
             exit();
             break;
     }

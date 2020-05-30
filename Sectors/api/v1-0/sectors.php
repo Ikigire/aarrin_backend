@@ -17,12 +17,12 @@
                 $consult->execute();
                 if($consult->rowCount()){//if is there any result for the query then
                     $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
-                    header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
+                    header("HTTP/1.1 202 Accepted"); //this indicates to the client that the request was accepted
                     header('Content-Type: application/json'); //now define the content type to get back
                     echo json_encode($consult->fetchAll()); //to finalize the server return the data
 
                 }else{//it there isn't any result for the query
-                    header("HTTP/1.0 404 Not found");//the server advice to not found result
+                    header("HTTP/1.1 404 Not found");//the server advice to not found result
 
                 }
             }elseif (isset($_GET['iso']) && isset($_GET['t'])) { /** Admin information request */
@@ -32,11 +32,11 @@
                     $consult = $dbConnection->prepare($query);
                     $consult->execute();
                     $consult->setFetchMode(PDO::FETCH_ASSOC); //this comand sets the fetch mode in association for the best way to put the data
-                    header("HTTP/1.0 202 Accepted");//this indicates to the client that the request was accepted
+                    header("HTTP/1.1 202 Accepted");//this indicates to the client that the request was accepted
                     header('Content-Type: application/json');//now define the content type to get back
                     echo json_encode($consult->fetchAll());//to finalize the server return the data
                 } else {
-                    header("HTTP/1.0 401 Unauthorized");
+                    header("HTTP/1.1 401 Unauthorized");
                 }
             }elseif (isset($_GET['t'])) {/**Get sector for an application*/
                 if (TokenTool::isValid($_GET['t'])){
@@ -44,14 +44,14 @@
                     $consult = $dbConnection->prepare($query);
                     $consult->execute();
                     $consult->setFetchMode(PDO::FETCH_ASSOC); //this comand sets the fetch mode in association for the best way to put the data
-                    header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
+                    header("HTTP/1.1 202 Accepted"); //this indicates to the client that the request was accepted
                     header('Content-Type: application/json'); //now define the content type to get back
                     echo json_encode($consult->fetchAll());//to finalize the server return the data
                 }else {
-                    header("HTTP/1.0 401 Unauthorized");
+                    header("HTTP/1.1 401 Unauthorized");
                 }
             } else {
-                header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions
+                header("HTTP/1.1 412 Precondition Failed"); //the request don't complete the preconditions
             }
             exit();
             break;
@@ -67,18 +67,18 @@
                     try{//try to complete the insertion
                         $insert->execute();
                         $dbConnection->commit();//it's everything ok
-                        header("HTTP/1.0 200 Created"); //this indicates to the client that the new record was created
+                        header("HTTP/1.1 200 Created"); //this indicates to the client that the new record was created
                     }catch (Exception $e){//the insertion fails then
                         $dbConnection->rollBack();//make rollback the database
-                        header("HTTP/1.0 409 Conflict with the Server");//info for the client
+                        header("HTTP/1.1 409 Conflict with the Server");//info for the client
                     }
                 }else{
-                    header("HTTP/1.0 401 Unauthorized");
+                    header("HTTP/1.1 401 Unauthorized");
                 }
                 exit();
             }
             else{
-                header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions
+                header("HTTP/1.1 412 Precondition Failed"); //the request don't complete the preconditions
                 exit();
             }
             break;
@@ -100,18 +100,18 @@
                     try {//try to complete the modification
                         $update->execute();
                         $dbConnection->commit();//it's everything ok
-                        header("HTTP/1.0 200 Modified"); //this indicates to the client that the reecord was modified
+                        header("HTTP/1.1 200 Modified"); //this indicates to the client that the reecord was modified
                     }catch (Exception $e) {//the modification fails then
                         $dbConnection->rollBack();//get rollback the database
-                        header("HTTP/1.0 409 Conflict with the Server");//info for the client
+                        header("HTTP/1.1 409 Conflict with the Server");//info for the client
                     }
                 }else{
-                    header("HTTP/1.0 401 Unauthorized"); //the request don't complete the preconditions
+                    header("HTTP/1.1 401 Unauthorized"); //the request don't complete the preconditions
                 }
                 exit();
             }
             else{
-                header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions
+                header("HTTP/1.1 412 Precondition Failed"); //the request don't complete the preconditions
                 exit();
             }
             break;
@@ -122,7 +122,7 @@
             break;
         /**Any other request type will be refuse for the server */
         default:
-            header("HTTP/1.0 405 Allow; GET, POST, PUT");
+            header("HTTP/1.1 405 Allow; GET, POST, PUT");
             exit();
             break;
     }

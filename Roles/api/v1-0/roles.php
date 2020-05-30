@@ -18,19 +18,19 @@
                     $roleSearch->execute();
                     if($roleSearch->rowCount()){ //if is there any result for the query then
                         $roleSearch->setFetchMode(PDO::FETCH_ASSOC);
-                        header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
+                        header("HTTP/1.1 202 Accepted"); //this indicates to the client that the request was accepted
                         header('Content-Type: application/json'); //now define the content type to get back
                         echo json_encode($roleSearch->fetchAll()); //to finalize the server return the data
                     }else{//it there isn't any result for the query
-                        header("HTTP/1.0 404 Not found");//the server advice to not found result
+                        header("HTTP/1.1 404 Not found");//the server advice to not found result
                     }
                 }
                 else {
-                    header("HTTP/1.0 401 Unauthorized");
+                    header("HTTP/1.1 401 Unauthorized");
                 }
             }
             else{
-                header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions
+                header("HTTP/1.1 412 Precondition Failed"); //the request don't complete the preconditions
             }
             exit();
             break;
@@ -47,18 +47,18 @@
                     try{//try to complete the insertion
                         $insert->execute();
                         $dbConnection->commit();//it's everything ok
-                        header("HTTP/1.0 200 Created"); //this indicates to the client that the new record was created
+                        header("HTTP/1.1 200 Created"); //this indicates to the client that the new record was created
                     }catch (Exception $e){//the insertion fails then
                         $dbConnection->rollBack();//make rollback the database
-                        header("HTTP/1.0 409 Conflict with the Server");//info for the client
+                        header("HTTP/1.1 409 Conflict with the Server");//info for the client
                     }
                 }else{
-                    header("HTTP/1.0 401 Unauthorized"); //the request don't complete the preconditions
+                    header("HTTP/1.1 401 Unauthorized"); //the request don't complete the preconditions
                 }
                 exit();
             }
             else{
-                header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions
+                header("HTTP/1.1 412 Precondition Failed"); //the request don't complete the preconditions
                 exit();
             }
             break;
@@ -76,20 +76,20 @@
                     try {
                         $roleDelete->execute();
                         if ($roleDelete->rowCount()){
-                            header("HTTP/1.0 202 Accepted"); //this indicates to the client that the request was accepted
+                            header("HTTP/1.1 202 Accepted"); //this indicates to the client that the request was accepted
                         } else {
-                            header("HTTP/1.0 400 Bad request");
+                            header("HTTP/1.1 400 Bad request");
                         }
                         $dbConnection->commit();
                     } catch (\Throwable $th) {
                         $dbConnection->rollBack();
-                        header("HTTP/1.0 409 Conflict with the Server");//info for the client
+                        header("HTTP/1.1 409 Conflict with the Server");//info for the client
                     }
                 } else {
-                    header("HTTP/1.0 401 Unauthorized");
+                    header("HTTP/1.1 401 Unauthorized");
                 }
             } else {
-                header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions
+                header("HTTP/1.1 412 Precondition Failed"); //the request don't complete the preconditions
             }
             exit();
             break;
@@ -100,7 +100,7 @@
             break;
         /**Any other request type will be refuse for the server */
         default:
-            header("HTTP/1.0 405 Allow; GET, POST, DELETE");
+            header("HTTP/1.1 405 Allow; GET, POST, DELETE");
             exit();
             break;
     }

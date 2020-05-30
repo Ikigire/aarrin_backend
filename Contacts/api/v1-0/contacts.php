@@ -24,12 +24,12 @@
                         'ContactEmail' => $contactData['ContactEmail']
                     );
                     $contactData['Token'] = TokenTool::createToken($dataForToken);
-                    header("HTTP/1.0 202 Accepted");
+                    header("HTTP/1.1 202 Accepted");
                     header('Content-Type: application/json');
                     echo json_encode($contactData); //Return the data
                     exit();
                 } else { //if there isn't any result for the query
-                    header("HTTP/1.0 404 Not found");
+                    header("HTTP/1.1 404 Not found");
                     exit();
                 }
             }elseif (isset($_GET['idContact']) && isset($_GET['t']) && TokenTool::isValid($_GET['t'])) {
@@ -40,13 +40,13 @@
                 $consult->execute(); //execute the query
                 if($consult->rowCount()){//if is there any result for the query then
                     $consult->setFetchMode(PDO::FETCH_ASSOC);
-                    header("HTTP/1.0 202 Accepted");
+                    header("HTTP/1.1 202 Accepted");
                     header('Content-Type: application/json');
                     $contactData = $consult->fetch();
                     echo json_encode($contactData);//Return the data
                     exit();
                 }else{//if there isn't any result for the query
-                    header("HTTP/1.0 404 Not found");
+                    header("HTTP/1.1 404 Not found");
                     exit();
                 }
             }elseif(isset($_GET['idCompany'])  && isset($_GET['t']) && TokenTool::isValid($_GET['t'])){/**Id not exist, then it's a request for the whole information */
@@ -55,13 +55,13 @@
                 $consult = $dbConnection->prepare($query);
                 $consult->execute();//execute the query
                 $consult->setFetchMode(PDO::FETCH_ASSOC);
-                header("HTTP/1.0 202 Accepted");
+                header("HTTP/1.1 202 Accepted");
                 header('Content-Type: application/json');
                 $companyContacts = $consult->fetchAll();
                 echo json_encode($companyContacts);//Return the data
                 exit();
             }else {
-                header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions
+                header("HTTP/1.1 412 Precondition Failed"); //the request don't complete the preconditions
                 exit();
             }
             break;
@@ -89,7 +89,7 @@
                         $update->execute(); //execute the statement
                     } catch (Exception $e) { //the insertion fails then
                         $dbConnection->rollBack(); //get back the database
-                        header("HTTP/1.0 409 Conflict with the Server"); //info for the client
+                        header("HTTP/1.1 409 Conflict with the Server"); //info for the client
                         exit();
                     }
                 }
@@ -99,14 +99,14 @@
                 try { //try to complete the insertion
                     $insert->execute(); //execute the statement
                     $dbConnection->commit(); //it's everything ok
-                    header("HTTP/1.0 200 Created"); //this indicates to the client that the new record
+                    header("HTTP/1.1 200 Created"); //this indicates to the client that the new record
                 } catch (Exception $e) { //the insertion fails then
                     $dbConnection->rollBack(); //get back the database
-                    header("HTTP/1.0 409 Conflict with the Server"); //info for the client
+                    header("HTTP/1.1 409 Conflict with the Server"); //info for the client
                 }
                 exit();
             } else {
-                header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions
+                header("HTTP/1.1 412 Precondition Failed"); //the request don't complete the preconditions
                 exit();
             }
             break;
@@ -142,7 +142,7 @@
                             $update->execute(); //execute the statement
                         } catch (Exception $e) { //the insertion fails then
                             $dbConnection->rollBack(); //get back the database
-                            header("HTTP/1.0 409 Conflict"); //info for the client
+                            header("HTTP/1.1 409 Conflict"); //info for the client
                             exit();
                         }
                     }
@@ -165,22 +165,22 @@
                                 'ContactEmail' => $contactData['ContactEmail']
                             );
                             $contactData['Token'] = TokenTool::createToken($dataForToken);
-                            header("HTTP/1.0 202 Modified");
+                            header("HTTP/1.1 202 Modified");
                             header('Content-Type: application/json');
                             echo json_encode($contactData); //Return the data
                         }
-                        header("HTTP/1.0 200 Modified"); //this indicates to the client that the reecord was modified
+                        header("HTTP/1.1 200 Modified"); //this indicates to the client that the reecord was modified
                     } catch (Exception $e) { //the modification fails then
                         $dbConnection->rollBack(); //get back the database
-                        header("HTTP/1.0 409 Conflict"); //info for the client
+                        header("HTTP/1.1 409 Conflict"); //info for the client
                     }
                 }else {
-                    header("HTTP/1.0 401 Unauthorized");
+                    header("HTTP/1.1 401 Unauthorized");
                 }
                 exit();
             }
             else{
-                header("HTTP/1.0 412 Precondition Failed"); //the request don't complete the preconditions
+                header("HTTP/1.1 412 Precondition Failed"); //the request don't complete the preconditions
                 exit();
             }
             break;
@@ -192,7 +192,7 @@
             break;
 
         default:
-            header("HTTP/1.0 405 Allow; GET, POST, PUT");
+            header("HTTP/1.1 405 Allow; GET, POST, PUT");
             exit();
             break;
     }
