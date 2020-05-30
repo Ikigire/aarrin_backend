@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 28-05-2020 a las 00:58:09
+-- Tiempo de generación: 30-05-2020 a las 05:27:41
 -- Versión del servidor: 10.4.11-MariaDB
 -- Versión de PHP: 7.3.16
 
@@ -30,9 +30,10 @@ SET time_zone = "+00:00";
 CREATE TABLE `applications` (
   `IdApp` int(11) NOT NULL,
   `IdCompany` int(11) NOT NULL,
+  `IdContact` int(11) NOT NULL,
   `IdService` int(11) NOT NULL,
   `IdSector` int(11) NOT NULL,
-  `AppLenguage` int(11) NOT NULL,
+  `AppLenguage` varchar(25) NOT NULL,
   `LastCertificateExpiration` date DEFAULT NULL,
   `LastCertificateCertifier` varchar(250) DEFAULT NULL,
   `LastCertificateResults` varchar(1500) DEFAULT NULL,
@@ -40,8 +41,18 @@ CREATE TABLE `applications` (
   `ExternalServicesProvider` varchar(500) DEFAULT NULL,
   `ReceiveConsultancy` tinyint(1) DEFAULT NULL,
   `ConsultantName` varchar(500) DEFAULT NULL,
-  `AppDate` datetime NOT NULL
+  `AppDate` datetime NOT NULL,
+  `AppStatus` varchar(60) DEFAULT 'On Review'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Volcado de datos para la tabla `applications`
+--
+
+INSERT INTO `applications` (`IdApp`, `IdCompany`, `IdContact`, `IdService`, `IdSector`, `AppLenguage`, `LastCertificateExpiration`, `LastCertificateCertifier`, `LastCertificateResults`, `NumberEmployees`, `ExternalServicesProvider`, `ReceiveConsultancy`, `ConsultantName`, `AppDate`, `AppStatus`) VALUES
+(4, 20, 22, 3, 1022, 'Spanish', NULL, NULL, NULL, 25, NULL, NULL, NULL, '2020-05-27 21:22:30', 'On Review'),
+(5, 19, 21, 2, 1029, 'Spanish', NULL, NULL, NULL, 15, NULL, NULL, NULL, '2020-05-28 07:22:32', 'On Review'),
+(6, 3, 12, 2, 1029, 'English', NULL, NULL, NULL, 6, NULL, NULL, NULL, '2020-05-29 04:26:11', 'On Review');
 
 -- --------------------------------------------------------
 
@@ -53,11 +64,24 @@ CREATE TABLE `app_detail` (
   `IdAppDetail` int(11) NOT NULL,
   `IdApp` int(11) NOT NULL,
   `Address` varchar(500) NOT NULL,
-  `ShiftEmployees1` int(11) NOT NULL,
-  `ShiftEmployees2` int(11) NOT NULL,
-  `ShiftEmployees3` int(11) NOT NULL,
+  `Shift1` varchar(20) DEFAULT NULL,
+  `Shift1Employees` int(11) DEFAULT NULL,
+  `Shift2` varchar(20) DEFAULT NULL,
+  `Shift2Employees` int(11) DEFAULT NULL,
+  `Shift3` varchar(20) DEFAULT NULL,
+  `Shift3Employees` int(11) DEFAULT NULL,
   `Activities` varchar(500) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Volcado de datos para la tabla `app_detail`
+--
+
+INSERT INTO `app_detail` (`IdAppDetail`, `IdApp`, `Address`, `Shift1`, `Shift1Employees`, `Shift2`, `Shift2Employees`, `Shift3`, `Shift3Employees`, `Activities`) VALUES
+(7, 4, 'Dirección', NULL, 10, NULL, NULL, NULL, NULL, 'Actividades'),
+(8, 4, 'Dirección', NULL, 10, NULL, NULL, NULL, NULL, 'Actividades'),
+(9, 5, 'Dirección', NULL, 10, NULL, NULL, NULL, NULL, 'Actividades'),
+(10, 6, 'Dirección', NULL, 6, NULL, NULL, NULL, NULL, 'Actividades');
 
 -- --------------------------------------------------------
 
@@ -115,6 +139,87 @@ INSERT INTO `contacts` (`IdContact`, `IdCompany`, `MainContact`, `ContactName`, 
 (21, 19, 1, 'Mayor Francis Monograma', '3421006559', 'asm_1995@outlook.com', 'Lider de la organización', 0x2483bb4d9af50039ba5bd69f5a16eeb9, NULL, 'Active'),
 (22, 20, 1, 'Alberto', '3316051393', 'contact.greentellus@gmail.com', 'General Manager', 0x8b0d7e2cc3145de191f3483d06a1fbbe, NULL, 'Active'),
 (23, 21, 1, 'Diana Cortés', '3311957480', 'dianjcortess@gmail.com', 'VENTAS', 0x35438abf65edc15410d84ee34c4d6ee3, NULL, 'Active');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `iso9kcomplement`
+--
+
+CREATE TABLE `iso9kcomplement` (
+  `IdApp` int(11) NOT NULL,
+  `ScopeActivities` varchar(500) NOT NULL,
+  `NumberProcesses` int(11) NOT NULL,
+  `LegalRequirements` varchar(500) NOT NULL,
+  `CriticalComplaint` varchar(500) DEFAULT NULL,
+  `ProcessAutomationLevel` varchar(500) NOT NULL,
+  `DesignResponsability` varchar(500) DEFAULT NULL,
+  `Justification` varchar(500) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `iso14kcomplement`
+--
+
+CREATE TABLE `iso14kcomplement` (
+  `IdApp` int(11) NOT NULL,
+  `ScopeActivities` varchar(500) NOT NULL,
+  `NumberProcesses` int(11) NOT NULL,
+  `LegalRequirements` varchar(500) NOT NULL,
+  `OperationalControls` varchar(500) NOT NULL,
+  `CriticalComplaint` varchar(500) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Volcado de datos para la tabla `iso14kcomplement`
+--
+
+INSERT INTO `iso14kcomplement` (`IdApp`, `ScopeActivities`, `NumberProcesses`, `LegalRequirements`, `OperationalControls`, `CriticalComplaint`) VALUES
+(5, 'Actividades', 3, 'Requerimiento Legales', 'Safety Control', NULL),
+(6, 'Actividades', 3, 'Requerimiento Legales', 'Safety Control', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `iso22kcomplement`
+--
+
+CREATE TABLE `iso22kcomplement` (
+  `IdApp` int(11) NOT NULL,
+  `NumberHACCP` int(11) NOT NULL,
+  `GeneralDescription` varchar(500) NOT NULL,
+  `NumberLinesProducts` int(11) NOT NULL,
+  `Seasonality` varchar(500) NOT NULL,
+  `LegalRequirements` varchar(500) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Volcado de datos para la tabla `iso22kcomplement`
+--
+
+INSERT INTO `iso22kcomplement` (`IdApp`, `NumberHACCP`, `GeneralDescription`, `NumberLinesProducts`, `Seasonality`, `LegalRequirements`) VALUES
+(4, 2, 'Descripción', 6, 'Primavera', 'Requerimiento Legales');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `iso45kcomplement`
+--
+
+CREATE TABLE `iso45kcomplement` (
+  `IdApp` int(11) NOT NULL,
+  `ScopeActivities` varchar(500) NOT NULL,
+  `NumberProcesses` int(11) NOT NULL,
+  `LegalRequirements` varchar(500) NOT NULL,
+  `FatalitiesRate` int(11) NOT NULL,
+  `AccidentsRate` int(11) NOT NULL,
+  `InjuriesRate` int(11) NOT NULL,
+  `NearMissRate` int(11) NOT NULL,
+  `OHSMSAudit` varchar(500) DEFAULT NULL,
+  `HighLevelRisks` text NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -267,18 +372,19 @@ CREATE TABLE `services` (
   `IdService` int(11) NOT NULL,
   `ServiceStandard` varchar(250) NOT NULL,
   `ServiceShortName` varchar(10) NOT NULL,
-  `ServiceStatus` varchar(15) DEFAULT 'Available'
+  `ServiceStatus` varchar(15) DEFAULT 'Active',
+  `ServiceDescription` varchar(1500) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
 -- Volcado de datos para la tabla `services`
 --
 
-INSERT INTO `services` (`IdService`, `ServiceStandard`, `ServiceShortName`, `ServiceStatus`) VALUES
-(1, 'ISO 9001:2015', '9K', 'Available'),
-(2, 'ISO 14001:2015', '14K', 'Available'),
-(3, 'ISO 50001:2011', '50K', 'Available'),
-(4, 'ISO 27001:2015', '27K', 'Available');
+INSERT INTO `services` (`IdService`, `ServiceStandard`, `ServiceShortName`, `ServiceStatus`, `ServiceDescription`) VALUES
+(1, 'ISO 9001:2015', '9K', 'Active', 'This standard provides orientation and tolos to those Companies and Organisations who want to assure quality in their products and services. The new High Level Structure on ISO 9001, includes the orientation to Client requirements, but also focus on Stakeholders such as the Company itself.\r\n\r\n\r\nThis new versión try to balance the Quality principles, Client Satisfaction with the expectation from the Top Managements and Business perspective; and how the can be reach the results based on Risk Management approach.'),
+(2, 'ISO 14001:2015', '14K', 'Active', 'Environmental is always a concern when Organization have preventive pollution and environmental protection compromise.\r\n\r\nISO 14001:2015 and the ISO 14000 family, such as standard ISO 14006 are focus on Environmental systems to achieve the Environmental protection objectives.\r\n\r\nISO 14001:2015 helps to the Organizations to improve their Environmental performance, by promoting the efficiency on the use of resources, waste reduction and as consequence, the operation cost reduction and third parties confident.'),
+(3, 'ISO 22001:2015', '22K', 'Active', 'ISO 22000:2005 Food Safety Management System is focused to guarantee the effective implementation on controls to prevent that the food can harm customer during the Hazard Analysis based on Alimentarius CODEX to identify Hazard: Physical, Chemical, Biological, Radiological.\r\n\r\nThe consequences of unsafe food can be serious and ISO´s food safety management standards help organizations identify and control food safety hazards. As many of today’s food products repeatedly cross national boundaries, International Standards are needed to ensure the safety of the global food supply chain.'),
+(4, 'ISO 45001:2015', '45K', 'Active', 'About tan 6,300 person diez per month because of accidents or health because of work activities.\r\n\r\nThese accidents and health sickness because of work activities is really important for the employees and more important for the organization, because of the productivity, pensions, absenteeism, rotation, accident payment and other related with accidents.\r\n\r\nTo avoid the problem, ISO has develop the new estándar ISO 45001:2018 Health an Safety Management System, based on the recognized OHSAS 18001. These standards has the specific requirements to identify potential safety and health risks and to improve the organization performance, reducing to he acceptable levels the probability of accidents and improving the work environment, requested by the Quality Standards.');
 
 -- --------------------------------------------------------
 
@@ -370,13 +476,13 @@ ALTER TABLE `validation_keys`
 -- AUTO_INCREMENT de la tabla `applications`
 --
 ALTER TABLE `applications`
-  MODIFY `IdApp` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `IdApp` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `app_detail`
 --
 ALTER TABLE `app_detail`
-  MODIFY `IdAppDetail` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `IdAppDetail` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `companies`
