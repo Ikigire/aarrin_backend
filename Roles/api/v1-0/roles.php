@@ -13,7 +13,7 @@
             if (isset($_GET['employee']) && isset($_GET['t'])) {
                 if (TokenTool::isValid($_GET['t'])){
                     $id = $_GET['employee'];
-                    $query = "SELECT Role_Type FROM roles WHERE IdEmployee = $id";
+                    $query = "SELECT Role_Type FROM roles WHERE IdEmployee = $id ORDER BY Role_Type";
                     $roleSearch = $dbConnection->prepare($query);
                     $roleSearch->execute();
                     if($roleSearch->rowCount()){ //if is there any result for the query then
