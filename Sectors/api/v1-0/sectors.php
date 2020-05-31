@@ -30,7 +30,7 @@
             }elseif (isset($_GET['t']) && isset($_GET['iso'])) {/**Get sector for an application*/
                 if (TokenTool::isValid($_GET['t'])){
                     $sectorISO = $_GET['iso'];
-                    $query = "SELECT IdSector, IAF_MD5, SectorCluster, SectorCategory, SectorSubcategory, SectorRiskLevel FROM sectors WHERE SectorStatus = 'Active' AND SectorISO = '$sectorISO' ORDER BY IAF_MD5, SectorCluster, SectorCategory, SectorSubcategory";
+                    $query = "SELECT IdSector, IAF_MD5, SectorCluster, SectorCategory, SectorSubcategory, SectorRiskLevel FROM sectors WHERE SectorStatus = 'Active' AND SectorISO = '$sectorISO' ORDER BY IAF_MD5, SectorRiskLevel, SectorCategory, SectorSubcategory, SectorCluster";
                     $consult = $dbConnection->prepare($query);
                     $consult->execute();
                     $consult->setFetchMode(PDO::FETCH_ASSOC); //this comand sets the fetch mode in association for the best way to put the data
@@ -42,7 +42,7 @@
                 }
             }elseif (isset($_GET['t'])) {/**Get sector for an application*/
                 if (TokenTool::isValid($_GET['t'])){
-                    $query = "SELECT IdSector, SectorISO, IAF_MD5, SectorCluster, SectorCategory, SectorSubcategory, SectorRiskLevel, SectorStatus FROM sectors ORDER BY SectorISO, IAF_MD5, SectorCluster, SectorCategory, SectorSubcategory";
+                    $query = "SELECT IdSector, SectorISO, IAF_MD5, SectorCluster, SectorCategory, SectorSubcategory, SectorRiskLevel, SectorStatus FROM sectors ORDER BY SectorISO, IAF_MD5, SectorRiskLevel, SectorCategory, SectorSubcategory, SectorCluster";
                     $consult = $dbConnection->prepare($query);
                     $consult->execute();
                     $consult->setFetchMode(PDO::FETCH_ASSOC); //this comand sets the fetch mode in association for the best way to put the data
@@ -115,7 +115,7 @@
 /**-----Put request (request for change information in the table; it needs the new sector type and the Id) ------------------------------------------------------------------*/
         case 'PUT':
             if(isset($_GET['idSector']) && isset($_GET['category']) && isset($_GET['iso']) && isset($_GET['t'])){
-                if (TokenTool::isValid($_POST['t'])){
+                if (TokenTool::isValid($_GET['t'])){
                     //get the sended data
                     $idSector = $_GET['idSector'];
                     $category = $_GET['category'];
