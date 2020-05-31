@@ -133,11 +133,15 @@
                     }
                     if (isset($_GET['subcategory'])) {
                         $subcategory = $_GET['subcategory'];
-                        $init .= ", SectorSubcategory = '$subcategory'";
+                        $query .= ", SectorSubcategory = '$subcategory'";
                     }
                     if (isset($_GET['risklevel'])) {
                         $riskLevel = $_GET['risklevel'];
-                        $init .= ", SectorRiskLevel = '$riskLevel'";
+                        $query .= ", SectorRiskLevel = '$riskLevel'";
+                    }
+                    if (isset($_GET['status'])) {
+                        $status = $_GET['status'];
+                        $query .= ", SectorStatus = '$status'";
                     }
 
                     $query .= " WHERE IdSector = $idSector;";
