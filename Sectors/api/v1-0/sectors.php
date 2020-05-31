@@ -10,22 +10,24 @@
 /**-----Get request (request of the whole information or just one of them; all data in the table of Sectors) ----------------------------------------------------------------*/
         case 'GET':
             /**If exist and id in the request then search the sector id */
-            if (isset($_GET['id'])) {
-                $id = $_GET['id'];
-                $query = "SELECT IdSector, SectorName FROM sectors WHERE IdSector = $id"; //it create the query for the server
-                $consult = $dbConnection->prepare($query); //this line prepare the query for execute
-                $consult->execute();
-                if($consult->rowCount()){//if is there any result for the query then
-                    $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
-                    header("HTTP/1.1 202 Accepted"); //this indicates to the client that the request was accepted
-                    header('Content-Type: application/json'); //now define the content type to get back
-                    echo json_encode($consult->fetchAll()); //to finalize the server return the data
+            if (isset($_GET['id']) && isset($_GET['t'])) {
+                if(TokenTool::isValid($_GET['t'])){
+                    $id = $_GET['id'];
+                    $query = "SELECT IdSector, SectorName FROM sectors WHERE IdSector = $id"; //it create the query for the server
+                    $consult = $dbConnection->prepare($query); //this line prepare the query for execute
+                    $consult->execute();
+                    if($consult->rowCount()){//if is there any result for the query then
+                        $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
+                        header("HTTP/1.1 202 Accepted"); //this indicates to the client that the request was accepted
+                        header('Content-Type: application/json'); //now define the content type to get back
+                        echo json_encode($consult->fetchAll()); //to finalize the server return the data
 
-                }else{//it there isn't any result for the query
-                    header("HTTP/1.1 404 Not found");//the server advice to not found result
+                    }else{//it there isn't any result for the query
+                        header("HTTP/1.1 404 Not found");//the server advice to not found result
 
+                    }
                 }
-            }elseif (isset($_GET['iso']) && isset($_GET['t'])) { /** Admin information request */
+            }elseif (isset($_GET['t'])) {/**Get sector for an application*/
                 if (TokenTool::isValid($_GET['t'])){
                     $sectorISO = $_GET['iso'];
                     $query = "SELECT IdSector, SectorISO, IAF_MD5, SectorCluster, SectorCategory, SectorSubcategory, SectorRiskLevel FROM sectors WHERE SectorStatus = 'Active' AND SectorISO = '$sectorISO'";
@@ -38,18 +40,6 @@
                 } else {
                     header("HTTP/1.1 401 Unauthorized");
                 }
-            }elseif (isset($_GET['t'])) {/**Get sector for an application*/
-                if (TokenTool::isValid($_GET['t'])){
-                    $query = "SELECT IdSector, SectorName, SectorStatus FROM sectors ORDER BY SectorName"; //it create the query for the server
-                    $consult = $dbConnection->prepare($query);
-                    $consult->execute();
-                    $consult->setFetchMode(PDO::FETCH_ASSOC); //this comand sets the fetch mode in association for the best way to put the data
-                    header("HTTP/1.1 202 Accepted"); //this indicates to the client that the request was accepted
-                    header('Content-Type: application/json'); //now define the content type to get back
-                    echo json_encode($consult->fetchAll());//to finalize the server return the data
-                }else {
-                    header("HTTP/1.1 401 Unauthorized");
-                }
             } else {
                 header("HTTP/1.1 412 Precondition Failed"); //the request don't complete the preconditions
             }
@@ -58,10 +48,37 @@
 
 /**-----Post request (request for create a new sector; it just needs the sector type) ---------------------------------------------------------------------------------------*/
         case 'POST':
-            if(isset($_POST['sector']) && isset($_POST['t'])){
+            if(isset($_POST['category']) && isset($_POST['iso']) && isset($_POST['t'])){
                 if (TokenTool::isValid($_POST['t'])){
-                    $sector = $_POST['sector'];//get the sended data
-                    $query = "INSERT INTO sectors(SectorName) VALUES ('$sector');";
+                    //get the sended data
+                    $category = $_POST['category'];
+                    $sectorISO = $_POST['iso'];
+
+                    $init = "INSERT INTO sectors (SectorISO, SectorCategory";
+                    $values = "VALUES ('$sectorISO', '$category'";
+
+                    if (isset($_POST['iaf'])) {
+                        $iaf = $_POST['iaf'];
+                        $init .= ", IAF_MD5";
+                        $values .=", $iaf";
+                    }
+                    if (isset($_POST['cluster'])) {
+                        $cluster = $_POST['cluster'];
+                        $init .= ", SectorCluster";
+                        $values .=", '$cluster'";
+                    }
+                    if (isset($_POST['subcategory'])) {
+                        $subcategory = $_POST['subcategory'];
+                        $init .= ", SectorSubcategory";
+                        $values .=", '$subcategory'";
+                    }
+                    if (isset($_POST['risklevel'])) {
+                        $riskLevel = $_POST['risklevel'];
+                        $init .= ", SectorRiskLevel";
+                        $values .=", '$riskLevel'";
+                    }
+
+                    $query = $init. ") ". $values. ");";
                     $dbConnection->beginTransaction();//starts a transaction in the database
                     $insert = $dbConnection->prepare($query);//prepare the statement
                     try{//try to complete the insertion
@@ -85,28 +102,45 @@
 
 /**-----Put request (request for change information in the table; it needs the new sector type and the Id) ------------------------------------------------------------------*/
         case 'PUT':
-            if(isset($_GET['sector']) && isset($_GET['id']) && isset($_GET['t'])){
-                if (TokenTool::isValid($_GET['t'])){
-                    $sector = $_GET['sector'];
-                    $id = $_GET['id'];
-                    $query = "UPDATE sectors SET SectorName = '$sector'";
-                    if(isset($_GET['status'])){
-                        $status = $_GET['status'];
-                        $query .= ", SectorStatus = $status";
+            if(isset($_GET['idSector']) && isset($_GET['category']) && isset($_GET['iso']) && isset($_GET['t'])){
+                if (TokenTool::isValid($_POST['t'])){
+                    //get the sended data
+                    $idSector = $_GET['idSector'];
+                    $category = $_GET['category'];
+                    $sectorISO = $_GET['iso'];
+
+                    $query = "UPDATE sectors SET SectorISO = '$sectorISO', SectorCategory = '$category'";
+
+                    if (isset($_GET['iaf'])) {
+                        $iaf = $_GET['iaf'];
+                        $$query .= ", IAF_MD5 = $iaf";
                     }
-                    $query .= " WHERE IdSector = $id;";
+                    if (isset($_GET['cluster'])) {
+                        $cluster = $_GET['cluster'];
+                        $query .= ", SectorCluster = '$cluster'";
+                    }
+                    if (isset($_GET['subcategory'])) {
+                        $subcategory = $_GET['subcategory'];
+                        $init .= ", SectorSubcategory = '$subcategory'";
+                    }
+                    if (isset($_GET['risklevel'])) {
+                        $riskLevel = $_GET['risklevel'];
+                        $init .= ", SectorRiskLevel = '$riskLevel'";
+                    }
+
+                    $query .= " WHERE IdSector = $idSector;";
                     $dbConnection->beginTransaction();//starts a transaction in the database
-                    $update = $dbConnection->prepare($query);
-                    try {//try to complete the modification
-                        $update->execute();
+                    $insert = $dbConnection->prepare($query);//prepare the statement
+                    try{//try to complete the insertion
+                        $insert->execute();
                         $dbConnection->commit();//it's everything ok
-                        header("HTTP/1.1 200 Modified"); //this indicates to the client that the reecord was modified
-                    }catch (Exception $e) {//the modification fails then
-                        $dbConnection->rollBack();//get rollback the database
+                        header("HTTP/1.1 200 Modified"); //this indicates to the client that the new record was created
+                    }catch (Exception $e){//the insertion fails then
+                        $dbConnection->rollBack();//make rollback the database
                         header("HTTP/1.1 409 Conflict with the Server");//info for the client
                     }
                 }else{
-                    header("HTTP/1.1 401 Unauthorized"); //the request don't complete the preconditions
+                    header("HTTP/1.1 401 Unauthorized");
                 }
                 exit();
             }
