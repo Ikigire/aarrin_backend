@@ -27,10 +27,22 @@
 
                     }
                 }
-            }elseif (isset($_GET['t'])) {/**Get sector for an application*/
+            }elseif (isset($_GET['t']) && isset($_GET['iso'])) {/**Get sector for an application*/
                 if (TokenTool::isValid($_GET['t'])){
                     $sectorISO = $_GET['iso'];
-                    $query = "SELECT IdSector, SectorISO, IAF_MD5, SectorCluster, SectorCategory, SectorSubcategory, SectorRiskLevel FROM sectors WHERE SectorStatus = 'Active' AND SectorISO = '$sectorISO'";
+                    $query = "SELECT IdSector, IAF_MD5, SectorCluster, SectorCategory, SectorSubcategory, SectorRiskLevel FROM sectors WHERE SectorStatus = 'Active' AND SectorISO = '$sectorISO'";
+                    $consult = $dbConnection->prepare($query);
+                    $consult->execute();
+                    $consult->setFetchMode(PDO::FETCH_ASSOC); //this comand sets the fetch mode in association for the best way to put the data
+                    header("HTTP/1.1 202 Accepted");//this indicates to the client that the request was accepted
+                    header('Content-Type: application/json');//now define the content type to get back
+                    echo json_encode($consult->fetchAll());//to finalize the server return the data
+                } else {
+                    header("HTTP/1.1 401 Unauthorized");
+                }
+            }elseif (isset($_GET['t'])) {/**Get sector for an application*/
+                if (TokenTool::isValid($_GET['t'])){
+                    $query = "SELECT IdSector, SectorISO, IAF_MD5, SectorCluster, SectorCategory, SectorSubcategory, SectorRiskLevel, SectorStatus FROM sectors";
                     $consult = $dbConnection->prepare($query);
                     $consult->execute();
                     $consult->setFetchMode(PDO::FETCH_ASSOC); //this comand sets the fetch mode in association for the best way to put the data
