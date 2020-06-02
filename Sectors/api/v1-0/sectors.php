@@ -13,7 +13,7 @@
             if (isset($_GET['id']) && isset($_GET['t'])) {
                 if(TokenTool::isValid($_GET['t'])){
                     $id = $_GET['id'];
-                    $query = "SELECT IdSector, SectorName FROM sectors WHERE IdSector = $id"; //it create the query for the server
+                    $query = "SELECT IdSector, SectorISO, IAF_MD5, SectorCluster, SectorCategory, SectorSubcategory, SectorRiskLevel, SectorStatus FROM sectors  WHERE IdSector = $id"; //it create the query for the server
                     $consult = $dbConnection->prepare($query); //this line prepare the query for execute
                     $consult->execute();
                     if($consult->rowCount()){//if is there any result for the query then

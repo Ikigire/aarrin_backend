@@ -21,19 +21,19 @@
                     $appDetail = json_decode($_POST['AppDetail'], true);
                     $appComplement = json_decode($_POST['AppComplement'], true);
                     $query = "UPDATE applications SET IdSector = $idSector, AppLenguage = '$appLenguage', NumberEmployees = $numberEmployees";
-                    if (isset($_POST['LastCertificationExpire'])) {
-                        $lastCertificationExpire = $_POST['LastCertificationExpire'];
-                        $query .= ", LastCertificationExpire = '$lastCertificationExpire'";
+                    if (isset($_POST['LastCertificateExpiration'])) {
+                        $lastCertificationExpire = $_POST['LastCertificateExpiration'];
+                        $query .= ", LastCertificateExpiration = '$lastCertificationExpire'";
                     }
                     
-                    if (isset($_POST['LastCertificationCertifier'])) {
-                        $lastCertificationCertifier = $_POST['LastCertificationCertifier'];
-                        $query .= ",LastCertificationCertifier = '$lastCertificationCertifier'";
+                    if (isset($_POST['LastCertificateCertifier'])) {
+                        $lastCertificationCertifier = $_POST['LastCertificateCertifier'];
+                        $query .= ",LastCertificateCertifier = '$lastCertificationCertifier'";
                     }
                     
-                    if (isset($_POST['LastCertificationResults'])) {
-                        $lastCertificationResults = $_POST['LastCertificationResults'];
-                        $query .= ", LastCertificationResults = '$lastCertificationResults'";
+                    if (isset($_POST['LastCertificateResults'])) {
+                        $lastCertificationResults = $_POST['LastCertificateResults'];
+                        $query .= ", LastCertificateResults = '$lastCertificationResults'";
                     }
                     
                     if (isset($_POST['ExternalServicesProvider'])) {

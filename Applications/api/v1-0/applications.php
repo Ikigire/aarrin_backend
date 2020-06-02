@@ -126,21 +126,21 @@
                     $appComplement = json_decode($_POST['AppComplement'], true);
                     $initialPart = "INSERT INTO applications (IdCompany, IdContact, IdService, IdSector, AppLenguage, NumberEmployees, AppDate";
                     $values = "VALUES ($idCompany, $idContact, $idService, $idSector, '$appLenguage', $numberEmployees, '$currentDate'";
-                    if (isset($_POST['LastCertificationExpire'])) {
-                        $lastCertificationExpire = $_POST['LastCertificationExpire'];
-                        $initialPart .= ", LastCertificationExpire";
+                    if (isset($_POST['LastCertificateExpiration'])) {
+                        $lastCertificationExpire = $_POST['LastCertificateExpiration'];
+                        $initialPart .= ", LastCertificateExpiration";
                         $values .= ", '$lastCertificationExpire'";
                     }
                     
-                    if (isset($_POST['LastCertificationCertifier'])) {
-                        $lastCertificationCertifier = $_POST['LastCertificationCertifier'];
-                        $initialPart .= ",LastCertificationCertifier";
+                    if (isset($_POST['LastCertificateCertifier'])) {
+                        $lastCertificationCertifier = $_POST['LastCertificateCertifier'];
+                        $initialPart .= ",LastCertificateCertifier";
                         $values .= ", '$lastCertificationCertifier'";
                     }
                     
-                    if (isset($_POST['LastCertificationResults'])) {
-                        $lastCertificationResults = $_POST['LastCertificationResults'];
-                        $initialPart .= ", LastCertificationResults";
+                    if (isset($_POST['LastCertificateResults'])) {
+                        $lastCertificationResults = $_POST['LastCertificateResults'];
+                        $initialPart .= ", LastCertificateResults";
                         $values .= ", '$lastCertificationResults'";
                     }
                     
