@@ -3,6 +3,7 @@
     header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
     header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, PATCH, DELETE");
     header("Allow: GET, POST, OPTIONS, PUT, PATCH, DELETE");
+    header('Content-Type: application/json');
     include("../../../Config/Connection.php");
 
     switch ($_SERVER['REQUEST_METHOD']) {
@@ -11,13 +12,13 @@
             if (isset($_GET['t']) && isset($_GET['IdApplication'])) {
                 if (TokenTool::isValid($_GET['t'])) {
                     $idApplication = $_GET['IdApplication'];
-                    $query ="SELECT IdApp, IdCompany, IdContact, IdService, IdSector, AppLenguage, LastCertificateExpiration, LastCertificateCertifier, LastCertificateResults, NumberEmployees, ExternalServicesProvider, ReceiveConsultancy, ConsultantName, AppDate, AppStatus FROM applications WHERE IdApp = $idApplication;";
+                    $query ="SELECT IdApp, IdCompany, IdContact, IdService, IdSector, AppLenguage, LastCertificateStandard, LastCertificateExpiration, LastCertificateCertifier, LastCertificateResults, NumberEmployees, ExternalServicesProvider, ReceiveConsultancy, ConsultantName, AppDate, AppStatus FROM applications WHERE IdApp = $idApplication;";
                     $consult = $dbConnection->prepare($query);
                     $consult->execute();
                     if ($consult->rowCount()) {
                         $consult->SetFetchMode(PDO::FETCH_ASSOC);
                         $appData = $consult->fetchAll()[0];
-                        $query = "SELECT IdAppDetail, IdApp, Address, Shift1, Shift1Employees, Shift2, Shift2Employees, Shift3, Shift3Employees, Activities FROM app_detail WHERE IdApp = $idApplication;";
+                        $query = "SELECT IdAppDetail, IdApp, Address, Shift1, Shift1Employees, Shift1Activities, Shift2, Shift2Employees, Shift2Activities, Shift3, Shift3Employees, Shift3Activities, OfficeShift, OfficeShiftEmployees, OfficeShiftActivities FROM app_detail WHERE IdApp = $idApplication;";
                         $consult = $dbConnection->prepare($query);
                         $consult->execute();
                         $consult->SetFetchMode(PDO::FETCH_ASSOC);
@@ -34,7 +35,7 @@
                                 $consult = $dbConnection->prepare($query);
                                 $consult->execute();
                                 $consult->SetFetchMode(PDO::FETCH_ASSOC);
-                                $appData['AppComplement'] = $consult->fetchAll();
+                                $appData['AppComplement'] = $consult->fetchAll()[0];
                                 break;
 
                             case '14k':
@@ -42,7 +43,7 @@
                                 $consult = $dbConnection->prepare($query);
                                 $consult->execute();
                                 $consult->SetFetchMode(PDO::FETCH_ASSOC);
-                                $appData['AppComplement'] = $consult->fetchAll();
+                                $appData['AppComplement'] = $consult->fetchAll()[0];
                                 break;
 
                             case '22k':
@@ -50,7 +51,7 @@
                                 $consult = $dbConnection->prepare($query);
                                 $consult->execute();
                                 $consult->SetFetchMode(PDO::FETCH_ASSOC);
-                                $appData['AppComplement'] = $consult->fetchAll();
+                                $appData['AppComplement'] = $consult->fetchAll()[0];
                                 break;
                             
                             case '45k':
@@ -58,7 +59,7 @@
                                 $consult = $dbConnection->prepare($query);
                                 $consult->execute();
                                 $consult->SetFetchMode(PDO::FETCH_ASSOC);
-                                $appData['AppComplement'] = $consult->fetchAll();
+                                $appData['AppComplement'] = $consult->fetchAll()[0];
                                 break;
                             
                             default:
@@ -80,19 +81,23 @@
             } elseif (isset($_GET['t']) && isset($_GET['IdCompany'])) {
                 if (TokenTool::isValid($_GET['t'])) {
                     $idCompany = $_GET['IdCompany'];
-                    $query = "SELECT app.IdApp, c.CompanyName, c.CompanyLogo, co.ContactName, co.ContactPhone, co.ContactEmail, co.ContactCharge, co.ContactPhoto, s.ServiceShortName, sec.IAF_MD5, sec.SectorCluster, sec.SectorCategory, sec.SectorSubcategory, sec.SectorRiskLevel, app.AppLenguage, app.LastCertificateExpiration, app.LastCertificateCertifier, app.LastCertificateResults, app.NumberEmployees, app.ExternalServicesProvider, app.ReceiveConsultancy, app.ConsultantName, app.AppDate, app.AppStatus FROM applications AS app JOIN companies AS c ON app.IdCompany = c.IdCompany JOIN contacts AS co on app.IdContact = co.IdContact JOIN services as s ON app.IdService = s.IdService JOIN sectors As sec ON app.IdSector = sec.IdSector WHERE app.IdCompany = $idCompany;";
+                    $query = "SELECT app.IdApp, c.CompanyName, c.CompanyLogo, co.ContactName, co.ContactPhone, co.ContactEmail, co.ContactCharge, co.ContactPhoto, s.ServiceShortName, sec.IAF_MD5, sec.SectorCluster, sec.SectorCategory, sec.SectorSubcategory, sec.SectorRiskLevel, app.AppLenguage, app.LastCertificateStandard, app.LastCertificateExpiration, app.LastCertificateCertifier, app.LastCertificateResults, app.NumberEmployees, app.ExternalServicesProvider, app.ReceiveConsultancy, app.ConsultantName, app.AppDate, app.AppStatus FROM applications AS app JOIN companies AS c ON app.IdCompany = c.IdCompany JOIN contacts AS co on app.IdContact = co.IdContact JOIN services as s ON app.IdService = s.IdService JOIN sectors As sec ON app.IdSector = sec.IdSector WHERE app.IdCompany = $idCompany ORDER BY app.AppDate DESC;";
                     $consult = $dbConnection->prepare($query);
                     $consult->execute();
-                    $consult->setFetchMode(PDO::FETCH_ASSOC);
-                    header("HTTP/1.1 200 OK");
-                    header("Content-Type: application/json");
-                    echo json_encode($consult->fetchAll());
+                    if ($consult->rowCount()) {
+                        $consult->setFetchMode(PDO::FETCH_ASSOC);
+                        header("HTTP/1.1 200 OK");
+                        header("Content-Type: application/json");
+                        echo json_encode($consult->fetchAll());
+                    } else {
+                        header("HTTP/1.1 404 Not Found");
+                    }
                 } else {
                     header("HTTP/1.1 401 Unhautorized");
                 }
             } elseif (isset($_GET['t'])) {
                 if (TokenTool::isValid($_GET['t'])) {
-                    $query = "SELECT app.IdApp, c.CompanyName, c.CompanyLogo, co.ContactName, co.ContactPhone, co.ContactEmail, co.ContactCharge, co.ContactPhoto, s.ServiceShortName, sec.IAF_MD5, sec.SectorCluster, sec.SectorCategory, sec.SectorSubcategory, sec.SectorRiskLevel, app.AppLenguage, app.LastCertificateExpiration, app.LastCertificateCertifier, app.LastCertificateResults, app.NumberEmployees, app.ExternalServicesProvider, app.ReceiveConsultancy, app.ConsultantName, app.AppDate, app.AppStatus FROM applications AS app JOIN companies AS c ON app.IdCompany = c.IdCompany JOIN contacts AS co on app.IdContact = co.IdContact JOIN services as s ON app.IdService = s.IdService JOIN sectors As sec ON app.IdSector = sec.IdSector;";
+                    $query = "SELECT app.IdApp, c.CompanyName, c.CompanyLogo, co.ContactName, co.ContactPhone, co.ContactEmail, co.ContactCharge, co.ContactPhoto, s.ServiceShortName, sec.IAF_MD5, sec.SectorCluster, sec.SectorCategory, sec.SectorSubcategory, sec.SectorRiskLevel, app.AppLenguage, app.LastCertificateStandard, app.LastCertificateExpiration, app.LastCertificateCertifier, app.LastCertificateResults, app.NumberEmployees, app.ExternalServicesProvider, app.ReceiveConsultancy, app.ConsultantName, app.AppDate, app.AppStatus FROM applications AS app JOIN companies AS c ON app.IdCompany = c.IdCompany JOIN contacts AS co on app.IdContact = co.IdContact JOIN services as s ON app.IdService = s.IdService JOIN sectors As sec ON app.IdSector = sec.IdSector ORDER BY app.AppDate DESC;";
                     $consult = $dbConnection->prepare($query);
                     $consult->execute();
                     $consult->setFetchMode(PDO::FETCH_ASSOC);
@@ -126,6 +131,12 @@
                     $appComplement = json_decode($_POST['AppComplement'], true);
                     $initialPart = "INSERT INTO applications (IdCompany, IdContact, IdService, IdSector, AppLenguage, NumberEmployees, AppDate";
                     $values = "VALUES ($idCompany, $idContact, $idService, $idSector, '$appLenguage', $numberEmployees, '$currentDate'";
+                    if (isset($_POST['LastCertificateStandard'])) {
+                        $lastCertificationStandard = $_POST['LastCertificateStandard'];
+                        $initialPart .= ", LastCertificateStandard";
+                        $values .= ", '$lastCertificationStandard'";
+                    }
+                    
                     if (isset($_POST['LastCertificateExpiration'])) {
                         $lastCertificationExpire = $_POST['LastCertificateExpiration'];
                         $initialPart .= ", LastCertificateExpiration";
@@ -151,7 +162,7 @@
                     }
                     
                     if (isset($_POST['ReceiveConsultancy'])) {
-                        $receiveConsultancy = $_POST['ReceiveConsultancy'];
+                        $receiveConsultancy = '1';
                         $consultantName = $_POST['ConsultantName'];
                         $initialPart .= ", ReceiveConsultancy, ConsultantName";
                         $values .= ", $receiveConsultancy, '$consultantName'";
@@ -166,26 +177,22 @@
                     } catch (\Throwable $th) {
                         $dbConnection->rollBack();
                         header("HTTP/1.1 409 Conflict");
+                        echo json_encode(array(
+                            'Request-Status' => 'Error',
+                            'Request-Message' => 'App header bad request:'. $th
+                        ));
                         exit();
                     }
                     
                     for ($i=0; $i < count($appDetail); $i++) { 
                         $detail = $appDetail[$i];
                         $address = $detail['Address'];
-                        $activities = $detail['Activities'];
-                        $initialPart = "INSERT INTO app_detail (IdApp, Address, Activities";
-                        $values = "Values ($idApp, '$address', '$activities'";
-
-                        if (isset($detail['Shift1'])){
-                            $shift1 = $detail['Shift1'];
-                            $initialPart .= ", Shift1";
-                            $values .= ", '$shift1'";
-                        }
-                        if (isset($detail['Shift1Employees'])){
-                            $shift1Employees = $detail['Shift1Employees'];
-                            $initialPart .= ", Shift1Employees";
-                            $values .= ", $shift1Employees";
-                        }
+                        $shift1 = $detail['Shift1'];
+                        $shift1Employees = $detail['Shift1Employees'];
+                        $shift1Activities = $detail['Shift1Activities'];
+                        $initialPart = "INSERT INTO app_detail (IdApp, Address, Shift1, Shift1Employees, Shift1Activities";
+                        $values = "Values ($idApp, '$address', '$shift1', $shift1Employees ,  '$shift1Activities'";
+                    
                         if (isset($detail['Shift2'])){
                             $shift2 = $detail['Shift2'];
                             $initialPart .= ", Shift2";
@@ -195,6 +202,11 @@
                             $shift2Employees = $detail['Shift2Employees'];
                             $initialPart .= ", Shift2Employees";
                             $values .= ", $shift2Employees";
+                        }
+                        if (isset($detail['Shift2Activities'])) {
+                            $shift2Activities = $detail['Shift2Activities'];
+                            $initialPart .= ", Shift2Activities";
+                            $values .= ", '$shift2Activities'";
                         }
                         if (isset($detail['Shift3'])){
                             $shift3 = $detail['Shift3'];
@@ -206,6 +218,26 @@
                             $initialPart .= ", Shift3Employees";
                             $values .= ", $shift3Employees";
                         }
+                        if (isset($detail['Shift3Activities'])) {
+                            $shift3Activities = $detail['Shift3Activities'];
+                            $initialPart .= ", Shift3Activities";
+                            $values .= ", '$shift3Activities'";
+                        }
+                        if (isset($detail['OfficeShift'])){
+                            $officeShift = $detail['OfficeShift'];
+                            $initialPart .= ", OfficeShift";
+                            $values .= ", '$officeShift'";
+                        }
+                        if (isset($detail['OfficeShiftEmployees'])){
+                            $officeShiftEmployees = $detail['OfficeShiftEmployees'];
+                            $initialPart .= ", OfficeShiftEmployees";
+                            $values .= ", $officeShiftEmployees";
+                        }
+                        if (isset($detail['OfficeShiftActivities'])) {
+                            $officeShiftActivities = $detail['OfficeShiftActivities'];
+                            $initialPart .= ", OfficeShiftActivities";
+                            $values .= ", '$officeShiftActivities'";
+                        }
 
                         $query = $initialPart. ") ". $values. ");";
                         $saveAppDetail = $dbConnection->prepare($query);
@@ -214,14 +246,30 @@
                         } catch (\Throwable $th) {
                             $dbConnection->rollBack();
                             header("HTTP/1.1 409 Conflict");
+                            echo json_encode(array(
+                                'Request-Status' => 'Error',
+                                'Request-Message' => 'App details bad request:'. $th
+                            ));
                             exit();
                         }
                     }
+                    $query = "SELECT ServiceShortName FROM services WHERE IdService = $idService";
                     
-                    $serviceRequest = $dbConnection->prepare("SELECT ServiceShortName FROM services WHERE IdService = $idService");
-                    $serviceRequest->execute();
-                    $serviceRequest->setFetchMode(PDO::FETCH_ASSOC);
-                    $serviceShortName = $serviceRequest->fetchAll()[0]['ServiceShortName'];
+                    $serviceRequest = $dbConnection->prepare($query);
+                    try {
+                        $serviceRequest->execute();
+                        $serviceRequest->setFetchMode(PDO::FETCH_ASSOC);
+                        $serviceShortName = $serviceRequest->fetchAll()[0]['ServiceShortName'];
+                    } catch (\Throwable $th) {
+                        header("HTTP/1.1 409 Conflict");
+                        echo json_encode(array(
+                            'Request-Status' => 'Error',
+                            'Request-Message' => 'App service no identified request:'. $th,
+                        ));
+                        $dbConnection->rollBack();
+                        exit();
+                    }
+                    
 
                     switch (strtolower($serviceShortName)) {
                         case '9k':
@@ -249,7 +297,7 @@
                             try {
                                 $saveAppComplement->execute();
                                 $dbConnection->commit();
-                                header('Content-Type: application/json');
+                                
                                 echo json_encode(array(
                                     'Request-Status' => 'Saved',
                                     'Request-Message' => 'Application Saved'
@@ -257,6 +305,10 @@
                             } catch (\Throwable $th) {
                                 $dbConnection->rollBack();
                                 header("HTTP/1.1 409 Conflict");
+                                echo json_encode(array(
+                                    'Request-Status' => 'Error',
+                                    'Request-Message' => 'App complement bad request:'. $th
+                                ));
                                 exit();
                             }
                             break;
@@ -280,7 +332,7 @@
                             try {
                                 $saveAppComplement->execute();
                                 $dbConnection->commit();
-                                header('Content-Type: application/json');
+                                
                                 echo json_encode(array(
                                     'Request-Status' => 'Saved',
                                     'Request-Message' => 'Application Saved'
@@ -303,7 +355,7 @@
                             try {
                                 $saveAppComplement->execute();
                                 $dbConnection->commit();
-                                header('Content-Type: application/json');
+                                
                                 echo json_encode(array(
                                     'Request-Status' => 'Saved',
                                     'Request-Message' => 'Application Saved'
@@ -332,7 +384,7 @@
                             try {
                                 $saveAppComplement->execute();
                                 $dbConnection->commit();
-                                header('Content-Type: application/json');
+                                
                                 echo json_encode(array(
                                     'Request-Status' => 'Saved',
                                     'Request-Message' => 'Application Saved'
@@ -363,27 +415,14 @@
             }
             break;
 
-
-/**-----Put request (request for change information in the table) -----------------------------------------------------------------------------------------------------------*/
-        case 'PUT':
-            
-            exit();
-            break;
-
-
-/**-----Patch request (request for change employee photo in the table) -----------------------------------------------------------------------------------------------------------*/
-        case 'PATCH':
-            
-            break;
-
         case 'OPTIONS':
             header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
             header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, PATCH, DELETE");
-            header("Allow: GET, POST, OPTIONS, PUT, PATCH, DELETE");
+            header("Allow: GET, POST, OPTIONS");
             break;
         
         default:
-            header("HTTP/1.1 405 Allow; GET, POST, PUT, PATCH");
+            header("HTTP/1.1 405 Allow; GET, POST, OPTIONS");
             exit();
             break;
     }

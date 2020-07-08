@@ -5,8 +5,8 @@
     header("Allow: GET, POST, OPTIONS, PUT, DELETE");
     include("../../../Config/Connection.php");
     //Function to erase a validation code
-    function eraseCode(object $connection, int $id){
-        $query = "DELETE FROM validation_keys WHERE IdKey = $id";
+    function eraseCode(object $connection, string $email){
+        $query = "DELETE FROM validation_keys WHERE ValidationEmail = '$email'";
         $delete = $connection->prepare($query);
         $delete->execute();
     }
@@ -33,16 +33,16 @@
                 $today = new DateTime("now");
                 $dif = $today->diff($dateKey);
                 if ($dif->days){
-                    eraseCode($dbConnection, $validationKey['IdKey']);
+                    eraseCode($dbConnection, $email);
                     echo json_encode(createAnswer(false));
                 }elseif ($dif->h) {
-                    eraseCode($dbConnection, $validationKey['IdKey']);
+                    eraseCode($dbConnection, $email);
                     echo json_encode(createAnswer(false));
-                }elseif ($dif->i > 5) {
-                    eraseCode($dbConnection, $validationKey['IdKey']);
+                }elseif ($dif->i > 10) {
+                    eraseCode($dbConnection, $email);
                     echo json_encode(createAnswer(false));
                 }else {
-                    eraseCode($dbConnection, $validationKey['IdKey']);
+                    eraseCode($dbConnection, $email);
                     echo json_encode(createAnswer(true));
                 }
             }

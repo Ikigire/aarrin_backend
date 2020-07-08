@@ -21,6 +21,11 @@
                     $appDetail = json_decode($_POST['AppDetail'], true);
                     $appComplement = json_decode($_POST['AppComplement'], true);
                     $query = "UPDATE applications SET IdSector = $idSector, AppLenguage = '$appLenguage', NumberEmployees = $numberEmployees";
+                    if (isset($_POST['LastCertificateStandard'])) {
+                        $lastCertificationStandard = $_POST['LastCertificateStandard'];
+                        $query .= ", LastCertificateStandard = '$lastCertificationStandard'";
+                    }
+                    
                     if (isset($_POST['LastCertificateExpiration'])) {
                         $lastCertificationExpire = $_POST['LastCertificateExpiration'];
                         $query .= ", LastCertificateExpiration = '$lastCertificationExpire'";
@@ -47,6 +52,11 @@
                         $query .= ", ReceiveConsultancy = $receiveConsultancy, ConsultantName = '$consultantName'";
                     }
 
+                    if (isset($_POST['AppStatus'])) {
+                        $appStatus = $_POST['AppStatus'];
+                        $query .= ", AppStatus = '$appStatus'";
+                    }
+
                     $query .= " WHERE IdApp = $idApp;";
                     $dbConnection->beginTransaction();//starts a transaction in the database
                     $createApp = $dbConnection->prepare($query);
@@ -58,47 +68,139 @@
                         exit();
                     }
                     
+                    $listIdDetails = array();
                     for ($i=0; $i < count($appDetail); $i++) { 
                         $detail = $appDetail[$i];
-                        $idAppDetail = $detail['IdAppDetail'];
-                        $address = $detail['Address'];
-                        $activities = $detail['Activities'];
-                        $query = "UPDATE app_detail SET Address = '$address', Activities = '$activities'";
-
-                        if (isset($detail['Shift1'])){
+                        $exist = isset($detail['IdAppDetail']);
+                        if ($exist) {
+                            $idAppDetail = $detail['IdAppDetail'];
+                            $address = $detail['Address'];
                             $shift1 = $detail['Shift1'];
-                            $query .= ", Shift1 = '$shift1'";
-                        }
-                        if (isset($detail['Shift1Employees'])){
                             $shift1Employees = $detail['Shift1Employees'];
-                            $query .= ", Shift1Employees = $shift1Employees";
-                        }
-                        if (isset($detail['Shift2'])){
-                            $shift2 = $detail['Shift2'];
-                            $query .= ", Shift2 = '$shift2'";
-                        }
-                        if (isset($detail['Shift2Employees'])){
-                            $shift2Employees = $detail['Shift2Employees'];
-                            $query .= ", Shift2Employees = $shift2Employees";
-                        }
-                        if (isset($detail['Shift3'])){
-                            $shift3 = $detail['Shift3'];
-                            $query .= ", Shift3 = '$shift3'";
-                        }
-                        if (isset($detail['Shift3Employees'])){
-                            $shift3Employees = $detail['Shift3Employees'];
-                            $query .= ", Shift3Employees = $shift3Employees";
-                        }
+                            $shift1Activities = $detail['Shift1Activities'];
+                            $query = "UPDATE app_detail SET Address = '$address', Shift1 = '$shift1', Shift1Employees = $shift1Employees, Shift1Activities = '$shift1Activities'";
 
-                        $query .= " WHERE IdAppDetail = $idAppDetail;";
+                            if (isset($detail['Shift2'])){
+                                $shift2 = $detail['Shift2'];
+                                $query .= ", Shift2 = '$shift2'";
+                            }
+                            if (isset($detail['Shift2Employees'])){
+                                $shift2Employees = $detail['Shift2Employees'];
+                                $query .= ", Shift2Employees = $shift2Employees";
+                            }
+                            if (isset($detail['Shift2Activities'])) {
+                                $shift2Activities = $detail['Shift2Activities'];
+                                $query .= ", Shift2Activities = '$shift2Activities'";
+                            }
+                            if (isset($detail['Shift3'])){
+                                $shift3 = $detail['Shift3'];
+                                $query .= ", Shift3 = '$shift3'";
+                            }
+                            if (isset($detail['Shift3Employees'])){
+                                $shift3Employees = $detail['Shift3Employees'];
+                                $query .= ", Shift3Employees = $shift3Employees";
+                            }
+                            if (isset($detail['Shift3Activities'])) {
+                                $shift3Activities = $detail['Shift3Activities'];
+                                $query .= ", Shift3Activities = '$shift3Activities'";
+                            }
+                            if (isset($detail['OfficeShift'])){
+                                $officeShift = $detail['OfficeShift'];
+                                $query .= ", OfficeShift = '$officeShift'";
+                            }
+                            if (isset($detail['OfficeShiftEmployees'])){
+                                $officeShiftEmployees = $detail['OfficeShiftEmployees'];
+                                $query .= ", OfficeShiftEmployees = $officeShiftEmployees";
+                            }
+                            if (isset($detail['OfficeShiftActivities'])) {
+                                $officeShiftActivities = $detail['OfficeShiftActivities'];
+                                $query .= ", OfficeShiftActivities = '$officeShiftActivities'";
+                            }
+
+                            $query .= " WHERE IdAppDetail = $idAppDetail;";
+                        } else {
+                            $address = $detail['Address'];
+                            $shift1 = $detail['Shift1'];
+                            $shift1Employees = $detail['Shift1Employees'];
+                            $shift1Activities = $detail['Shift1Activities'];
+                            $initialPart = "INSERT INTO app_detail (IdApp, Address, Shift1, Shift1Employees, Shift1Activities";
+                            $values = "Values ($idApp, '$address', '$shift1', $shift1Employees ,  '$shift1Activities'";
+                        
+                            if (isset($detail['Shift2'])){
+                                $shift2 = $detail['Shift2'];
+                                $initialPart .= ", Shift2";
+                                $values .= ", '$shift2'";
+                            }
+                            if (isset($detail['Shift2Employees'])){
+                                $shift2Employees = $detail['Shift2Employees'];
+                                $initialPart .= ", Shift2Employees";
+                                $values .= ", $shift2Employees";
+                            }
+                            if (isset($detail['Shift2Activities'])) {
+                                $shift2Activities = $detail['Shift2Activities'];
+                                $initialPart .= ", Shift2Activities";
+                                $values .= ", '$shift2Activities'";
+                            }
+                            if (isset($detail['Shift3'])){
+                                $shift3 = $detail['Shift3'];
+                                $initialPart .= ", Shift3";
+                                $values .= ", '$shift3'";
+                            }
+                            if (isset($detail['Shift3Employees'])){
+                                $shift3Employees = $detail['Shift3Employees'];
+                                $initialPart .= ", Shift3Employees";
+                                $values .= ", $shift3Employees";
+                            }
+                            if (isset($detail['Shift3Activities'])) {
+                                $shift3Activities = $detail['Shift3Activities'];
+                                $initialPart .= ", Shift3Activities";
+                                $values .= ", '$shift3Activities'";
+                            }
+                            if (isset($detail['OfficeShift'])){
+                                $officeShift = $detail['OfficeShift'];
+                                $initialPart .= ", OfficeShift";
+                                $values .= ", '$officeShift'";
+                            }
+                            if (isset($detail['OfficeShiftEmployees'])){
+                                $officeShiftEmployees = $detail['OfficeShiftEmployees'];
+                                $initialPart .= ", OfficeShiftEmployees";
+                                $values .= ", $officeShiftEmployees";
+                            }
+                            if (isset($detail['OfficeShiftActivities'])) {
+                                $officeShiftActivities = $detail['OfficeShiftActivities'];
+                                $initialPart .= ", OfficeShiftActivities";
+                                $values .= ", '$officeShiftActivities'";
+                            }
+
+                            $query = $initialPart. ") ". $values. ");";
+                        }
+                        
                         $saveAppDetail = $dbConnection->prepare($query);
                         try {
                             $saveAppDetail->execute();
+                            if ($exist) {
+                                array_push($listIdDetails, $idAppDetail);
+                            } else {
+                                array_push($listIdDetails, $dbConnection->lastInsertId());
+                            }
                         } catch (\Throwable $th) {
                             $dbConnection->rollBack();
                             header("HTTP/1.1 409 Conflict");
                             exit();
                         }
+                    }
+
+                    $query = "DELETE FROM app_detail WHERE IdApp = $idApp";
+                    for ($i=0; $i < count($listIdDetails); $i++) { 
+                            $query .= " AND IdAppDetail <> ". $listIdDetails[$i];
+                    }
+                    $removeUnnecessaryDetails = $dbConnection->prepare($query);
+                    try {
+                        $removeUnnecessaryDetails->execute();
+                    } catch (\Throwable $th) {
+                        $dbConnection->rollBack();
+                        header("HTTP/1.1 409 Conflict");
+                        exit();
                     }
                     
                     $serviceRequest = $dbConnection->prepare("SELECT ServiceShortName FROM services WHERE IdService = $idService");
@@ -137,6 +239,7 @@
                             } catch (\Throwable $th) {
                                 $dbConnection->rollBack();
                                 header("HTTP/1.1 409 Conflict");
+                                
                                 exit();
                             }
                             break;
@@ -166,6 +269,7 @@
                             } catch (\Throwable $th) {
                                 $dbConnection->rollBack();
                                 header("HTTP/1.1 409 Conflict");
+                                
                                 exit();
                             }
                             break;
@@ -189,6 +293,7 @@
                             } catch (\Throwable $th) {
                                 $dbConnection->rollBack();
                                 header("HTTP/1.1 409 Conflict");
+                                
                                 exit();
                             }
                             break;
@@ -219,6 +324,7 @@
                             } catch (\Throwable $th) {
                                 $dbConnection->rollBack();
                                 header("HTTP/1.1 409 Conflict");
+                                
                                 exit();
                             }
                             break;
@@ -226,6 +332,7 @@
                         default:
                             $dbConnection->rollBack();
                             header("HTTP/1.1 409 Conflict");
+                            
                             exit();
                             break;
                     }
@@ -245,11 +352,11 @@
         case 'OPTIONS':
             header("Access-Control-Allow-Headers: X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method");
             header("Access-Control-Allow-Methods: POST, OPTIONS");
-            header("Allow: POST");
+            header("Allow: POST, OPTIONS");
             break;
         
         default:
-            header("HTTP/1.1 405 Allow; GET, POST, PUT, PATCH");
+            header("HTTP/1.1 405 Allow; POST, OPTIONS");
             exit();
             break;
     }

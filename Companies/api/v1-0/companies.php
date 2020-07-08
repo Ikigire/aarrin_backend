@@ -4,6 +4,7 @@
     header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
     header("Allow: GET, POST, OPTIONS, PUT, PATCH, DELETE");
     include("../../../Config/Connection.php");
+    header('Content-Type: application/json'); //now define the content type to get back
 
     switch ($_SERVER['REQUEST_METHOD']) {
 /**-----Get request (request of the whole information or just one of them; all data in the table of Sectors) ----------------------------------------------------------------*/
@@ -15,7 +16,6 @@
                 $consult->execute(); //execute the query
                 $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
                 header("HTTP/1.1 202 Accepted"); //this indicates to the client that the request was accepted
-                header('Content-Type: application/json'); //now define the content type to get back
                 $companyData = $consult->fetchAll()[0];
                 echo json_encode($companyData); //to finalize the server return the data
             }else{/**RFC doesn't exist, then it's a request for the whole information */
@@ -26,7 +26,6 @@
                     if ($consult->rowCount()) {
                         $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
                         header("HTTP/1.1 202 Accepted"); //this indicates to the client that the request was accepted
-                        header('Content-Type: application/json'); //now define the content type to get back
                         echo json_encode($consult->fetchAll()); //to finalize the server return the data
                     }else{
                         header("HTTP/1.1 409 Conflict with the Server");//the server advice to not found result
@@ -47,6 +46,18 @@
                 $companyName = $_POST['name'];
                 $companyRFC = strtoupper($_POST['rfc']);
                 $companyAddress = $_POST['address'];
+
+                $query = "SELECT * FROM companies WHERE CompanyRFC = '$companyRFC'; ";//it create the query for the server
+                $consult = $dbConnection->prepare($query);//this line prepare the query for execute
+                $consult->execute();//execute the query
+                if ($consult->rowCount()) {
+                    echo json_encode(array(
+                        'answer' => 'Error',
+                        'status' => 'That company has already been registered'
+                    )); //to finalize the server return the data
+                    exit();
+                }
+
                 if(isset($_POST['website'])){
                     $companyWebsite = $_POST['website'];
                     $query = "INSERT INTO companies(CompanyName, CompanyRFC, CompanyAddress, CompanyWebsite) VALUES ('$companyName', '$companyRFC', '$companyAddress', '$companyWebsite');";//prepare the query including the website

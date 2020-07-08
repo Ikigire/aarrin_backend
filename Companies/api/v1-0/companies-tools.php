@@ -19,7 +19,7 @@
                     $companyId = $_POST['company'];
                     $companyRFC = $_POST['rfc'];
                     $f = $_FILES['logo'];
-                    $name = "logo_$companyId.Image-$companyRF.Clajhasd9ul3iu0a.ñohsdf-jsdf.klsdj0ojmalsdasd.png";
+                    $name = "logo_$companyId.Image-$companyRFC.Clajhasd9ul3iu0a.ñohsdf-jsdf.klsdj0ojmalsdasd.png";
                     $path = "https://aarrin.com/mobile/app_resources/companies/$name";
                     if (move_uploaded_file($f['tmp_name'], __DIR__. "/../../../../app_resources/companies/$name")){
                         $query = "UPDATE companies SET CompanyLogo = '$path' WHERE IdCompany = $companyId";

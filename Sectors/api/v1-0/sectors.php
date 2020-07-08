@@ -20,7 +20,7 @@
                         $consult->setFetchMode(PDO::FETCH_ASSOC); //sets the fetch mode in association for the best way to put the data
                         header("HTTP/1.1 202 Accepted"); //this indicates to the client that the request was accepted
                         header('Content-Type: application/json'); //now define the content type to get back
-                        echo json_encode($consult->fetchAll()); //to finalize the server return the data
+                        echo json_encode($consult->fetchAll()[0]); //to finalize the server return the data
 
                     }else{//it there isn't any result for the query
                         header("HTTP/1.1 404 Not found");//the server advice to not found result

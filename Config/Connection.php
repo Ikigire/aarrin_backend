@@ -12,7 +12,9 @@
     try{
     $dbConnection = new PDO($dsn, $userName, $password);
     $dbConnection->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+    $dbConnection->setAttribute(PDO::ATTR_ORACLE_NULLS, PDO::NULL_EMPTY_STRING);
     $dbConnection->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, true);
+    $dbConnection->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
     $dbConnection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     $dbConnection->query("SET NAMES 'utf8'");//formating data to utf-8

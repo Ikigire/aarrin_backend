@@ -95,7 +95,6 @@
                 }
                 $query = "INSERT INTO contacts(IdCompany, MainContact, ContactName, ContactPhone, ContactEmail, ContactCharge, ContactPassword) VALUES ($companyId, $mainContact, '$contactName', '$contactPhone', '$contactEmail', '$contactCharge', AES_ENCRYPT('$contactPassword', '@Company'));"; //prepare the query including to make this contact the main
                 $insert = $dbConnection->prepare($query); //prepare the statement
-                echo "<h4>ok</h4>";
                 try { //try to complete the insertion
                     $insert->execute(); //execute the statement
                     $dbConnection->commit(); //it's everything ok
