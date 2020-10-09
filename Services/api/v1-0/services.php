@@ -61,7 +61,7 @@
                     $serviceStandard = $_POST['standard'];//get the sended data
                     $serviceDescription = $_POST['description'];//get the sended data
                     $serviceShortName = trim($_POST['shortname']);
-                    $query = "INSERT INTO services(IdService, ServiceStandard, ServiceShortName, ServiceDescription) VALUES (null,'$serviceStandard', '$serviceShortName', $serviceDescription);";
+                    $query = "INSERT INTO services(IdService, ServiceStandard, ServiceShortName, ServiceDescription) VALUES (null,'$serviceStandard', '$serviceShortName', '$serviceDescription');";
                     $dbConnection->beginTransaction();//starts a transaction in the database
                     $insert = $dbConnection->prepare($query);//prepare the statement
                     try{//try to complete the insertion
