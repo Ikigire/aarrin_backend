@@ -78,7 +78,7 @@ switch ($url[5]) {
             exit();
         }
 
-        if (isset($url[6]) && isset($url[7])){
+        if (!isset($url[6]) || !isset($url[7])){
             header(HTTP_CODE_412);
             exit();
         }
