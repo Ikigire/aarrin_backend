@@ -54,8 +54,7 @@ switch ($url[5]) {
 
             if ($data) {
                 header(HTTP_CODE_200);
-                $sectorData = $data[0];
-                echo json_encode($sectorData);
+                echo json_encode($data);
             } else {
                 header(HTTP_CODE_204);
             }
