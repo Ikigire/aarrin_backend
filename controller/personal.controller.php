@@ -5,7 +5,7 @@
 * Manejo de acciones sobre la tabla personal
 * Operaciones a utilizar y descripción a utilizar:
 
-* Solicitar todos los datos en modo lista-> url: .../api/v1-2/personal/listview, metodo: GET, datos-solicitados: {}
+* Solicitar todos los datos en modo lista-> url: .../api/v1-2/personal/all, metodo: GET, datos-solicitados: {}
 
 * Solicitar datos completos de un empleado-> url: .../api/v1-2/personal/get/:idEmployee, metodo: GET, datos-solicitados: {}
 
@@ -92,12 +92,12 @@ $employeeInsurance = null;
 switch ($url[5]) {
     /**
      * Solicitar todos los datos en modo lista-> 
-     * url: .../api/v1-2/personal/listview, 
+     * url: .../api/v1-2/personal/all, 
      * metodo: GET, 
      * datos-solicitados: {}
      * @return jsonString Todos los registros en modo vista de lista
      */
-    case 'listview':
+    case 'all':
         if ($method !== 'GET') {
             header('HTTP/1.1 405 Allow; GET');
             exit();

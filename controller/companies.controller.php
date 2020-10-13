@@ -5,7 +5,7 @@
 * Manejo de acciones sobre la tabla companies
 * Operaciones a utilizar y descripción a utilizar:
 
-* Solicitar todos en modo lista-> url: .../api/v1-2/companies/listview, metodo: GET, datos-solicitados: {}
+* Solicitar todos en modo lista-> url: .../api/v1-2/companies/all, metodo: GET, datos-solicitados: {}
 
 * Solicitar datos completos de una compañia-> url: .../api/v1-2/companies/get/:idCompany, metodo: GET, datos-solicitados: {}
 
@@ -50,12 +50,12 @@ $companyWebsite = null;
 switch ($url[5]) {
     /**
      * Solicitar todos en modo lista -> 
-     * url: .../api/v1-2/companies/listview, 
+     * url: .../api/v1-2/companies/all, 
      * metodo: GET, 
      * datos-solicitados: {}
      * @return jsonString Todos los registros en vista de lista
      */
-    case 'listview':
+    case 'all':
         if ($method !== 'GET') {
             header('HTTP/1.1 405 Allow; GET');
             exit();
