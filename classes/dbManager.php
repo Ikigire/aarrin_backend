@@ -9,7 +9,7 @@
         /**
          * @var string Nombre de la base de datos a conectarse
          */
-        private const DBNAME     = 'aarrindb';
+        private const DBNAME     = 'app-aarrin-page';
         
         /**
          * @var string Nombre de usuario para acceso a la BD
@@ -19,7 +19,7 @@
         /**
          * @var string Contraseña de acceso a la BD
          */
-        private const PASSWORD   = '';
+        private const PASSWORD   = '?DMI5Owz;Y9g';
 
         /**
          * Función que establece la conexión con la base de datos y retorna dicha conexión

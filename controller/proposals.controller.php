@@ -318,7 +318,7 @@ switch ($url[5]) {
                 ':proposalDetail' => json_encode($proposalDetail),
             );
 
-            $query = "UPDATE proposals SET TotalInvestment = :totalInvestment";
+            $query = "UPDATE proposals SET TotalInvestment = :totalInvestment, ProposalDetail = :proposalDetail";
 
             if (isset($data['ProposalApproved'])) {
                 if ($data['ProposalApproved']) {                    
