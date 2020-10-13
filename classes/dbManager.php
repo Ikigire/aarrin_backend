@@ -9,12 +9,12 @@
         /**
          * @var string Nombre de la base de datos a conectarse
          */
-        private const DBNAME     = 'app-aarrin-page';
+        private const DBNAME     = 'aarrindb';
         
         /**
          * @var string Nombre de usuario para acceso a la BD
          */
-        private const USER       = 'root';
+        private const USER       = 'app-aarrin-page';
 
         /**
          * @var string Contraseña de acceso a la BD
