@@ -53,7 +53,8 @@ $token = null;
 
 
 if ($method === 'OPTIONS') {
-    header('HTTP/1.1 405 Allow: GET, POST, PUT, DELETE, OPTIONS');
+    header(HTTP_CODE_200);
+    // header("Allow: GET, POST, OPTIONS, PUT, DELETE");
     exit();
 }
 
