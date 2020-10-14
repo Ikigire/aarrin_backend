@@ -53,9 +53,7 @@ $token = null;
 
 
 if ($method === 'OPTIONS') {
-    header(HTTP_CODE_200);
-    // header("Allow: GET, POST, OPTIONS, PUT, DELETE");
-    exit();
+    die();
 }
 
 if (isset($_GET['token']) && $_GET['token'] !== null) {
