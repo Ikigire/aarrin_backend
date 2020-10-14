@@ -64,9 +64,9 @@
 
             $connection = self::connect();
             $connection->beginTransaction();
-            $stmt = $connection->prepare($query);
 
             try {
+                $stmt = $connection->prepare($query);
                 $stmt->execute($params);
                 if (explode(' ', $query)[0] === 'SELECT'){
                     $stmt->setFetchMode(PDO::FETCH_ASSOC);
