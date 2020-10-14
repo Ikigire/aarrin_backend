@@ -300,7 +300,6 @@ switch ($url[5]) {
             if (isset($data['DayCalculationApproved'])){
                 if ($data['DayCalculationApproved']){
                     $params[':idReviewerEmployee'] = $data['IdReviewerEmployee'];
-                    $params[':dayCalculationApproved'] = $data['DayCalculationApproved'];
                     $date = new DateTime("now");
                     $currentDate = $date->format('Y-m-d H:i:s');
                     $params[':currentDate'] = $currentDate;
