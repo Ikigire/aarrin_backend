@@ -344,12 +344,11 @@ switch ($url[5]) {
                 ':idSector' => $idSector,
                 ':appLanguage' => $appLanguage,
                 ':numberEmployees' => $numberEmployees,
-                ':currentDate' => $currentDate,
                 ':appDetail' => json_encode($appDetail),
                 ':appComplement' => json_encode($appComplement)
             );
 
-            $query = "UPDATE applications SET IdSector = :idSector, AppLanguage = :appLanguage, NumberEmployees = :numberEmployees";
+            $query = "UPDATE applications SET IdSector = :idSector, AppLanguage = :appLanguage, NumberEmployees = :numberEmployees, AppDetail = :appDetail, AppComplement = :appComplement";
 
             if (isset($data['LastCertificateStandard'])) {
                 $params[':lastCertificateStandard'] = $data['LastCertificateStandard'];
