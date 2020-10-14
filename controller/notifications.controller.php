@@ -73,10 +73,12 @@ switch ($url[5]) {
             if (isset($_GET['Role_Type'])) {
                 $role = $_GET['Role_Type'];
                 $query .= " OR Role_Type = :roleType";
-                $params[':roleType'] = $roleType;
+                $params[':roleType'] = $role;
             }
             
             $query .= " ORDER BY NotificationDate DESC";
+
+
             $data = DBManager::query($query, $params);
 
             if ($data) {
