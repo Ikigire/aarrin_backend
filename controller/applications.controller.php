@@ -338,9 +338,6 @@ switch ($url[5]) {
 
             $params = array(
                 ':idApplication' => $idApplication,
-                ':idCompany' => $idCompany,
-                ':idContact' => $idContact,
-                ':idService' => $idService,
                 ':idSector' => $idSector,
                 ':appLanguage' => $appLanguage,
                 ':numberEmployees' => $numberEmployees,
