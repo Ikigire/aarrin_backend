@@ -148,8 +148,8 @@ switch ($url[5]) {
                 $date = new DateTime("now");
                 $currentDate = $date->format('Y-m-d H:i:s');
 
-                $initialPart = "INSERT INTO notifications (Role_Type, Message, URL, NotificationDate";
-                $values = "VALUES(:roleType, :message, :notificationUrl', :currentDate";
+                $initialPart = "INSERT INTO notifications(Role_Type, Message, URL, NotificationDate";
+                $values = "VALUES (:roleType, :message, :notificationUrl, :currentDate";
 
                 $params = array(
                     ':message' => $message,
@@ -172,7 +172,7 @@ switch ($url[5]) {
                     $params[':idCompany'] = $idCompany;
                 }
 
-                $query = $initialPart. ") ". $values. ");";
+                $query = $initialPart. ") ". $values. ")";
 
                 $response = DBManager::query($query, $params);
                 if ($response) {
