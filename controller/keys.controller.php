@@ -247,7 +247,7 @@ switch ($url[5]) {
      * url: .../api/v1-2/keys/recover, 
      * metodo: POST, 
      * datos-solicitados. {email: string, method: string}
-     * @return JsonString respuesta de resultado de la acción
+     * @return JsonString respuesta de resultado de la acción que incluye los datos del usuario y un token válido por 10 minutos
      */
     case 'recover':
         if ($method !== 'POST') {
@@ -284,7 +284,7 @@ switch ($url[5]) {
             $query = "INSERT INTO validation_keys(ValidationCode, ValidationDate, ValidationEmail) VALUES(:code, :currentDate, :email)";
             if (DBManager::query($query, array(':code' => $code, 'currentDate' => $currentDate, ':email' => $email))) {
                 header(HTTP_CODE_201);
-                echo json_encode($answer);
+                echo json_encode(array('data' => json_encode($answer), 'token' => TokenTool::createToken($answer, 0.1)));
             } else {
                 header(HTTP_CODE_409);
                 exit();
