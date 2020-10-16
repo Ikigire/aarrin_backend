@@ -247,7 +247,7 @@ switch ($url[5]) {
      * url: .../api/v1-2/keys/recover, 
      * metodo: POST, 
      * datos-solicitados. {email: string, method: string}
-     * @return JsonString respuesta de resultado de la acción que incluye los datos del usuario y un token válido por 10 minutos
+     * @return JsonString respuesta de resultado de la acción que incluye los datos del usuario y un token válido
      */
     case 'recover':
         if ($method !== 'POST') {
@@ -263,11 +263,13 @@ switch ($url[5]) {
 
             $query = "SELECT * FROM personal WHERE EmployeeEmail = :email";
             $personalSearch = DBManager::query($query, array(':email' => $email));
-
+            $data = array('Hola' => 'Cómo estás?');
             if($contactSearch){
-                $answer = $contactSearch[0];
+                $data = $contactSearch[0];
+                $data['ContactPassword'] = '';
             }elseif($personalSearch){
-                $answer = $personalSearch[0];
+                $data = $personalSearch[0];
+                $data['EmployeePassword'] = '';
             }else{
                 echo json_encode(array (
                     'answer' => 'Error',
@@ -282,10 +284,7 @@ switch ($url[5]) {
             $code = create_code();
             
             $query = "INSERT INTO validation_keys(ValidationCode, ValidationDate, ValidationEmail) VALUES(:code, :currentDate, :email)";
-            if (DBManager::query($query, array(':code' => $code, 'currentDate' => $currentDate, ':email' => $email))) {
-                header(HTTP_CODE_201);
-                echo json_encode(array('data' => json_encode($answer), 'token' => TokenTool::createToken($answer, 0.1)));
-            } else {
+            if (!DBManager::query($query, array(':code' => $code, 'currentDate' => $currentDate, ':email' => $email))) {
                 header(HTTP_CODE_409);
                 exit();
             }
@@ -324,13 +323,14 @@ switch ($url[5]) {
                             <img src='https://fqehjo.stripocdn.email/content/guids/95820a7c-b5c9-40db-b28f-2db8ff838956/images/66451586029405480.png' alt style='display:block;border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;' width='125' height='89'></a></td></tr></table></td></tr></table></td></tr></table></td></tr></table></td></tr></table></div></body>
                             </html>";
                 mail($email, $subject, $message, $headers);
-                echo json_encode(array (
-                    'answer' => 'OK',
-                    'status' => 'The email message was sent'
+                header(HTTP_CODE_201);
+                echo json_encode(array(
+                    'data' => $data,
+                    'token' => TokenTool::createToken($data, 0.1)
                 ));
             } else {
 
-                include('../classes/httpPHPAltiria.php');
+                include(__DIR__.'/../classes/httpPHPAltiria.php');
 
                 $altiriaSMS = new AltiriaSMS();
                 $altiriaSMS->setUrl("http://www.altiria.net/api/http");
@@ -348,16 +348,16 @@ switch ($url[5]) {
                 $response = $altiriaSMS->sendSMS('52'. $phone, $message);
                 //Utilizar esta llamada solo si se cuenta con un remitente autorizado por Altiria
                 //$response = $altiriaSMS->sendSMS($sDestination, "Mensaje de prueba", "remitente")
-
+                header(HTTP_CODE_201);
                 if (!$response){
                     echo json_encode(array (
                         'answer' => 'Error',
                         'status' => 'The sms message wasn\'t sent'
                     ));
                 } else {
-                    echo json_encode(array (
-                        'answer' => 'OK',
-                        'status' => 'The sms message was sent'
+                    echo json_encode(array(
+                        'data' => json_encode($answer), 
+                        'token' => TokenTool::createToken($answer, 0.1)
                     ));
                 }
                 
