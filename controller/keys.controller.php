@@ -326,7 +326,7 @@ switch ($url[5]) {
                 header(HTTP_CODE_201);
                 echo json_encode(array(
                     'data' => $data,
-                    'token' => TokenTool::createToken($data, 0.1)
+                    'token' => TokenTool::createToken($data)
                 ));
             } else {
 
@@ -357,7 +357,7 @@ switch ($url[5]) {
                 } else {
                     echo json_encode(array(
                         'data' => json_encode($answer), 
-                        'token' => TokenTool::createToken($answer, 0.1)
+                        'token' => TokenTool::createToken($answer)
                     ));
                 }
                 
