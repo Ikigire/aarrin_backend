@@ -236,7 +236,7 @@ switch ($url[5]) {
             }
         }
         else {
-            header("HTTP/1.1 404 Not Found");
+            header(HTTP_CODE_404);
             exit();
         }
         break;
@@ -264,10 +264,14 @@ switch ($url[5]) {
             $query = "SELECT * FROM personal WHERE EmployeeEmail = :email";
             $personalSearch = DBManager::query($query, array(':email' => $email));
 
-            if(!$contactSearch && !$personalSearch){
+            if($contactSearch){
+                $answer = $contactSearch[0];
+            }elseif($personalSearch){
+                $answer = $personalSearch[0];
+            }else{
                 echo json_encode(array (
                     'answer' => 'Error',
-                    'status' => 'That email has NOT been registered'
+                    'message' => 'That email has NOT been registered'
                 ));
                 exit();
             }
@@ -280,6 +284,7 @@ switch ($url[5]) {
             $query = "INSERT INTO validation_keys(ValidationCode, ValidationDate, ValidationEmail) VALUES(:code, :currentDate, :email)";
             if (DBManager::query($query, array(':code' => $code, 'currentDate' => $currentDate, ':email' => $email))) {
                 header(HTTP_CODE_201);
+                echo json_encode($answer);
             } else {
                 header(HTTP_CODE_409);
                 exit();
