@@ -159,7 +159,7 @@ switch ($url[5]) {
      * url: .../api/v1-2/personal/login (Este caso no necesitará de un token), 
      * metodo: GET, 
      * datos-solicitados. {email: string, password: string}
-     * @return jsonString|null Datos y token de sesión para el empleado
+     * @return jsonString|null Token de sesión para el empleado en donde van incluidos sus datos
      */
     case 'login':
         if ($method !== 'GET') {
@@ -177,13 +177,7 @@ switch ($url[5]) {
             if($data){
                 $employeeData = $data[0];
 
-                $dataForToken = array(
-                    'IdEmployee'    => $employeeData['IdEmployee'],
-                    'EmployeeName'  => $employeeData['EmployeeName'].' '.$employeeData['EmployeeLastName'],
-                    'EmployeeRFC'   => $employeeData['EmployeeRFC'],
-                    'EmployeeEmail' => $employeeData['EmployeeEmail']
-                );
-                $employeeData['Token'] = TokenTool::createToken($dataForToken);
+                $token = TokenTool::createToken($employeeData);
                 if ($employeeData['EmployeeStatus'] == 'Active'){
                     header(HTTP_CODE_200);
                     echo json_encode($employeeData);
@@ -359,7 +353,7 @@ switch ($url[5]) {
      * Editar los datos de un empleado-> 
      * url: .../api/v1-2/personal/edit/:idEmployee, 
      * metodo: PUT, 
-     * datos-solicitados. {data: jsonString}
+     * datos-solicitados. {data: jsonString} deberá ir en el cuerpo de la solicitud
      * @param int idEmployee ID del empleado, deberá ir al final de la url
      * @return jsonString Datos actualizados del empleado
      */
@@ -375,13 +369,12 @@ switch ($url[5]) {
         }
         $idEmployee = (int) $url[6];
 
-        $data = null;
+        $data = json_decode(file_get_contents('php://input'), true);
 
-        if (!isset($_GET['data'])) {
+        if (!isset($data)){
             header(HTTP_CODE_412);
             exit();
         }
-        $data = json_decode($_GET['data'], true);
 
         if (TokenTool::isValid($token)){
             $employeeName           = $data['EmployeeName'];
@@ -441,15 +434,9 @@ switch ($url[5]) {
 
                 if ($data) {
                     $employeeData = $data[0];
-                    $dataForToken = array(
-                        'IdEmployee'    => $employeeData['IdEmployee'],
-                        'EmployeeName'  => $employeeData['EmployeeName'].' '.$employeeData['EmployeeLastName'],
-                        'EmployeeRFC'   => $employeeData['EmployeeRFC'],
-                        'EmployeeEmail' => $employeeData['EmployeeEmail']
-                    );
-                    $employeeData['Token'] = TokenTool::createToken($dataForToken);
+                    $token = TokenTool::createToken($employeeData);
                     header(HTTP_CODE_205);
-                    echo json_encode($employeeData);
+                    echo json_encode(array('token' => $token));
                 }
             } else {
                 $connection->rollBack();

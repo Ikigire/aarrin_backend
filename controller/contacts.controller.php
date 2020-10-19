@@ -134,7 +134,7 @@ switch ($url[5]) {
      * url: .../api/v1-2/contacts/login (Este caso no necesitará de un token), 
      * metodo: GET, 
      * datos-solicitados. {email: string, password: string}
-     * @return jsonString|null Datos y token de sesión para el empleado
+     * @return jsonString|null Token de sesión para el contacto en donde van incluidos sus datos
      */
     case 'login':
         if ($method !== 'GET') {
@@ -155,17 +155,11 @@ switch ($url[5]) {
             $data = DBManager::query($query, $params);
 
             if($data){
-                $employeeData = $data[0];
+                $contactData = $data[0];
 
-                $dataForToken = array(
-                    'IdContact'   => $contactData['IdContact'],
-                    'ContactName'  => $contactData['ContactName'],
-                    'ContactPhone' => $contactData['ContactPhone'],
-                    'ContactEmail' => $contactData['ContactEmail']
-                );
-                $employeeData['Token'] = TokenTool::createToken($dataForToken);
+                $token = TokenTool::createToken($contactData);
                 header(HTTP_CODE_200);
-                echo json_encode($employeeData);
+                echo json_encode(array('token' => $token));
                 exit();
             }else{
                 header(HTTP_CODE_204);
@@ -304,7 +298,7 @@ switch ($url[5]) {
      * Editar los datos de un contacto-> 
      * url: .../api/v1-2/contacts/edit/:idContact, 
      * metodo: PUT, 
-     * datos-solicitados. {data: jsonString}
+     * datos-solicitados. {data: jsonString} deberá ir en el cuerpo de la solicitud
      * @param int idContact ID del contacto, deberá ir al final de la url
      * @return jsonString Datos actualizados del empleado
      */
@@ -320,11 +314,12 @@ switch ($url[5]) {
         }
         $idContact = (int) $url[6];
 
-        if (!isset($_GET['data'])) {
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        if (!isset($data)) {
             header(HTTP_CODE_412);
             exit();
         }
-        $data = json_decode($_GET['data'], true);
 
         if (TokenTool::isValid($token)){
             $contactName = $data['ContactName'];
@@ -371,15 +366,9 @@ switch ($url[5]) {
 
                 if($data){
                     $contactData = $data[0];
-                    $dataForToken = array(
-                        'IdContact' => $contactData['IdContact'],
-                        'IdCompany' => $contactData['IdCompany'],
-                        'ContactName' => $contactData['ContactName'],
-                        'ContactEmail' => $contactData['ContactEmail']
-                    );
-                    $contactData['Token'] = TokenTool::createToken($dataForToken);
+                    $token = TokenTool::createToken($contactData);
                     header(HTTP_CODE_205);
-                    echo json_encode($contactData);
+                    echo json_encode(array('token' => $token));
                 }
             }else{
                 header(HTTP_CODE_409);

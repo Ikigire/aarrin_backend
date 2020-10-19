@@ -14,12 +14,12 @@
         /**
          * @var string Nombre de usuario para acceso a la BD
          */
-        private const USER       = 'app-aarrin-page';
+        private const USER       = 'root';
 
         /**
          * @var string Contraseña de acceso a la BD
          */
-        private const PASSWORD   = '?DMI5Owz;Y9g';
+        private const PASSWORD   = '';
 
         /**
          * Función que establece la conexión con la base de datos y retorna dicha conexión

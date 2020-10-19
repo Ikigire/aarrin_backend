@@ -25,7 +25,7 @@ class TokenTool {
             'iat' => time(),
             'exp' => (time() + $time *60 *60),
             'aud' => self::getAud(),
-            'data' => $data
+            'data' => json_encode($data)
         );
         
         return JWT::encode($payload, self::$SECRET_KEY);
