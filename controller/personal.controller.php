@@ -177,7 +177,7 @@ switch ($url[5]) {
             if($data){
                 $employeeData = $data[0];
 
-                $token = TokenTool::createToken($employeeData);
+                $employeeData['Token'] = TokenTool::createToken($employeeData);
                 if ($employeeData['EmployeeStatus'] == 'Active'){
                     header(HTTP_CODE_200);
                     echo json_encode($employeeData);
@@ -322,13 +322,7 @@ switch ($url[5]) {
 
                         $employeeData = $data[0];
 
-                        $dataForToken = array(
-                            'IdEmployee'    => $employeeData['IdEmployee'],
-                            'EmployeeName'  => $employeeData['EmployeeName'].' '.$employeeData['EmployeeLastName'],
-                            'EmployeeRFC'   => $employeeData['EmployeeRFC'],
-                            'EmployeeEmail' => $employeeData['EmployeeEmail']
-                        );
-                        $employeeData['Token'] = TokenTool::createToken($dataForToken);
+                        $employeeData['Token'] = TokenTool::createToken($employeeData);
                         echo json_encode($employeeData);
                     } else {
                         echo json_encode(array('error' => 'Can\'t change the data', 'place' => 'At moment to register the new path'));
@@ -434,9 +428,10 @@ switch ($url[5]) {
 
                 if ($data) {
                     $employeeData = $data[0];
-                    $token = TokenTool::createToken($employeeData);
+
+                    $employeeData['Token'] = TokenTool::createToken($employeeData);
                     header(HTTP_CODE_205);
-                    echo json_encode(array('token' => $token));
+                    echo json_encode($employeeData);
                 }
             } else {
                 $connection->rollBack();

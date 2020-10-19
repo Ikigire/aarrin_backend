@@ -157,9 +157,9 @@ switch ($url[5]) {
             if($data){
                 $contactData = $data[0];
 
-                $token = TokenTool::createToken($contactData);
+                $contactData['Token'] = TokenTool::createToken($contactData);
                 header(HTTP_CODE_200);
-                echo json_encode(array('token' => $token));
+                echo json_encode($contactData);
                 exit();
             }else{
                 header(HTTP_CODE_204);
@@ -214,7 +214,7 @@ switch ($url[5]) {
                 $response = DBManager::query($query, $params);
                 if ($response) {
                     header(HTTP_CODE_201);
-                    echo array('IdConact' => $response);
+                    echo array('IdContact' => $response);
                 } else {
                     header(HTTP_CODE_409);
                 }
@@ -268,13 +268,7 @@ switch ($url[5]) {
                         $data = DBManager::query($query, array(':idContact' => $idContact));
                         $contactData = $data[0];
 
-                        $dataForToken = array(
-                            'IdContact' => $contactData['IdContact'],
-                            'IdCompany' => $contactData['IdCompany'],
-                            'ContactName' => $contactData['ContactName'],
-                            'ContactEmail' => $contactData['ContactEmail']
-                        );
-                        $contactData['Token'] = TokenTool::createToken($dataForToken);
+                        $contactData['Token'] = TokenTool::createToken($contactData);
                         header(HTTP_CODE_205);
                         echo json_encode($contactData); //Return the data
                     } else {
@@ -366,9 +360,10 @@ switch ($url[5]) {
 
                 if($data){
                     $contactData = $data[0];
-                    $token = TokenTool::createToken($contactData);
+
+                    $contactData['Token'] = TokenTool::createToken($contactData);
                     header(HTTP_CODE_205);
-                    echo json_encode(array('token' => $token));
+                    echo json_encode($contactData);
                 }
             }else{
                 header(HTTP_CODE_409);
