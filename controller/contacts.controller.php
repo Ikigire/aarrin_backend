@@ -362,7 +362,7 @@ switch ($url[5]) {
                     $contactData = $data[0];
 
                     $contactData['Token'] = TokenTool::createToken($contactData);
-                    header(HTTP_CODE_205);
+                    header(HTTP_CODE_200);
                     echo json_encode($contactData);
                 }
             }else{

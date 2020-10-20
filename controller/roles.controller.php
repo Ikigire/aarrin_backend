@@ -144,7 +144,7 @@ switch ($url[5]) {
             );
 
             if (DBManager::query($query, $params)){
-                header(HTTP_CODE_205);
+                header(HTTP_CODE_200);
                 echo json_encode(array('result' => 'Deleted'));
             }else {
                 header(HTTP_CODE_409);

@@ -279,7 +279,7 @@ switch ($url[5]) {
             
             $response = DBManager::query($query, $params);
             if ($response){
-                header(HTTP_CODE_205);
+                header(HTTP_CODE_200);
                 echo json_encode($data);
             }else {
                 header(HTTP_CODE_409);

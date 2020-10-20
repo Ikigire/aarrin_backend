@@ -299,12 +299,11 @@ switch ($url[5]) {
         }
         $idProposal = (int) $url[6];
 
-        if (!isset($_GET['data'])) {
+        $data = json_decode(file_get_contents('php://input'), true);
+        if (!isset($data)) {
             header(HTTP_CODE_412);
             exit();
         }
-
-        $data = json_decode($_GET['data'], true);
 
         if (TokenTool::isValid($token)){
             $totalInvestment = $data['TotalInvestment'];
@@ -373,7 +372,7 @@ switch ($url[5]) {
             $query .= " WHERE IdProposal = :idProposal";
             
             if (DBManager::query($query, $params)){
-                header(HTTP_CODE_205);
+                header(HTTP_CODE_200);
                 echo json_encode(array('result' => 'Updated'));
             }else {
                 header(HTTP_CODE_409);

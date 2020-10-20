@@ -217,7 +217,7 @@ switch ($url[5]) {
             $query = "UPDATE notifications SET Viewed = 1 WHERE IdNotification = :idNotification";
 
             if (DBManager::query($query, array(':idNotification' => $idNotification))){
-                header(HTTP_CODE_205);
+                header(HTTP_CODE_200);
                 echo json_encode(array('result' => 'Updated'));
             }else {
                 header(HTTP_CODE_409);

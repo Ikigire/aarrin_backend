@@ -430,7 +430,7 @@ switch ($url[5]) {
                     $employeeData = $data[0];
 
                     $employeeData['Token'] = TokenTool::createToken($employeeData);
-                    header(HTTP_CODE_205);
+                    header(HTTP_CODE_200);
                     echo json_encode($employeeData);
                 }
             } else {

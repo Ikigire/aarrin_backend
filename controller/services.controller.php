@@ -203,11 +203,11 @@ switch ($url[5]) {
         }
         $idService = (int) $url[6];
 
-        if (!isset($_GET['data'])) {
+        $data = json_decode(file_get_contents('php://input'), true);
+        if (!isset($data)) {
             header(HTTP_CODE_412);
             exit();
         }
-        $data = json_decode($_GET['data'], true);
 
         if (TokenTool::isValid($token)){
             $serviceStandard    = $data['serviceStandard'];
@@ -233,7 +233,7 @@ switch ($url[5]) {
             if (DBManager::query($query, $params)){
                 $query = "SELECT IdService, ServiceStandard, ServiceShortName, ServiceStatus, ServiceDescription FROM services WHERE IdService = :idService";
                 $data = DBManager::query($query, array(':idService' => $idService));
-                header(HTTP_CODE_205);
+                header(HTTP_CODE_200);
                 echo json_encode($data[0]);
             }else {
                 header(HTTP_CODE_409);
