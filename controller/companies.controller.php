@@ -279,10 +279,8 @@ switch ($url[5]) {
             
             $response = DBManager::query($query, $params);
             if ($response){
-                $query = "SELECT IdCompany, CompanyName, CompanyRFC, CompanyAddress, CompanyWebsite CompanyLogo FROM companies WHERE IdCompany = :idCompany";
-                $data = DBManager::query($query, array(':idCompany' => $idCompany));
                 header(HTTP_CODE_205);
-                echo json_encode($data[0]);
+                echo json_encode($data);
             }else {
                 header(HTTP_CODE_409);
             }
