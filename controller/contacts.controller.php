@@ -259,7 +259,7 @@ switch ($url[5]) {
                 $name = "profile_$idContact.Image-$contactEmail.Clajhasd9ul3iu0a.ohsdf-jsdf.klsdj0ojmalsdasd.png";
                 $path = "https://aarrin.com/mobile/app_resources/contacts/$name";
 
-                if (move_uploaded_file($f['tmp_name'], __DIR__. "/../../../../app_resources/contacts/$name")){
+                if (move_uploaded_file($f['tmp_name'], __DIR__. "/../../app_resources/contacts/$name")){
                     $query = "UPDATE contacts SET ContactPhoto = :path WHERE IdContact = :idContact";
                     $response = DBManager::query($query, array(':path' => $path, ':idContact' => $idContact));
 
