@@ -323,7 +323,6 @@ switch ($url[5]) {
             $idCompany = $data['IdCompany'];
 
             $params = array(
-                ':idCompany'       => $idCompany,
                 ':contactName'     => $contactName,
                 ':contactPhone'    => $contactPhone,
                 ':contactEmail'    => $contactEmail,
@@ -348,13 +347,14 @@ switch ($url[5]) {
             if ($mainContact === 1) {
                 $query = "UPDATE contacts SET MainContact = 0 WHERE IdCompany = :idCompany;";
                 if(!DBManager::query($query, array(':idCompany' => $idCompany))) { 
-                    header("HTTP/1.1 409 Conflict");
+                    header(HTTP_CODE_409);
                     exit();
                 }
             }
+
             $updateQuery = $updateQuery. " WHERE IdContact = :idContact;";
 
-            if (DBManager::query($query, $params)){
+            if (DBManager::query($updateQuery, $params)){
                 $query = "SELECT IdContact, IdCompany, MainContact, ContactName, ContactPhone, ContactEmail, ContactCharge, AES_DECRYPT(ContactPassword, '@Company') AS 'ContactPassword', ContactPhoto FROM contacts WHERE IdContact = :idContact";
                 $data = DBManager::query($query, array(':idContact' => $idContact));
 
