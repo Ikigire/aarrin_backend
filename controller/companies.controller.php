@@ -204,7 +204,7 @@ switch ($url[5]) {
                 $f = $_FILES['logo'];
                 $name = "logo_$idCompany.Image-$companyRFC.Clajhasd9ul3iu0a.ñohsdf-jsdf.klsdj0ojmalsdasd.png";
                 $path = "https://aarrin.com/mobile/app_resources/companies/$name";
-                if (move_uploaded_file($f['tmp_name'], __DIR__. "/../../../../app_resources/companies/$name")){
+                if (move_uploaded_file($f['tmp_name'], __DIR__. "/../../app_resources/companies/$name")){
                     $query = "UPDATE companies SET CompanyLogo = :path WHERE IdCompany = :idCompany";
                     $response = DBManager::query($query, array(':path' => $path, ':idCompany' => $idCompany));
                     if ($response){
