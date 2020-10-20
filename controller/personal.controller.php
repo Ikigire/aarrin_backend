@@ -312,7 +312,7 @@ switch ($url[5]) {
                 $name = "profile_$idEmployee.Image-pqwe82354daloihd.png";
                 $path = "https://aarrin.com/mobile/app_resources/personal/$name";
                 
-                if (move_uploaded_file($f['tmp_name'], __DIR__. "/../../../../app_resources/personal/$name")){
+                if (move_uploaded_file($f['tmp_name'], __DIR__. "/../../app_resources/personal/$name")){
                     $query = "UPDATE personal SET EmployeePhoto = :path WHERE IdEmployee = :idEmployee";
                     $response = DBManager::query($query, array(':path' => $path, ':idEmployee' => $idEmployee));
 
