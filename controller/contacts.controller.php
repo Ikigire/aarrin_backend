@@ -265,12 +265,11 @@ switch ($url[5]) {
                     if ($response) {
                         $query = "SELECT IdContact, IdCompany, MainContact, ContactName, ContactPhone, ContactEmail, ContactCharge, ContactPhoto FROM contacts WHERE IdContact = :idContact";
                         $data = DBManager::query($query, array(':idContact' => $idContact));
-                        if ($data) {
-                            header(HTTP_CODE_200);
-                            echo json_encode($data[0]);
-                        } else {
-                            header(HTTP_CODE_409);
-                        }
+                        $contactData = $data[0];
+
+                        $contactData['Token'] = TokenTool::createToken($contactData);
+                        header(HTTP_CODE_200);
+                        echo json_encode($contactData);
                     } else {
                         header(HTTP_CODE_409);
                     }
