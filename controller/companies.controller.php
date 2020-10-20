@@ -252,11 +252,12 @@ switch ($url[5]) {
         }
         $idCompany = (int) $url[6];
 
-        if (!isset($_GET['data'])) {
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        if (!isset($data)) {
             header(HTTP_CODE_412);
             exit();
         }
-        $data = json_decode($_GET['data'], true);
 
         if (TokenTool::isValid($token)){
             $companyName = $data['CompanyName'];
