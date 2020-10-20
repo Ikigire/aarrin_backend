@@ -265,7 +265,7 @@ switch ($url[5]) {
                     if ($response) {
                         $query = "SELECT IdContact, IdCompany, MainContact, ContactName, ContactPhone, ContactEmail, ContactCharge, AES_DECRYPT(ContactPassword, '@Company') AS 'ContactPassword', ContactPhoto FROM contacts WHERE IdContact = :idContact;";
                         $data = DBManager::query($query, array(':idContact' => $idContact));
-                        $contactData = $data[0];
+                        $contactData = (array) $data[0];
 
                         $contactData['Token'] = TokenTool::createToken($contactData);
                         header(HTTP_CODE_200);
