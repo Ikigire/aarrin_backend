@@ -263,15 +263,15 @@ switch ($url[5]) {
                     $response = DBManager::query($query, array(':path' => $path, ':idContact' => $idContact));
 
                     if ($response) {
-                        $query = "SELECT IdContact, IdCompany, MainContact, ContactName, ContactPhone, ContactEmail, ContactCharge, AES_DECRYPT(ContactPassword, '@Company') AS 'ContactPassword', ContactPhoto FROM contacts WHERE IdContact = :idContact;";
+                        $query = "SELECT IdContact, IdCompany, MainContact, ContactName, ContactPhone, ContactEmail, ContactCharge, ContactPhoto FROM contacts WHERE IdContact = :idContact";
                         $data = DBManager::query($query, array(':idContact' => $idContact));
-                        $contactData = (array) $data[0];
+                        $contactData = $data[0];
 
                         $contactData['Token'] = TokenTool::createToken($contactData);
                         header(HTTP_CODE_200);
-                        echo json_encode($contactData); //Return the data
+                        echo json_encode($contactData);
                     } else {
-                        header(HTTP_CODE_409); //info for the client
+                        header(HTTP_CODE_409);
                     }
                 } else {
                     header(HTTP_CODE_409);
