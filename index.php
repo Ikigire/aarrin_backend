@@ -286,6 +286,21 @@ if ($url[3] === 'v1-2') {
             require_once('controller/localidades.controller.php');
             break;
 
+        /**
+         *   ______________________________
+         *  /     CONTENIDO DE PÁGINAS     \
+         * |                                |
+         * |  TABLA PARA EL MANEJO DE       |
+         * |  CONTENIDO DE LAS PÁGINAS      |
+         * |                                |
+         * |                                |
+         *  \______________________________/
+         * 
+         */
+        case 'page_content':
+            require_once('controller/editor.controller.php');
+            break;
+
         default:
             header(HTTP_CODE_404);
             break;
