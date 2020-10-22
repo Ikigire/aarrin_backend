@@ -15,7 +15,7 @@
 
 * Editar un contenido de página-> url: ../api/v1-2/page_content/edit/:id, método: PUT, datos-solicitados{data: jsonString}
 
-* Borrar un contenido-> url: ../api/v1-2/page_content/delete/:id, método: , datos-solicitados: {}
+* Borrar un contenido-> url: ../api/v1-2/page_content/delete/:id, método: DELETE, datos-solicitados: {}
 *
 * @author Yael Alejandro Santana Michel
 * @author ya_el1995@hotmail.com
@@ -113,7 +113,7 @@ switch ($url[5]) {
      */
     case 'add':
         if ($method !== 'POST') {
-            header('HTTP/1.1 405 Allow: GET');
+            header('HTTP/1.1 405 Allow: POST');
             exit();
         }
 
@@ -124,8 +124,8 @@ switch ($url[5]) {
         }
 
         if (TokenTool::isValid($token)) {
-            $query = "INSERT INTO page_content VALUES(:id, :codeHTML, :pagina)";
-            $response = DBManager::query($query, array(':id' => $data['id'], ':codeHTML' => $data['codeHTML'], 'pagina' => $data['pagina']));
+            $query = "INSERT INTO page_content VALUES(null, :codeHTML, :pagina)";
+            $response = DBManager::query($query, array(':codeHTML' => $data['codeHTML'], ':pagina' => $data['pagina']));
             if ($response) {
                 header(HTTP_CODE_201);
                 echo json_encode(array('id' => $response));
@@ -135,9 +135,112 @@ switch ($url[5]) {
         } else {
             header(HTTP_CODE_401);
         }
-        exit();
         break;
 
+    /**
+     * Subir una archivo al servidor-> 
+     * url: ../api/v1-2/page_content/upload, 
+     * método: POST, 
+     * datos-solicitados: {file: File}
+     * @return string La ruta de la imagen guardada
+     */
+    case 'upload':
+        if ($method !== 'POST') {
+            header('HTTP/1.1 405 Allow: POST');
+            exit();
+        }
+
+        if(!isset($_FILES['file'])) {
+            header(HTTP_CODE_412);
+            exit();
+        }
+
+        if (TokenTool::isValid($token)) {
+            $f = $_FILES['file'];
+            $ext = pathinfo($f['name'])['extension'];
+            $name = pathinfo($f['name'])['filename'].'.'.$ext;
+            $path = "https://aarrin.com/mobile/app_resources/page_content/$name";
+            if (move_uploaded_file($f['tmp_name'], __DIR__. "/../../app_resources/page_content/$name")){
+                header(HTTP_CODE_201);
+                echo $path;
+            }else{
+                header(HTTP_CODE_409);
+            }
+        } else {
+            header(HTTP_CODE_401);
+        }
+        break;
+    
+    /**
+     * Editar un contenido de página-> 
+     * url: ../api/v1-2/page_content/edit/:id, 
+     * método: PUT, 
+     * datos-solicitados{data: jsonString}
+     * @param id int El ID del contenido de página a editar
+     * @return jsonString Objeto con los datos actualizados
+     */
+    case 'edit':
+        if ($method !== 'PUT') {
+            header('HTTP/1.1 405 Allow: PUT');
+            exit();
+        }
+
+        if (!isset($url[6])) {
+            header(HTTP_CODE_412);
+            exit();
+        }
+        $id = (int) $url[6];
+
+        $data = json_decode(file_get_contents('php://input'), true);
+        if (!isset($data)) {
+            header(HTTP_CODE_412);
+            exit();
+        }
+
+        if (TokenTool::isValid($token)) {
+            $query = "UPDATE page_content SET codeHTML = :codeHTML, página = :pagina WHERE id = :id";
+            if (DBManager::query($query, array(':id' => $id, ':codeHTML' => $data['codeHTML'], ':pagina' => $data['pagina']))) {
+                header(HTTP_CODE_201);
+                echo json_encode($data);
+            }else {
+                header(HTTP_CODE_409);
+            }
+        } else {
+            header(HTTP_CODE_401);
+        }
+        break;
+
+    /**
+     * Borrar un contenido-> 
+     * url: ../api/v1-2/page_content/delete/:id, 
+     * método: DELETE, 
+     * datos-solicitados: {}
+     */
+    case 'delete':
+        if ($method !== 'DELETE') {
+            header('HTTP/1.1 405 Allow: DELETE');
+            exit();
+        }
+        
+        if (!isset($url[6])) {
+            header(HTTP_CODE_412);
+            exit();
+        }
+
+        $id = (int) $url[6];
+
+        if (TokenTool::isValid($token)) {
+            $query = "DELETE FROM page_content WHERE id = :id";
+            if (DBManager::query($query, array(':id' => $id))) {
+                header(HTTP_CODE_201);
+                echo json_encode(array('message' => 'Contenido Eliminado'));
+            }else {
+                header(HTTP_CODE_409);
+            }
+        } else {
+            header(HTTP_CODE_401);
+        }
+        break;
     default:
         header(HTTP_CODE_404);
         break;
