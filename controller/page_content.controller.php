@@ -215,6 +215,8 @@ switch ($url[5]) {
      * url: ../api/v1-2/page_content/delete/:id, 
      * método: DELETE, 
      * datos-solicitados: {}
+     * @param id int ID del contenido de página a eliminar
+     * @return string mensaje de resultado de operación 
      */
     case 'delete':
         if ($method !== 'DELETE') {
@@ -233,7 +235,7 @@ switch ($url[5]) {
             $query = "DELETE FROM page_content WHERE id = :id";
             if (DBManager::query($query, array(':id' => $id))) {
                 header(HTTP_CODE_201);
-                echo json_encode(array('message' => 'Contenido Eliminado'));
+                echo json_encode(array('message' => 'Content deleted'));
             }else {
                 header(HTTP_CODE_409);
             }
