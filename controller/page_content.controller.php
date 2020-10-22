@@ -162,7 +162,7 @@ switch ($url[5]) {
             $path = "https://aarrin.com/mobile/app_resources/page_content/$name";
             if (move_uploaded_file($f['tmp_name'], __DIR__. "/../../app_resources/page_content/$name")){
                 header(HTTP_CODE_201);
-                echo $path;
+                echo json_encode(array('path' => $path));
             }else{
                 header(HTTP_CODE_409);
             }
