@@ -298,7 +298,7 @@ if ($url[3] === 'v1-2') {
          * 
          */
         case 'page_content':
-            require_once('controller/editor.controller.php');
+            require_once('controller/page_content.controller.php');
             break;
 
         default:
