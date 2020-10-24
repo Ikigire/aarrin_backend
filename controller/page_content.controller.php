@@ -198,7 +198,7 @@ switch ($url[5]) {
         }
 
         if (TokenTool::isValid($token)) {
-            $query = "UPDATE page_content SET codeHTML = :codeHTML, página = :pagina WHERE id = :id";
+            $query = "UPDATE page_content SET codeHTML = :codeHTML, pagina = :pagina WHERE id = :id";
             if (DBManager::query($query, array(':id' => $id, ':codeHTML' => $data['codeHTML'], ':pagina' => $data['pagina']))) {
                 header(HTTP_CODE_201);
                 echo json_encode($data);
