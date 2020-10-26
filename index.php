@@ -301,6 +301,21 @@ if ($url[3] === 'v1-2') {
             require_once('controller/page_content.controller.php');
             break;
 
+        /**
+         *   ______________________________
+         *  /        LISTA MAESTRA         \
+         * |                                |
+         * |  TABLA PARA EL MANEJO DE       |
+         * |  CUALIDADES DE LOS AUDITORES   |
+         * |  DE ARI                        |
+         * |                                |
+         *  \______________________________/
+         * 
+         */
+        case 'master_list':
+            require_once('controller/master_list.controller.php');
+            break;
+
         default:
             header(HTTP_CODE_404);
             break;

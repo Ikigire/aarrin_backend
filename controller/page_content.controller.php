@@ -96,7 +96,7 @@ switch ($url[5]) {
 
         $data = DBManager::query($query, array(':id' => $id));
         if ($data) {
-            header(HTTP_CODE_201);
+            header(HTTP_CODE_200);
             echo json_encode($data[0]);
         }else {
             header(HTTP_CODE_409);
