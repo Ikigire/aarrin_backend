@@ -150,19 +150,19 @@ switch ($url[5]) {
             exit();
         }
 
-        if(!isset($_FILES['file'])) {
+        if(!isset($_FILES['upload'])) {
             header(HTTP_CODE_412);
             exit();
         }
 
         if (TokenTool::isValid($token)) {
-            $f = $_FILES['file'];
+            $f = $_FILES['upload'];
             $ext = pathinfo($f['name'])['extension'];
             $name = pathinfo($f['name'])['filename'].'.'.$ext;
             $path = "https://aarrin.com/mobile/app_resources/page_content/$name";
             if (move_uploaded_file($f['tmp_name'], __DIR__. "/../../app_resources/page_content/$name")){
                 header(HTTP_CODE_201);
-                echo json_encode(array('path' => $path));
+                echo json_encode(array('url' => $path));
             }else{
                 header(HTTP_CODE_409);
             }

@@ -63,7 +63,7 @@ switch ($url[5]) {
         $isoSN = (string) $url[6];
 
         if (TokenTool::isValid($token)){
-            $query = "SELECT ml.IdMasterList, ml.ServiceShortName, sec.*, per.IdEmployee, per.EmployeeName, per.EmployeeLastName, per.EmployeeDegree, per.EmployeeRFC FROM master_list AS ml JOIN sectors AS sec ON ml.IdSector = sec.IdSector JOIN personal AS per ON ml.IdEmployee = per.IdEmployee WHERE ml.ServiceShortName = :isoSN";
+            $query = "SELECT ml.IdMasterList, ml.ServiceShortName, sec.*, per.IdEmployee, per.EmployeeName, per.EmployeeLastName, per.EmployeeDegree, per.EmployeeRFC, per.EmployeePhoto FROM master_list AS ml JOIN sectors AS sec ON ml.IdSector = sec.IdSector JOIN personal AS per ON ml.IdEmployee = per.IdEmployee WHERE ml.ServiceShortName = :isoSN ORDER BY sec.IAF_MD5, sec.SectorRiskLevel, sec.SectorCategory, sec.SectorSubcategory, sec.SectorCluster";
             $data = DBManager::query($query, array(':isoSN' => $isoSN));
 
             if ($data) {
@@ -100,14 +100,14 @@ switch ($url[5]) {
         $idSector = (int) $url[6];
 
         if (TokenTool::isValid($token)){
-            $query = "SELECT ml.IdMasterList, ml.ServiceShortName, sec.*, per.IdEmployee, per.EmployeeName, per.EmployeeLastName, per.EmployeeDegree, per.EmployeeRFC FROM master_list AS ml JOIN sectors AS sec ON ml.IdSector = sec.IdSector JOIN personal AS per ON ml.IdEmployee = per.IdEmployee WHERE ml.IdSector = :idSector";
+            $query = "SELECT ml.IdMasterList, ml.ServiceShortName, sec.*, per.IdEmployee, per.EmployeeName, per.EmployeeLastName, per.EmployeeDegree, per.EmployeeRFC, per.EmployeePhoto FROM master_list AS ml JOIN sectors AS sec ON ml.IdSector = sec.IdSector JOIN personal AS per ON ml.IdEmployee = per.IdEmployee WHERE ml.IdSector = :idSector ORDER BY sec.IAF_MD5, sec.SectorRiskLevel, sec.SectorCategory, sec.SectorSubcategory, sec.SectorCluster";
 
             $data = DBManager::query($query, array(':idSector' => $idSector));
             if ($data) {
                 header(HTTP_CODE_200);
-                echo json_encode($data[0]);
+                echo json_encode($data);
             }else {
-                header(HTTP_CODE_409);
+                header(HTTP_CODE_204);
             }
         } else {
             header(HTTP_CODE_401);
@@ -136,14 +136,14 @@ switch ($url[5]) {
         $idEmployee = (int) $url[6];
 
         if (TokenTool::isValid($token)){
-            $query = "SELECT ml.IdMasterList, ml.ServiceShortName, sec.*, per.IdEmployee, per.EmployeeName, per.EmployeeLastName, per.EmployeeDegree, per.EmployeeRFC FROM master_list AS ml JOIN sectors AS sec ON ml.IdSector = sec.IdSector JOIN personal AS per ON ml.IdEmployee = per.IdEmployee WHERE ml.IdEmployee = :idEmployee";
+            $query = "SELECT ml.IdMasterList, ml.ServiceShortName, sec.*, per.IdEmployee, per.EmployeeName, per.EmployeeLastName, per.EmployeeDegree, per.EmployeeRFC, per.EmployeePhoto FROM master_list AS ml JOIN sectors AS sec ON ml.IdSector = sec.IdSector JOIN personal AS per ON ml.IdEmployee = per.IdEmployee WHERE ml.IdEmployee = :idEmployee ORDER BY sec.IAF_MD5, sec.SectorRiskLevel, sec.SectorCategory, sec.SectorSubcategory, sec.SectorCluster";
 
             $data = DBManager::query($query, array(':idEmployee' => $idEmployee));
             if ($data) {
                 header(HTTP_CODE_200);
-                echo json_encode($data[0]);
+                echo json_encode($data);
             }else {
-                header(HTTP_CODE_409);
+                header(HTTP_CODE_204);
             }
         } else {
             header(HTTP_CODE_401);
