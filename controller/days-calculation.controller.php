@@ -77,6 +77,7 @@ switch ($url[5]) {
 
             $data = DBManager::query($query);
             if ($data) {
+                $data = setJSONDetail($data);
                 header(HTTP_CODE_200);
                 echo json_encode($data);
             } else {
@@ -113,6 +114,7 @@ switch ($url[5]) {
             $data = DBManager::query($query, array(':idCompany' =>$idCompany));
 
             if ($data) {
+                $data = setJSONDetail($data);
                 header(HTTP_CODE_200);
                 echo json_encode($data);
             } else {
@@ -330,4 +332,11 @@ switch ($url[5]) {
     default:
         header(HTTP_CODE_404);
         break;
+}
+
+function  setJSONDetail(array $data){
+    for ($i=0; $i < count($data); $i++) { 
+        $data[$i]['DaysCalculationDetail'] = json_decode($data[$i]['DaysCalculationDetail'], true);
+    }
+    return $data;
 }
