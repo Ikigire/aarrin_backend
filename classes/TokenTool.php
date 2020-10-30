@@ -68,7 +68,7 @@ class TokenTool {
         try {
             $payload = JWT::decode($token, self::$SECRET_KEY, self::$ENCRYPTH);
             if ($payload->aud === self::getAud()) {
-                return (array) $payload->data;
+                return $payload->data;
             }
         } catch (\Throwable $th) {
             return false;
