@@ -81,18 +81,17 @@ switch ($url[5]) {
             $rol = $_GET['rol'];
             $params = array();
 
-            $query = "SELECT c.CompanyName, c.CompanyLogo, co.ContactName, co.ContactPhone, co.ContactEmail, co.ContactCharge, co.ContactPhoto, s.ServiceShortName, sec.IAF_MD5, sec.SectorCluster, sec.SectorCategory, sec.SectorSubcategory, sec.SectorRiskLevel, app.NumberEmployees, app.AppDate, app.AppStatus, dc.*, emp1.EmployeeName + ' ' + emp1.EmployeeLastName AS 'EmployeeCreator', emp1.EmployeePhoto AS 'EmployeeCreatorPhoto', emp2.EmployeeName + ' ' + emp2.EmployeeLastName AS 'EmployeeReviewer', emp2.EmployeePhoto AS 'EmployeeReviewerPhoto' FROM applications AS app JOIN companies AS c ON app.IdCompany = c.IdCompany JOIN contacts AS co on app.IdContact = co.IdContact JOIN services as s ON app.IdService = s.IdService JOIN sectors As sec ON app.IdSector = sec.IdSector JOIN days_calculation AS dc ON dc.IdApp = app.IdApp JOIN personal AS emp1 ON dc.IdCreatorEmployee = emp1.IdEmployee JOIN personal AS emp2 ON dc.IdReviewerEmployee = emp2.IdEmployee";
+            $query = "SELECT dc.IdDayCalculation, c.CompanyName, c.CompanyLogo, co.ContactName, co.ContactPhone, co.ContactEmail, co.ContactCharge, co.ContactPhoto, s.ServiceShortName, sec.IAF_MD5, sec.SectorCluster, sec.SectorCategory, sec.SectorSubcategory, sec.SectorRiskLevel, app.AppLanguage, dc.DayCalculationDate, dc.DaysCalculationStatus, dc.DaysInitialStage, dc.DaysSurveillance, dc.DaysRR, emp1.EmployeeName + ' ' + emp1.EmployeeLastName AS 'EmployeeCreator', emp1.EmployeePhoto AS 'EmployeeCreatorPhoto', emp2.EmployeeName + ' ' + emp2.EmployeeLastName AS 'EmployeeReviewer', emp2.EmployeePhoto AS 'EmployeeReviewerPhoto' FROM applications AS app JOIN companies AS c ON app.IdCompany = c.IdCompany JOIN contacts AS co on app.IdContact = co.IdContact JOIN services as s ON app.IdService = s.IdService JOIN sectors As sec ON app.IdSector = sec.IdSector JOIN days_calculation AS dc ON dc.IdApp = app.IdApp JOIN personal AS emp1 ON dc.IdCreatorEmployee = emp1.IdEmployee JOIN personal AS emp2 ON dc.IdReviewerEmployee = emp2.IdEmployee";
 
             if ($rol === 'SALESCDMX_ROLE') {
                 $params[':rol'] = $rol;
                 $query .= " WHERE app.AssignedTo = :rol";
             }
 
-            $query .= " ORDER BY app.AppDate DESC;";
+            $query .= " ORDER BY dc.DayCalculationDate DESC;";
 
             $data = DBManager::query($query, $params);
             if ($data) {
-                $data = setJSONDetail($data);
                 header(HTTP_CODE_200);
                 echo json_encode($data);
             } else {
@@ -129,7 +128,6 @@ switch ($url[5]) {
             $data = DBManager::query($query, array(':idCompany' =>$idCompany));
 
             if ($data) {
-                $data = setJSONDetail($data);
                 header(HTTP_CODE_200);
                 echo json_encode($data);
             } else {
@@ -347,11 +345,4 @@ switch ($url[5]) {
     default:
         header(HTTP_CODE_404);
         break;
-}
-
-function  setJSONDetail(array $data){
-    for ($i=0; $i < count($data); $i++) { 
-        $data[$i]['DaysCalculationDetail'] = json_decode($data[$i]['DaysCalculationDetail'], true);
-    }
-    return $data;
 }
