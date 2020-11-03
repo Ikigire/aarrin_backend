@@ -124,8 +124,8 @@ switch ($url[5]) {
         }
 
         if (TokenTool::isValid($token)) {
-            $query = "INSERT INTO page_content VALUES(null, :codeHTML, :pagina)";
-            $response = DBManager::query($query, array(':codeHTML' => $data['codeHTML'], ':pagina' => $data['pagina']));
+            $query = "INSERT INTO page_content VALUES(null, :codeHTML, :pagina, :archivo)";
+            $response = DBManager::query($query, array(':codeHTML' => $data['codeHTML'], ':pagina' => $data['pagina'], ':archivo' => $data['archivo']));
             if ($response) {
                 header(HTTP_CODE_201);
                 echo json_encode(array('id' => $response));
@@ -198,8 +198,8 @@ switch ($url[5]) {
         }
 
         if (TokenTool::isValid($token)) {
-            $query = "UPDATE page_content SET codeHTML = :codeHTML, pagina = :pagina WHERE id = :id";
-            if (DBManager::query($query, array(':id' => $id, ':codeHTML' => $data['codeHTML'], ':pagina' => $data['pagina']))) {
+            $query = "UPDATE page_content SET codeHTML = :codeHTML, pagina = :pagina, archivo = :archivo WHERE id = :id";
+            if (DBManager::query($query, array(':id' => $id, ':codeHTML' => $data['codeHTML'], ':pagina' => $data['pagina'], ':archivo' => $data['archivo']))) {
                 header(HTTP_CODE_201);
                 echo json_encode($data);
             }else {
