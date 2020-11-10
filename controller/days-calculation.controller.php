@@ -166,6 +166,7 @@ switch ($url[5]) {
 
             if ($data) {
                 $daysCalculationData = $data[0];
+                $daysCalculationData['DayCalculationApproved'] = (bool) $daysCalculationData['DayCalculationApproved'];
                 $daysCalculationData['DaysCalculationDetail'] = json_decode($daysCalculationData['DaysCalculationDetail']);
                 header(HTTP_CODE_200);
                 echo json_encode($daysCalculationData);
@@ -203,6 +204,7 @@ switch ($url[5]) {
             $data = DBManager::query($query, array(':idDayCalculation' => $idDayCalculation));
             if ($data) {
                 $daysCalculationData = $data[0];
+                $daysCalculationData['DayCalculationApproved'] = (bool) $daysCalculationData['DayCalculationApproved'];
                 $daysCalculationData['DaysCalculationDetail'] = json_decode($daysCalculationData['DaysCalculationDetail']);
                 header(HTTP_CODE_200);
                 echo json_encode($daysCalculationData);

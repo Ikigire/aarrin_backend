@@ -83,6 +83,9 @@ switch ($url[5]) {
 
             if ($data) {
                 header(HTTP_CODE_200);
+                for ($i=0; $i < count($data); $i++) { 
+                    $data[$i]['Viewed'] = (bool) $data[$i]['Viewed'];
+                }
                 echo json_encode($data);
             } else {
                 header(HTTP_CODE_204);
@@ -121,6 +124,9 @@ switch ($url[5]) {
 
             if ($data) {
                 header(HTTP_CODE_200);
+                for ($i=0; $i < count($data); $i++) { 
+                    $data[$i]['Viewed'] = (bool) $data[$i]['Viewed'];
+                }
                 echo json_encode($data);
             } else {
                 header(HTTP_CODE_204);

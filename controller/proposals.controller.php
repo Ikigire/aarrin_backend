@@ -161,6 +161,8 @@ switch ($url[5]) {
 
             if ($data) {
                 $proposalData = $data[0];
+                $proposalData['ProposalApproved'] = (bool) $proposalData['ProposalApproved'];
+                $proposalData['ProposalClientApproved'] = (bool) $proposalData['ProposalClientApproved'];
                 $proposalData['ProposalDetail'] = json_decode($proposalData['ProposalDetail']);
                 header(HTTP_CODE_200);
                 echo json_encode($proposalData);
@@ -198,6 +200,8 @@ switch ($url[5]) {
             $data = DBManager::query($query, array(':idProposal' => $idProposal));
             if ($data) {
                 $proposalData = $data[0];
+                $proposalData['ProposalApproved'] = (bool) $proposalData['ProposalApproved'];
+                $proposalData['ProposalClientApproved'] = (bool) $proposalData['ProposalClientApproved'];
                 $proposalData['ProposalDetail'] = json_decode($proposalData['ProposalDetail']);
                 header(HTTP_CODE_200);
                 echo json_encode($proposalData);

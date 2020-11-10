@@ -82,6 +82,9 @@ switch ($url[5]) {
 
             if ($data) {
                 header(HTTP_CODE_200);
+                for ($i=0; $i < count($data); $i++) { 
+                    $data[$i]['MainContact'] = (bool) $data[$i]['MainContact'];
+                }
                 echo json_encode($data);
             } else {
                 header(HTTP_CODE_204);
@@ -119,6 +122,7 @@ switch ($url[5]) {
 
             if ($data) {
                 header(HTTP_CODE_200);
+                $data[0]['MainContact'] = (bool) $data[0]['MainContact'];
                 echo json_encode($data[0]);
             } else {
                 header(HTTP_CODE_204);
@@ -156,7 +160,7 @@ switch ($url[5]) {
 
             if ($data) {
                 $contactData = $data[0];
-
+                $contactData['MainContact'] = (bool) $contactData['MainContact'];
                 $contactData['Token'] = TokenTool::createToken($contactData);
                 header(HTTP_CODE_200);
                 echo json_encode($contactData);

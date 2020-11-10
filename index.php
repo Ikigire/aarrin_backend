@@ -316,6 +316,21 @@ if ($url[3] === 'v1-2') {
             require_once('controller/master_list.controller.php');
             break;
 
+        /**
+         *   ______________________________
+         *  /           CONTRATOS          \
+         * |                                |
+         * |  TABLA PARA EL MANEJO DE       |
+         * |  CONTRATOS ENTRE LAS COMPAÑÍAS |
+         * |  Y ARI                         |
+         * |                                |
+         *  \______________________________/
+         * 
+         */
+        case 'contracts':
+            require_once('controller/contracts.controller.php');
+            break;
+
         default:
             header(HTTP_CODE_404);
             break;

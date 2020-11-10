@@ -206,6 +206,7 @@ switch ($url[5]) {
             $data = DBManager::query($query, $params);
             if ($data) {
                 $appData = $data[0];
+                $appData['ReceiveConsultancy'] = (bool) $appData['ReceiveConsultancy'];
                 $appData['AppDetail'] = json_decode($appData['AppDetail']);
                 $appData['AppComplement'] = json_decode($appData['AppComplement']);
                 header(HTTP_CODE_200);
