@@ -393,9 +393,12 @@ switch ($url[5]) {
             }
             
             if (isset($data['ReceiveConsultancy'])) {
-                $params[':receiveConsultancy'] = $data['ReceiveConsultancy'];
+                $params[':receiveConsultancy'] = (int) $data['ReceiveConsultancy'];
                 $params[':consultantName'] = $data['ConsultantName'];
                 $query .= ", ReceiveConsultancy = :receiveConsultancy, ConsultantName = :consultantName";
+            } else {
+                $params[':receiveConsultancy'] = (int) $data['ReceiveConsultancy'];
+                $query .= ", ReceiveConsultancy = :receiveConsultancy, ConsultantName = null";
             }
 
             if (isset($data['AppStatus'])) {
