@@ -152,6 +152,46 @@ switch ($url[5]) {
      * metodo: POST, 
      * datos-solicitados: {data: jsonString}
      */
+    case 'upload':
+        if ($method !== 'POST') {
+            header('HTTP/1.1 405 Allow: POST');
+            exit();
+        }
+
+        if (!isset($_FILES['upload'])) {
+            header(HTTP_CODE_412);
+            exit();
+        }
+
+        if (TokenTool::isValid($token)) {
+            $f = $_FILES['upload'];
+            $ext = pathinfo($f['name'])['extension'];
+
+            if ($ext !== 'docx'){
+                header(HTTP_CODE_412);
+                exit();
+            }
+
+            $name = 'contract.docx';
+            $path = "https://aarrin.com/mobile/app_resources/contracts/$name";
+            if (move_uploaded_file($f['tmp_name'], __DIR__. "/../../app_resources/contracts/$name")){
+                header(HTTP_CODE_201);
+                echo json_encode(array('url' => $path));
+            }else{
+                header(HTTP_CODE_409);
+            }
+        } else {
+            header(HTTP_CODE_401);
+        }
+        break;
+    
+    
+    /**
+     * Crear un nuevo contrato-> 
+     * url: .../api/v1-2/contracts/add, 
+     * metodo: POST, 
+     * datos-solicitados: {data: jsonString}
+     */
     case 'add':
         if ($method !== 'POST') {
             header('HTTP/1.1 405 Allow: POST');
@@ -248,6 +288,49 @@ switch ($url[5]) {
             } else {
                 $params[':clientApprove'] = (int) $data['ClientApprove'];
                 $query .= ", ClientApprove = :clientApprove, ClientApproveDate = null, ClientFile = null";
+            }
+
+            #### Sección para el manejo de archivos del cliente
+            if(isset($data['ReviewReport'])){
+                $params[':reviewReport'] = $data['ReviewReport'];
+                $query .= ", ReviewReport = :reviewReport";
+            } else {
+                $query .= ", ReviewReport = null";
+            }
+
+            if(isset($data['InternalAuditReport'])){
+                $params[':internalAuditReport'] = $data['InternalAuditReport'];
+                $query .= ", InternalAuditReport = :internalAuditReport";
+            } else {
+                $query .= ", InternalAuditReport = null";
+            }
+
+            if(isset($data['ProcessManual'])){
+                $params[':processManual'] = $data['ProcessManual'];
+                $query .= ", ProcessManual = :processManual";
+            } else {
+                $query .= ", ProcessManual = null";
+            }
+
+            if(isset($data['ProcessInteractionMap'])){
+                $params[':processInteractionMap'] = $data['ProcessInteractionMap'];
+                $query .= ", ProcessInteractionMap = :processInteractionMap";
+            } else {
+                $query .= ", ProcessInteractionMap = null";
+            }
+
+            if(isset($data['OperationalControls'])){
+                $params[':operationalControls'] = $data['OperationalControls'];
+                $query .= ", OperationalControls = :operationalControls";
+            } else {
+                $query .= ", OperationalControls = null";
+            }
+
+            if(isset($data['HazardAnalysis'])){
+                $params[':hazardAnalysis'] = $data['HazardAnalysis'];
+                $query .= ", HazardAnalysis = :hazardAnalysis";
+            } else {
+                $query .= ", HazardAnalysis = null";
             }
 
             $query .= " WHERE IdContract = :idContract;";

@@ -78,7 +78,7 @@ switch ($url[5]) {
 
             $query = "SELECT c.CompanyName, c.CompanyLogo, co.ContactName, co.ContactPhone, co.ContactEmail, co.ContactCharge, co.ContactPhoto, s.ServiceShortName, sec.IAF_MD5, sec.SectorCluster, sec.SectorCategory, sec.SectorSubcategory, sec.SectorRiskLevel, pr.IdProposal, pr.ProposalStatus, pr.ProposalDate, pr.ProposalExpirationDate, pr.CurrencyType, pr.TotalInvestment, pr.ProposalApproved, pr.ProposalClientApproved FROM applications AS app JOIN companies AS c ON app.IdCompany = c.IdCompany JOIN contacts AS co on app.IdContact = co.IdContact JOIN services as s ON app.IdService = s.IdService JOIN sectors As sec ON app.IdSector = sec.IdSector JOIN days_calculation AS dc ON dc.IdApp = app.IdApp JOIN proposals AS pr ON pr.IdDayCalculation = dc.IdDayCalculation";
 
-            if ($rol !== 'ADMIN_ROLE' && $rol !== 'SALES_ROLE') {
+            if ($rol !== 'ADMIN_ROLE' && $rol !== 'SALES_ROLE' && $rol !== 'FINANCE_ROLE') {
                 $params[':rol'] = $rol;
                 $query .= " WHERE app.AssignedTo = :rol";
             }

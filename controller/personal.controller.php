@@ -269,7 +269,7 @@ switch ($url[5]) {
                     </html>";
                     mail($employeeEmail, $subject, $message, $headers);
                     header(HTTP_CODE_201);
-                    echo json_encode($array);
+                    echo json_encode(array('IdEmployee' => $response));
                 } else {
                     header(HTTP_CODE_409);
                 }
@@ -377,6 +377,7 @@ switch ($url[5]) {
             $employeeCharge         = $data['EmployeeCharge'];
             $employeeEmail          = $data['EmployeeEmail'];
             $employeeRFC            = $data['EmployeeRFC'];
+            $employeeStatus         = $data['EmployeeStatus'];
 
             $params = array(
                 ':employeeName'         => $employeeName,
@@ -384,10 +385,11 @@ switch ($url[5]) {
                 ':employeeContractYear' => $employeeContractYear,
                 ':employeeCharge'       => $employeeCharge,
                 ':employeeEmail'        => $employeeEmail,
-                ':employeeRFC'          =>$employeeRFC,
+                ':employeeRFC'          => $employeeRFC,
+                ':employeeStatus'       => $employeeStatus
             );
 
-            $query = "UPDATE personal SET EmployeeName = :employeeName, EmployeeLastName = :employeeLastName, EmployeeContractYear = :employeeContractYear, EmployeeCharge = :employeeCharge, EmployeeEmail = :employeeEmail, EmployeeRFC = :employeeRFC";
+            $query = "UPDATE personal SET EmployeeName = :employeeName, EmployeeLastName = :employeeLastName, EmployeeContractYear = :employeeContractYear, EmployeeCharge = :employeeCharge, EmployeeEmail = :employeeEmail, EmployeeRFC = :employeeRFC, EmployeeStatus = :employeeStatus";
             if (isset($data['EmployeeDegree']) && trim($data['EmployeeDegree']) !== '') {
                 $employeeDegree = $data['EmployeeDegree'];
                 $query          .= ", EmployeeDegree = :employeeDegree";
