@@ -129,7 +129,11 @@ switch ($url[5]) {
         $idContract = (int) $url[6];
 
         if (TokenTool::isValid($token)){
-            $query ="SELECT * FROM contracts WHERE IdContract = :idContract;";
+            if (isset($_GET['loadFiles']) && !(bool)$_GET['loadFiles']){
+                $query = "SELECT IdContract, IdProposal, IdPersonal, IdService, CreationDate, Approve, ApproveDate, ClientApprove, ClientApproveDate, ContractStatus FROM contracts WHERE IdContract = :idContract;;";
+            } else {
+                $query ="SELECT * FROM contracts WHERE IdContract = :idContract;";
+            }
 
             $params = array(':idContract' => $idContract);
 
@@ -209,13 +213,14 @@ switch ($url[5]) {
             $currentDate = $date->format('Y-m-d H:i:s');
 
             $params = array(
-                ':idProposal' => $data['IdProposal'],
-                ':idPersonal' => $data['IdPersonal'],
-                ':idService' => $data['IdService'],
-                ':creationDate' => $currentDate
+                ':idProposal'   => $data['IdProposal'],
+                ':idPersonal'   => $data['IdPersonal'],
+                ':idService'    => $data['IdService'],
+                ':creationDate' => $currentDate,
+                ':clientFile'   => $data['ClientFile']
             );
 
-            $query = "INSERT INTO contracts (IdContract, IdProposal, IdPersonal, IdService, CreationDate) VALUES(null, :idProposal, :idPersonal, :idService, :creationDate)";
+            $query = "INSERT INTO contracts (IdContract, IdProposal, IdPersonal, IdService, CreationDate, ClientFile) VALUES(null, :idProposal, :idPersonal, :idService, :creationDate, :clientFile)";
 
             $response = DBManager::query($query, $params);
             if ($response) {

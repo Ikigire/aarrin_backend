@@ -155,7 +155,11 @@ switch ($url[5]) {
         $idDayCalculation = (int) $url[6];
 
         if (TokenTool::isValid($token)){
-            $query = "SELECT * FROM proposals WHERE IdDayCalculation = :idDayCalculation;";
+            if (isset($_GET['loadFiles']) && !(bool)$_GET['loadFiles']){
+                $query = "SELECT IdProposal, IdDayCalculation, ProposalDate, ProposalExpirationDate, IdProposalCreator, IdProposalReviewer, CurrencyType, ProposalApproved, ProposalApprovedDate, ProposalClientApproved, ProposalClientApprovedDate, TotalInvestment, IssueInitialStage, IssueSurveillance1, IssueSurveillance2, IssueRR, ProposalDetail, LegalRepresentative, ProposalStatus FROM proposals WHERE IdDayCalculation = :idDayCalculation;";
+            } else {
+                $query = "SELECT * FROM proposals WHERE IdDayCalculation = :idDayCalculation;";
+            }
 
             $data = DBManager::query($query, array(':idDayCalculation' =>$idDayCalculation));
 
@@ -195,14 +199,18 @@ switch ($url[5]) {
         $idProposal = (int) $url[6];
 
         if (TokenTool::isValid($token)){
-            $query = "SELECT * FROM proposals WHERE IdProposal = :idProposal;";
-
+            if (isset($_GET['loadFiles']) && !(bool)$_GET['loadFiles']){
+                $query = "SELECT IdProposal, IdDayCalculation, ProposalDate, ProposalExpirationDate, IdProposalCreator, IdProposalReviewer, CurrencyType, ProposalApproved, ProposalApprovedDate, ProposalClientApproved, ProposalClientApprovedDate, TotalInvestment, IssueInitialStage, IssueSurveillance1, IssueSurveillance2, IssueRR, ProposalDetail, LegalRepresentative, ProposalStatus FROM proposals WHERE IdProposal = :idProposal;";
+            } else {
+                $query = "SELECT * FROM proposals WHERE IdProposal = :idProposal;";
+            }
             $data = DBManager::query($query, array(':idProposal' => $idProposal));
             if ($data) {
                 $proposalData = $data[0];
                 $proposalData['ProposalApproved'] = (bool) $proposalData['ProposalApproved'];
                 $proposalData['ProposalClientApproved'] = (bool) $proposalData['ProposalClientApproved'];
-                $proposalData['ProposalDetail'] = json_decode($proposalData['ProposalDetail']);
+                $proposalData['ProposalDetail'] = json_decode($proposalData['ProposalDetail'], true);
+                $proposalData['LegalRepresentative'] = json_decode($proposalData['LegalRepresentative'], true);
                 header(HTTP_CODE_200);
                 echo json_encode($proposalData);
             } else {
@@ -387,6 +395,11 @@ switch ($url[5]) {
                 
                 $query .= ", IssueRR = :issueRR";
             }
+            if(isset($data['LegalRepresentative'])){
+                $params[':legalRepresentative'] = json_encode($data['LegalRepresentative']);
+
+                $query .= ", LegalRepresentative = :legalRepresentative";
+            }
 
             $query .= " WHERE IdProposal = :idProposal";
             
@@ -394,6 +407,8 @@ switch ($url[5]) {
                 header(HTTP_CODE_200);
                 echo json_encode(array('result' => 'Updated'));
             }else {
+                echo "<br><br><br> $query  <br><br><br>";
+                print_r($params);
                 header(HTTP_CODE_409);
             }
         } else {
