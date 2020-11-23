@@ -130,7 +130,7 @@ switch ($url[5]) {
 
         if (TokenTool::isValid($token)){
             if (isset($_GET['loadFiles']) && !(bool)$_GET['loadFiles']){
-                $query = "SELECT IdContract, IdProposal, IdPersonal, IdService, CreationDate, Approve, ApproveDate, ClientApprove, ClientApproveDate, ContractStatus FROM contracts WHERE IdContract = :idContract;;";
+                $query = "SELECT IdContract, IdProposal, IdPersonal, IdService, CreationDate, Approve, ApproveDate, UltimateFile, ClientApprove, ClientApproveDate, ClientFile, ContractStatus FROM contracts WHERE IdContract = :idContract;;";
             } else {
                 $query ="SELECT * FROM contracts WHERE IdContract = :idContract;";
             }
