@@ -23,6 +23,7 @@ header('Content-Type: application/json');
 
 include('classes/dbManager.php');
 include('classes/TokenTool.php');
+include('classes/mailer.php');
 
 
 

@@ -187,49 +187,42 @@ switch ($url[5]) {
         }
 
         if (isset($_POST['idCompany']) && isset($_POST['name']) && isset($_POST['phone']) && isset($_POST['email']) && isset($_POST['charge']) && isset($_POST['main']) && isset($_POST['password'])) {
-            if (TokenTool::isValid($token)) {
-                $idCompany       = $_POST['idCompany'];
-                $contactName     = $_POST['name'];
-                $contactPhone    = $_POST['phone'];
-                $contactEmail    = $_POST['email'];
-                $contactCharge   = $_POST['charge'];
-                $mainContact     = $_POST['main'];
-                $contactPassword = $_POST['password'];
+            $idCompany       = $_POST['idCompany'];
+            $contactName     = $_POST['name'];
+            $contactPhone    = $_POST['phone'];
+            $contactEmail    = $_POST['email'];
+            $contactCharge   = $_POST['charge'];
+            $mainContact     = $_POST['main'];
+            $contactPassword = $_POST['password'];
 
-                $params = array(
-                    ':idCompany'       => $idCompany,
-                    ':contactName'     => $contactName,
-                    ':contactPhone'    => $contactPhone,
-                    ':contactEmail'    => $contactEmail,
-                    ':contactCharge'   => $contactCharge,
-                    ':contactPassword' => $contactPassword,
-                    ':mainContact'     => $mainContact
-                );
+            $params = array(
+                ':idCompany'       => $idCompany,
+                ':contactName'     => $contactName,
+                ':contactPhone'    => $contactPhone,
+                ':contactEmail'    => $contactEmail,
+                ':contactCharge'   => $contactCharge,
+                ':contactPassword' => $contactPassword,
+                ':mainContact'     => $mainContact
+            );
 
-                if ($mainContact) {
-                    //to ensure that the new contact will convert in the only main contact of the company
-                    $query = "UPDATE contacts SET MainContact = 0 WHERE IdCompany = :idCompany;";
-                    if (!DBManager::query($query, array(':idCompany' => $idCompany))) {
-                        header("HTTP/1.1 409 Conflict with the Server");
-                        exit();
-                    }
+            if ($mainContact === 1) {
+                //to ensure that the new contact will convert in the only main contact of the company
+                $query = "UPDATE contacts SET MainContact = 0 WHERE IdCompany = :idCompany;";
+                if (!DBManager::query($query, array(':idCompany' => $idCompany))) {
+                    header("HTTP/1.1 409 Conflict with the Server");
+                    exit();
                 }
-                $query = "INSERT INTO contacts(IdCompany, MainContact, ContactName, ContactPhone, ContactEmail, ContactCharge, ContactPassword) VALUES (:idCompany, :mainContact, :contactName, :contactPhone, :contactEmail, contactCharge, AES_ENCRYPT(:contactPassword, '@Company'));";
-                $response = DBManager::query($query, $params);
-                if ($response) {
-                    header(HTTP_CODE_201);
-                    echo array('IdContact' => $response);
-                } else {
-                    header(HTTP_CODE_409);
-                }
-                exit();
-            } else {
-                header(HTTP_CODE_401);
             }
-            exit();
+            $query = "INSERT INTO contacts(IdCompany, MainContact, ContactName, ContactPhone, ContactEmail, ContactCharge, ContactPassword) VALUES (:idCompany, :mainContact, :contactName, :contactPhone, :contactEmail, :contactCharge, AES_ENCRYPT(:contactPassword, '@Company'));";
+            $response = DBManager::query($query, $params);
+            if ($response) {
+                header(HTTP_CODE_201);
+                echo json_encode(array('IdContact' => $response));
+            } else {
+                header(HTTP_CODE_409);
+            }
         } else {
             header(HTTP_CODE_412);
-            exit();
         }
         break;
 
