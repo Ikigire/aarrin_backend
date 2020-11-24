@@ -22,20 +22,20 @@ class Mailer {
     private static function configMailer()
     {
         $mail = new PHPMailer(true);
-        //try {
+        try {
             //Server settings
-            $mail->isSMTP();                                            // Send using SMTP
+            $mail->isSMTP();                                   // Send using SMTP
             $mail->Host       = self::HOST;                    // Set the SMTP server to send through
-            $mail->SMTPAuth   = false;                                   // Enable SMTP authentication
+            $mail->SMTPAuth   = false;                         // Enable SMTP authentication
             $mail->SMTPSecure = 'tls';
         
             //Recipients
             $mail->setFrom(self::USER_NAME, 'ARI APP');
             $mail->addReplyTo('sales@aarrin.com', 'Sales contact');
             $mail->addReplyTo('system@aarrin.com', 'ARI system');
-        // } catch (Exception $e) {
-        //     echo $e;
-        // }
+        } catch (Exception $e) {
+            throw $e;
+        }
         return $mail;
     }
 
@@ -51,19 +51,19 @@ class Mailer {
     public static function sendMail(string $to, string $subject, string $body, string $altBody = "To view the message, please use an HTML compatible email viewer!")
     {
         $result = true;
-        //try {
+        try {
             $mail = self::configMailer();
             // Content
-            $mail->isHTML(true);                                  // Set email format to HTML
+            $mail->isHTML(true);               // Set email format to HTML
             $mail->addAddress($to);            // Add a recipient (destination email)
             $mail->Subject = $subject;
             $mail->Body    = $body;
             $mail->AltBody = $altBody;
         
             $mail->send();
-        // } catch (\Throwable $th) {
-        //     $result = false;
-        // }
+        } catch (\Throwable $th) {
+            $result = false;
+        }
         return $result;
     }
 }
