@@ -296,6 +296,41 @@ switch ($url[5]) {
             }
 
             #### Sección para el manejo de archivos del cliente
+            if(isset($data['LegalRepresentativeID'])){
+                $params[':legalRepresentativeID'] = $data['LegalRepresentativeID'];
+                $query .= ", LegalRepresentativeID = :legalRepresentativeID";
+            } else {
+                $query .= ", LegalRepresentativeID = null";
+            }
+
+            if(isset($data['RFCFile'])){
+                $params[':rfcFile'] = $data['RFCFile'];
+                $query .= ", RFCFile = :rfcFile";
+            } else {
+                $query .= ", RFCFile = null";
+            }
+
+            if(isset($data['OriginAccount'])){
+                $params[':originAccount'] = $data['OriginAccount'];
+                $query .= ", OriginAccount = :originAccount";
+            } else {
+                $query .= ", OriginAccount = null";
+            }
+
+            if(isset($data['ProofAddress'])){
+                $params[':proofAddress'] = $data['ProofAddress'];
+                $query .= ", ProofAddress = :proofAddress";
+            } else {
+                $query .= ", ProofAddress = null";
+            }
+
+            if(isset($data['PurchaseOrder'])){
+                $params[':purchaseOrder'] = $data['PurchaseOrder'];
+                $query .= ", PurchaseOrder = :purchaseOrder";
+            } else {
+                $query .= ", PurchaseOrder = null";
+            }
+
             if(isset($data['ReviewReport'])){
                 $params[':reviewReport'] = $data['ReviewReport'];
                 $query .= ", ReviewReport = :reviewReport";
