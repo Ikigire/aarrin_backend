@@ -83,6 +83,7 @@
                 }
                 $connection->commit();
             } catch (\Throwable $th) {
+                echo $th;
                 $connection->rollBack();
                 return false;
             }

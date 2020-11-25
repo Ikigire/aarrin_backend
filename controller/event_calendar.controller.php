@@ -24,23 +24,23 @@
 /**
  * @var int ID Evento Calendar
  */
-$dEvent = -1
+$dEvent = -1;
 /**
  * @var string color primario del evento
  */
-$eventcolorPrimary	
+$eventcolorPrimary = '';
 /**
  * @var string color secundario del evento
  */
-$eventcolorSecundary	
+$eventcolorSecundary = '';
 /**
  * @var string fecha inicial del evento
  */
-$eventstart	
+$eventstart	= '';
 /**
  * @var string fecha final del evento
  */
-$eventend	
+$eventend = '';
 	
 switch ($url[5]) {
     /**
@@ -145,9 +145,9 @@ switch ($url[5]) {
             header('HTTP/1.1 405 Allow: POST');
             exit();
         }
-
+        $data = json_decode(file_get_contents('php://input'), true);
         if(TokenTool::isValid($token)){
-            if(isset($_POST['eventstart']) && isset($_POST['eventend']) && isset($_POST['eventcolorPrimary']) && isset($_POST['eventcolorSecundary'])){
+            if(isset($data['eventstart']) && isset($data['eventend']) && isset($data['eventcolorPrimary']) && isset($data['eventcolorSecundary'])){
                 $eventstart    = $_POST['eventstart'];
                 $eventend    = $_POST['eventend'];
                 $eventcolorPrimary   = trim($_POST['eventcolorPrimary']);
@@ -156,11 +156,11 @@ switch ($url[5]) {
                 $params = array(
                     ':eventstart'           => $eventstart,
                     ':eventend'             => $eventend,
-                    ':eventcolorPrimary'    => $eventcolorPrimary
+                    ':eventcolorPrimary'    => $eventcolorPrimary,
                     ':eventcolorSecundary'  => $eventcolorSecundary
                 );
 
-                $query = "INSERT INTO `eventcalendar`(`idEvent`, `eventcolorPrimary`, `eventcolorSecundary`, `eventstart`, `eventend`) VALUES (null, :eventcolorPrimary, :eventcolorSecundary, :eventstart, :eventend);";
+                $query = "INSERT INTO eventcalendar(idEvent, eventcolorPrimary, eventcolorSecundary, eventstart, eventend) VALUES (null, :eventcolorPrimary, :eventcolorSecundary, :eventstart, :eventend);";
                 $response = DBManager::query($query, $params);
                 if ($response) {
                     header(HTTP_CODE_201);
@@ -216,19 +216,17 @@ switch ($url[5]) {
                 ':idEvent'              => $idEvent,
                 ':eventstart'           => $eventstart,
                 ':eventend'             => $eventend,
-                ':eventcolorPrimary'    => $eventcolorPrimary
+                ':eventcolorPrimary'    => $eventcolorPrimary,
                 ':eventcolorSecundary'  => $eventcolorSecundary
             );
 
-            $query = "UPDATE `eventcalendar` SET `eventcolorPrimary`=:eventcolorPrimary,`eventcolorSecundary`=:eventcolorSecundary,`eventstart`=:eventstart,`eventend`=:eventend";
+            $query = "UPDATE eventcalendar SET eventcolorPrimary=:eventcolorPrimary, eventcolorSecundary=:eventcolorSecundary, eventstart=:eventstart, eventend=:eventend";
           
             $query .= " WHERE idEvent = :idEvent;";
             
             if (DBManager::query($query, $params)){
-                $query = "SELECT idEvent,eventcolorPrimary,eventcolorSecundary,eventstart,eventend FROM eventcalendar";
-                $data = DBManager::query($query, array(':idEvent' => $idEvent));
                 header(HTTP_CODE_200);
-                echo json_encode($data[0]);
+                echo json_encode($data);
             }else {
                 header(HTTP_CODE_409);
             }
