@@ -254,10 +254,10 @@ switch ($url[5]) {
                                         <div style='table-layout:fixed; text-align:center; margin-bottom:15px'>
                                             <div style='width:100%; background-color:rgb(239,239,239); padding:5px 0px; font-size:0px'>
                                                 <div style='text-align:center; width:100%; max-width:324px; vertical-align:top; display:inline-block'>
-                                                    <p style='font:10px verdana,Helvetica,arial,sans-serif; color:rgb(0,0,0); margin:0px 0px 2px'>Este es un correo generado automáticamente, <strong style='color: red;'>no lo responda</strong></p>
+                                                <p style='font:10px verdana,Helvetica,arial,sans-serif; color:rgb(0,0,0); margin:0px 0px 2px'>This is an auto-generated mail, please don't <strong style='color: red;'>respond it.</strong></p>
                                                 </div>
                                                 <div style='text-align:center; width:100%; max-width:324px; vertical-align:top; display:inline-block'>
-                                                    <p style='font:10px verdana,Helvetica,arial,sans-serif; color:rgb(0,0,0); margin:0px'>Agrega <a href='mailto:web_app@aarrin.com' target='_blank' rel='noopener noreferrer' data-auth='NotApplicable' style='color:rgb(68,68,68)'>web_app@aarrin.com</a> a tus contactos </p>
+                                                <p style='font:10px verdana,Helvetica,arial,sans-serif; color:rgb(0,0,0); margin:0px'>Add <a href='mailto:web_app@aarrin.com' target='_blank' rel='noopener noreferrer' data-auth='NotApplicable' style='color:rgb(68,68,68)'>web_app@aarrin.com</a> to your contacts</p>
                                                 </div>
                                             </div>
                                             <div style='margin:18px auto 14px'>

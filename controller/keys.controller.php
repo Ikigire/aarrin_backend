@@ -131,15 +131,15 @@ switch ($url[5]) {
                                     <div style='table-layout:fixed; text-align:center; margin-bottom:15px'>
                                         <div style='width:100%; background-color:rgb(239,239,239); padding:5px 0px; font-size:0px'>
                                             <div style='text-align:center; width:100%; max-width:324px; vertical-align:top; display:inline-block'>
-                                                <p style='font:10px verdana,Helvetica,arial,sans-serif; color:rgb(0,0,0); margin:0px 0px 2px'>Este es un correo generado automáticamente, <strong style='color: red;'>no lo responda</strong></p>
+                                            <p style='font:10px verdana,Helvetica,arial,sans-serif; color:rgb(0,0,0); margin:0px 0px 2px'>This is an auto-generated mail, please don't <strong style='color: red;'>respond it.</strong></p>
                                             </div>
                                             <div style='text-align:center; width:100%; max-width:324px; vertical-align:top; display:inline-block'>
-                                                <p style='font:10px verdana,Helvetica,arial,sans-serif; color:rgb(0,0,0); margin:0px'>Agrega <a href='mailto:web_app@aarrin.com' target='_blank' rel='noopener noreferrer' data-auth='NotApplicable' style='color:rgb(68,68,68)'>web_app@aarrin.com</a> a tus contactos </p>
+                                            <p style='font:10px verdana,Helvetica,arial,sans-serif; color:rgb(0,0,0); margin:0px'>Add <a href='mailto:web_app@aarrin.com' target='_blank' rel='noopener noreferrer' data-auth='NotApplicable' style='color:rgb(68,68,68)'>web_app@aarrin.com</a> to your contacts</p>
                                             </div>
                                         </div>
                                         <div style='margin:18px auto 14px'>
                                             <a href='https://aarrin.com/home' target='_blank' rel='noopener noreferrer' data-auth='NotApplicable' style='text-decoration:none'>
-                                                <img data-imagetype='External' src='https://fqehjo.stripocdn.email/content/guids/95820a7c-b5c9-40db-b28f-2db8ff838956/images/66451586029405480.png' data-connectorsauthtoken='1' data-imageproxyendpoint='/actions/ei' data-imageproxyid='' width='180' alt='Has clic para visitar aarrin.com'>
+                                                <img data-imagetype='External' src='https://fqehjo.stripocdn.email/content/guids/95820a7c-b5c9-40db-b28f-2db8ff838956/images/66451586029405480.png' data-connectorsauthtoken='1' data-imageproxyendpoint='/actions/ei' data-imageproxyid='' width='180' alt='Click to visit aarrin.com'>
                                             </a>
                                         </div>
                                         <p style='margin:0px; padding:0px; font:14px /1.4em Helvetica,Arial,Verdana,sans-serif'>
@@ -183,7 +183,7 @@ switch ($url[5]) {
                                             <div style='display:block; margin-bottom:15px'>
                                                 <h3 style='margin:10px 0px; font:bold 16px /1em Arial,Helvetica,sans-serif; color:rgb(51,51,51)'>AMERICAN REGISTRATION INC. </h3>
                                                 <a href='https://aarrin.com/home' target='_blank' rel='noopener noreferrer' data-auth='NotApplicable' style='text-decoration:none'><img data-imagetype='External' src='https://fqehjo.stripocdn.email/content/guids/95820a7c-b5c9-40db-b28f-2db8ff838956/images/66451586029405480.png' data-connectorsauthtoken='1' data-imageproxyendpoint='/actions/ei' data-imageproxyid=''
-                                                        width='152' alt='click para ir a aarrin.com' style='display:inline-block; vertical-align:middle'> </a>
+                                                        width='152' alt='Click to visit aarrin.com' style='display:inline-block; vertical-align:middle'> </a>
                                             </div>
                                             <div style='font:11px /1.4em Arial,Helvetica,sans-serif; color:rgb(155,155,159); text-align:justify'>
                                                 <p style='margin:20px 12px 8px; font:bold 26px /1em;'>Web_app@aarrin.com</p>
@@ -389,15 +389,15 @@ switch ($url[5]) {
                                     <div style='table-layout:fixed; text-align:center; margin-bottom:15px'>
                                         <div style='width:100%; background-color:rgb(239,239,239); padding:5px 0px; font-size:0px'>
                                             <div style='text-align:center; width:100%; max-width:324px; vertical-align:top; display:inline-block'>
-                                                <p style='font:10px verdana,Helvetica,arial,sans-serif; color:rgb(0,0,0); margin:0px 0px 2px'>Este es un correo generado automáticamente, <strong style='color: red;'>no lo responda</strong></p>
+                                            <p style='font:10px verdana,Helvetica,arial,sans-serif; color:rgb(0,0,0); margin:0px 0px 2px'>This is an auto-generated mail, please don't <strong style='color: red;'>respond it.</strong></p>
                                             </div>
                                             <div style='text-align:center; width:100%; max-width:324px; vertical-align:top; display:inline-block'>
-                                                <p style='font:10px verdana,Helvetica,arial,sans-serif; color:rgb(0,0,0); margin:0px'>Agrega <a href='mailto:web_app@aarrin.com' target='_blank' rel='noopener noreferrer' data-auth='NotApplicable' style='color:rgb(68,68,68)'>web_app@aarrin.com</a> a tus contactos </p>
+                                            <p style='font:10px verdana,Helvetica,arial,sans-serif; color:rgb(0,0,0); margin:0px'>Add <a href='mailto:web_app@aarrin.com' target='_blank' rel='noopener noreferrer' data-auth='NotApplicable' style='color:rgb(68,68,68)'>web_app@aarrin.com</a> to your contacts </p>
                                             </div>
                                         </div>
                                         <div style='margin:18px auto 14px'>
                                             <a href='https://aarrin.com/home' target='_blank' rel='noopener noreferrer' data-auth='NotApplicable' style='text-decoration:none'>
-                                                <img data-imagetype='External' src='https://fqehjo.stripocdn.email/content/guids/95820a7c-b5c9-40db-b28f-2db8ff838956/images/66451586029405480.png' data-connectorsauthtoken='1' data-imageproxyendpoint='/actions/ei' data-imageproxyid='' width='180' alt='Has clic para visitar aarrin.com'>
+                                                <img data-imagetype='External' src='https://fqehjo.stripocdn.email/content/guids/95820a7c-b5c9-40db-b28f-2db8ff838956/images/66451586029405480.png' data-connectorsauthtoken='1' data-imageproxyendpoint='/actions/ei' data-imageproxyid='' width='180' alt='Click to visit aarrin.com'>
                                             </a>
                                         </div>
                                         <p style='margin:0px; padding:0px; font:14px /1.4em Helvetica,Arial,Verdana,sans-serif'>
@@ -441,7 +441,7 @@ switch ($url[5]) {
                                             <div style='display:block; margin-bottom:15px'>
                                                 <h3 style='margin:10px 0px; font:bold 16px /1em Arial,Helvetica,sans-serif; color:rgb(51,51,51)'>AMERICAN REGISTRATION INC. </h3>
                                                 <a href='https://aarrin.com/home' target='_blank' rel='noopener noreferrer' data-auth='NotApplicable' style='text-decoration:none'><img data-imagetype='External' src='https://fqehjo.stripocdn.email/content/guids/95820a7c-b5c9-40db-b28f-2db8ff838956/images/66451586029405480.png' data-connectorsauthtoken='1' data-imageproxyendpoint='/actions/ei' data-imageproxyid=''
-                                                        width='152' alt='click para ir a aarrin.com' style='display:inline-block; vertical-align:middle'> </a>
+                                                        width='152' alt='Click to visit aarrin.com' style='display:inline-block; vertical-align:middle'> </a>
                                             </div>
                                             <div style='font:11px /1.4em Arial,Helvetica,sans-serif; color:rgb(155,155,159); text-align:justify'>
                                                 <p style='margin:20px 12px 8px; font:bold 26px /1em;'>Web_app@aarrin.com</p>
