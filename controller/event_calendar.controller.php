@@ -20,27 +20,50 @@
 *
 * @package ari-mobile-api
 */
-
-/**
- * @var int ID Evento Calendar
+/** 
+ * @var int $idEvent ID Evento Calendar
  */
-$dEvent = -1;
-/**
- * @var string color primario del evento
+$idEvent = -1;
+/** 
+ * @var int $idEmployee ID empleado / Personal
  */
-$eventcolorPrimary = '';
-/**
- * @var string color secundario del evento
+$idEmployee = -1;
+/** 
+ * @var int $idCompany ID compañia
  */
-$eventcolorSecundary = '';
-/**
- * @var string fecha inicial del evento
+$idCompany = -1;
+/** 
+ * @var int $idLocalidad ID localidad
  */
-$eventstart	= '';
-/**
- * @var string fecha final del evento
+$idLocalidad = -1;
+/** 
+ * @var int $eventTitle titulo de evento
  */
-$eventend = '';
+$eventTitle = '';
+/** 
+ * @var string $eventStart fecha inicial del evento
+ */
+$eventStart = '';
+/** 
+ * @var string $eventEnd fecha final del evento
+ */
+$eventEnd = '';
+/** 
+ * @var string $eventTask descripcion de la tarea del evento
+ */
+$eventTask = '';
+/** 
+ * @var string $eventAddress dirección
+ */
+$eventAddress = '';
+/** 
+ * @var string $eventColorPrimary color del identificacion del evento
+ */
+$eventColorPrimary = '';
+/** 
+ * @var string $eventColorSecundary color secundario de evento
+ */
+$eventColorSecundary = '';
 	
 switch ($url[5]) {
     /**
@@ -50,23 +73,28 @@ switch ($url[5]) {
      * datos-solicitados: {}
      * @return jsonString Todos los registros
      */
-    case 'all':
+    case 'allmondeyyear':
         if ($method !== 'GET') {
             header('HTTP/1.1 405 Allow; GET');
             exit();
         }
-
-        if (TokenTool::isValid($token)){
-            $query = "SELECT idEvent,eventcolorPrimary,eventcolorSecundary,eventstart,eventend FROM eventcalendar";
-            $data = DBManager::query($query);
-
-            if ($data) {
-                header(HTTP_CODE_200);
-                echo json_encode($data);
-            }else{
-                header(HTTP_CODE_204);
+        if(isset($_GET['eventStart'])){
+            
+            $eventStart = $_GET['eventStart'];
+            
+            if (TokenTool::isValid($token)){
+                $query = "SELECT IdEvent, personal.IdEmployee, personal.EmployeeName, personal.EmployeeLastName, personal.EmployeeEmail, personal.EmployeeRFC, companies.IdCompany,companies.CompanyName,companies.CompanyRFC, companies.CompanyLogo,companies.CompanyWebsite, event_calendar.IdLocalidad, `EventTitle`, `EventStart`, `EventEnd`, `EventTask`, `EventAddress`, `EventColorPrimary`, `EventColorSecundary`,`EventAvailability`, `EventConfirmation` FROM `event_calendar` INNER JOIN personal on personal.IdEmployee = event_calendar.IdEmployee INNER JOIN companies on companies.IdCompany = event_calendar.IdCompany WHERE MONTH(event_calendar.EventStart) = MONTH('$eventStart') AND YEAR(event_calendar.EventStart) =  YEAR('$eventStart')";
+                $data = DBManager::query($query);
+                if ($data) {
+                    header(HTTP_CODE_200);
+                    echo json_encode($data);
+                }else{
+                    header(HTTP_CODE_204);
+                }
             }
         }
+
+        
         else {
             header(HTTP_CODE_401);
         }
@@ -79,24 +107,142 @@ switch ($url[5]) {
      * datos-solicitados: {}
      * @return jsonString Todos los registros
      */
-    case 'allactive':
+    case 'allmondeyyearemployee':
         if ($method !== 'GET') {
             header('HTTP/1.1 405 Allow; GET');
             exit();
         }
+        if(isset($_GET['eventStart']) && isset($_GET['idEmployee'])){
+            
+            $eventStart = $_GET['eventStart'];
+            $idEmployee = (int) $_GET['idEmployee'];
+            if (TokenTool::isValid($token)){
+                $query = "SELECT IdEvent, personal.IdEmployee, personal.EmployeeName, personal.EmployeeLastName, personal.EmployeeEmail, personal.EmployeeRFC, companies.IdCompany,companies.CompanyName,companies.CompanyRFC, companies.CompanyLogo,companies.CompanyWebsite, event_calendar.IdLocalidad, `EventTitle`, `EventStart`, `EventEnd`, `EventTask`, `EventAddress`, `EventColorPrimary`, `EventColorSecundary`,`EventAvailability`, `EventConfirmation` FROM `event_calendar` INNER JOIN personal on personal.IdEmployee = event_calendar.IdEmployee INNER JOIN companies on companies.IdCompany = event_calendar.IdCompany WHERE MONTH(event_calendar.EventStart) = MONTH('$eventStart') AND YEAR(event_calendar.EventStart) =  YEAR('$eventStart')  AND personal.IdEmployee = $idEmployee";
+                $data = DBManager::query($query);
+                if ($data) {
+                    header(HTTP_CODE_200);
+                    echo json_encode($data);
+                }else{
+                    header(HTTP_CODE_204);
+                }
+            }
+        }
 
-        $query = "SELECT idEvent,eventcolorPrimary,eventcolorSecundary,eventstart,eventend FROM eventcalendar";
-        $data = DBManager::query($query);
+        
+        else {
+            header(HTTP_CODE_401);
+        }
+        break;
+    /**
+     * 
+     */
+    case 'allmondeyyearcompany':
+        if ($method !== 'GET') {
+            header('HTTP/1.1 405 Allow; GET');
+            exit();
+        }
+        if(isset($_GET['eventStart']) && isset($_GET['idCompany'])){
+            
+            $eventStart = $_GET['eventStart'];
+            $idCompany = (int) $_GET['idCompany'];
+            if (TokenTool::isValid($token)){
+                $query = "SELECT IdEvent, personal.IdEmployee, personal.EmployeeName, personal.EmployeeLastName, personal.EmployeeEmail, personal.EmployeeRFC, companies.IdCompany,companies.CompanyName,companies.CompanyRFC, companies.CompanyLogo,companies.CompanyWebsite, event_calendar.IdLocalidad, `EventTitle`, `EventStart`, `EventEnd`, `EventTask`, `EventAddress`, `EventColorPrimary`, `EventColorSecundary`, `EventAvailability`, `EventConfirmation` FROM `event_calendar` INNER JOIN personal on personal.IdEmployee = event_calendar.IdEmployee INNER JOIN companies on companies.IdCompany = event_calendar.IdCompany WHERE MONTH(event_calendar.EventStart) = MONTH('$eventStart') AND YEAR(event_calendar.EventStart) =  YEAR('$eventStart') AND companies.IdCompany = $idCompany";
+                $data = DBManager::query($query);
+                if ($data) {
+                    header(HTTP_CODE_200);
+                    echo json_encode($data);
+                }else{
+                    header(HTTP_CODE_204);
+                }
+            }
+        }
 
-        if ($data) {
-            header(HTTP_CODE_200);
-            echo json_encode($data);
-        }else{
-            header(HTTP_CODE_204);
+        
+        else {
+            header(HTTP_CODE_401);
+        }
+        break;
+    /**
+     * 
+     */
+    case 'notificationcalendar':
+        if ($method !== 'GET') {
+            header('HTTP/1.1 405 Allow; GET');
+            exit();
+        }
+        if(isset($_GET['eventStart'])){
+            
+            $eventStart = $_GET['eventStart'];
+            if (TokenTool::isValid($token)){
+                $query = "SELECT `IdEvent`, personal.IdEmployee, personal.EmployeeName, personal.EmployeeLastName, personal.EmployeeEmail, personal.EmployeeRFC, companies.IdCompany,companies.CompanyName,companies.CompanyRFC, companies.CompanyLogo,companies.CompanyWebsite, event_calendar.IdLocalidad, `EventTitle`, `EventStart`, `EventEnd`, `EventTask`, `EventAddress`, `EventColorPrimary`, `EventColorSecundary`, `EventAvailability`, `EventConfirmation` FROM `event_calendar` INNER JOIN personal on personal.IdEmployee =  event_calendar.IdEmployee INNER JOIN companies on companies.IdCompany = event_calendar.IdCompany WHERE event_calendar.EventStart >= '$eventStart'";
+                $data = DBManager::query($query);
+                if ($data) {
+                    header(HTTP_CODE_200);
+                    echo json_encode($data);
+                }else{
+                    header(HTTP_CODE_204);
+                }
+            }
+        } else {
+            header(HTTP_CODE_401);
+        }
+        break;
+    /**
+     * 
+     */
+    case 'notificationcalendaremployee':
+        if ($method !== 'GET') {
+            header('HTTP/1.1 405 Allow; GET');
+            exit();
+        }
+        if(isset($_GET['eventStart']) && isset($_GET['idEmployee'])){
+            
+            $eventStart = $_GET['eventStart'];
+            $idEmployee = (int) $_GET['idEmployee'];
+            if (TokenTool::isValid($token)){
+                $query = "SELECT `IdEvent`, personal.IdEmployee, personal.EmployeeName, personal.EmployeeLastName, personal.EmployeeEmail, personal.EmployeeRFC, companies.IdCompany,companies.CompanyName,companies.CompanyRFC, companies.CompanyLogo,companies.CompanyWebsite, event_calendar.IdLocalidad, `EventTitle`, `EventStart`, `EventEnd`, `EventTask`, `EventAddress`, `EventColorPrimary`, `EventColorSecundary` FROM `event_calendar` INNER JOIN personal on personal.IdEmployee =  event_calendar.IdEmployee INNER JOIN companies on companies.IdCompany = event_calendar.IdCompany WHERE companies.CompanyStatus = 'Active' and event_calendar.EventStart >= '$eventstart' AND personal.IdEmployee = $idEmployee";
+                $data = DBManager::query($query);
+                if ($data) {
+                    header(HTTP_CODE_200);
+                    echo json_encode($data);
+                }else{
+                    header(HTTP_CODE_204);
+                }
+            }
+        }
+        else {
+            header(HTTP_CODE_401);
         }
         break;
 
 
+    /**
+     * 
+     */
+    case 'notificationcalendarcompany':
+            if ($method !== 'GET') {
+                header('HTTP/1.1 405 Allow; GET');
+                exit();
+            }
+            if(isset($_GET['eventStart']) && isset($_GET['idCompany'])){
+                
+                $eventStart = $_GET['eventStart'];
+                $idCompany = (int) $_GET['idCompany'];
+                if (TokenTool::isValid($token)){
+                    $query = "SELECT `IdEvent`, personal.IdEmployee, personal.EmployeeName, personal.EmployeeLastName, personal.EmployeeEmail, personal.EmployeeRFC, companies.IdCompany,companies.CompanyName,companies.CompanyRFC, companies.CompanyLogo,companies.CompanyWebsite, event_calendar.IdLocalidad, `EventTitle`, `EventStart`, `EventEnd`, `EventTask`, `EventAddress`, `EventColorPrimary`, `EventColorSecundary`, `EventAvailability`, `EventConfirmation` FROM `event_calendar` INNER JOIN personal on personal.IdEmployee =  event_calendar.IdEmployee INNER JOIN companies on companies.IdCompany = event_calendar.IdCompany WHERE event_calendar.EventStart >= '$eventStart' AND companies.IdCompany = $idCompany";
+                    $data = DBManager::query($query);
+                    if ($data) {
+                        header(HTTP_CODE_200);
+                        echo json_encode($data);
+                    }else{
+                        header(HTTP_CODE_204);
+                    }
+                }
+            }
+            else {
+                header(HTTP_CODE_401);
+            }
+            break;
     /**
      * Solicitar datos completos de un eventcalendar (ISO)-> 
      * url: .../api/v1-2/eventcalendar/get/:idEvent, 
@@ -104,6 +250,41 @@ switch ($url[5]) {
      * datos-solicitados: {}
      * @param int idEvent- Id del eventcalendar, el cual deberá ir al final de la URL
      * @return jsonString|null Los datos del eventcalendar con ese ID, 
+     */
+    case 'getall':
+        if ($method !== 'GET') {
+            header('HTTP/1.1 405 Allow; GET');
+            exit();
+        }
+        if(isset($_GET['eventStart'])){
+            $eventStart = $_GET['eventStart'];
+            if (TokenTool::isValid($token)){
+                $query = "SELECT `IdEvent`, `IdEmployee`, `IdCompany`, `IdLocalidad`, `EventTitle`, `EventStart`, `EventEnd`, `EventTask`, `EventAddress`, `EventColorPrimary`, `EventColorSecundary`, `EventAvailability`, `EventConfirmation` FROM `event_calendar` WHERE `EventStart` >= '$eventStart'";
+
+                if (isset($_GET['idCompany'])){
+                    $idCompany = $_GET['idCompany'];
+                    $query .= "AND `IdCompany` = $idCompany";
+                } else if (isset($_GET['idEmployee'])) {
+                    $IdEmployee = $_GET['idEmployee'];
+                    $query .= "AND `IdEmployee` = $IdEmployee";
+                }
+
+                $data = DBManager::query($query);
+                if ($data) {
+                    header(HTTP_CODE_200);
+                    echo json_encode($data);
+                }else{
+                    header(HTTP_CODE_204);
+                }
+            } else {
+                header(HTTP_CODE_401);
+            }
+        } else {
+            header(HTTP_CODE_401);
+        }
+        break;
+    /**
+     * 
      */
     case 'get':
         if ($method !== 'GET') {
