@@ -414,3 +414,59 @@ COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `event_calendar`
+--
+
+CREATE TABLE `event_calendar` (
+  `IdEvent` int(100) NOT NULL,
+  `IdEmployee` int(11) DEFAULT NULL,
+  `IdCompany` int(100) DEFAULT NULL,
+  `IdLocalidad` int(11) DEFAULT NULL,
+  `EventTitle` varchar(500) DEFAULT NULL,
+  `EventStart` datetime NOT NULL,
+  `EventEnd` datetime NOT NULL,
+  `EventTask` text,
+  `EventAddress` varchar(500) DEFAULT NULL,
+  `EventColorPrimary` varchar(10) DEFAULT NULL,
+  `EventColorSecundary` varchar(10) DEFAULT NULL,
+  `EventAvailability` varchar(500) NOT NULL DEFAULT 'Available',
+  `EventConfirmation` varchar(100) DEFAULT 'false',
+  `EventAllDay` varchar(100) DEFAULT 'false'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `event_calendar`
+--
+
+INSERT INTO `event_calendar` (`IdEvent`, `IdEmployee`, `IdCompany`, `IdLocalidad`, `EventTitle`, `EventStart`, `EventEnd`, `EventTask`, `EventAddress`, `EventColorPrimary`, `EventColorSecundary`, `EventAvailability`, `EventConfirmation`, `EventAllDay`) VALUES
+(1, 10, 2, 0, 'Cosas por Cambiar', '2020-11-18 00:00:00', '2020-11-30 00:00:00', 'debes ir a la empresa a hacer una auditoria', 'cacacacaeceve', '#ffffffff', '#00000000', 'Available', 'false', 'false'),
+(80, 1, 3, NULL, 'hander', '2020-12-03 00:00:00', '2020-12-03 23:59:59', 'iafevccaase', 'eveav', '#7745ff', '#2bff00', 'Available', 'false', 'false');
+
+--
+-- Índices para tablas volcadas
+--
+
+--
+-- Indices de la tabla `event_calendar`
+--
+ALTER TABLE `event_calendar`
+  ADD PRIMARY KEY (`IdEvent`);
+
+--
+-- AUTO_INCREMENT de las tablas volcadas
+--
+
+--
+-- AUTO_INCREMENT de la tabla `event_calendar`
+--
+ALTER TABLE `event_calendar`
+  MODIFY `IdEvent` int(100) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=81;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
