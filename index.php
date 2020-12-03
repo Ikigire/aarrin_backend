@@ -328,6 +328,20 @@ if ($url[3] === 'v1-2') {
          *  \______________________________/
          * 
          */
+        case 'event_calendar':
+            require_once('controller/event_calendar.controller.php');
+            break;
+
+        /**
+         *   ______________________________
+         *  /           CONTRATOS          \
+         * |                                |
+         * |  TABLA PARA EL MANEJO DE LOS   |
+         * |     EVENTOS DEL CALENDARIO     |
+         * |                                |
+         *  \______________________________/
+         * 
+         */
         case 'contracts':
             require_once('controller/contracts.controller.php');
             break;
