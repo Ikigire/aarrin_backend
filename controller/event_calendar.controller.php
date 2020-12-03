@@ -92,10 +92,6 @@ switch ($url[5]) {
                 $data = DBManager::query($query);
                 if ($data) {
                     header(HTTP_CODE_200);
-                    for ($i=0; $i < count($data); $i++) { 
-                        $data[$i]['EventAllDay'] = (bool) $data[$i]['EventAllDay'];
-                        $data[$i]['EventConfirmation'] = (bool) $data[$i]['EventConfirmation'];
-                    }
                     echo json_encode($data);
                 }else{
                     header(HTTP_CODE_204);
@@ -149,10 +145,6 @@ switch ($url[5]) {
                 $data = DBManager::query($query);
                 if ($data) {
                     header(HTTP_CODE_200);
-                    for ($i=0; $i < count($data); $i++) { 
-                        $data[$i]['EventAllDay'] = (bool) $data[$i]['EventAllDay'];
-                        $data[$i]['EventConfirmation'] = (bool) $data[$i]['EventConfirmation'];
-                    }
                     echo json_encode($data);
                 }else{
                     header(HTTP_CODE_204);
@@ -272,10 +264,6 @@ switch ($url[5]) {
                 $data = DBManager::query($query);
                 if ($data) {
                     header(HTTP_CODE_200);
-                    for ($i=0; $i < count($data); $i++) { 
-                        $data[$i]['EventAllDay'] = (bool) $data[$i]['EventAllDay'];
-                        $data[$i]['EventConfirmation'] = (bool) $data[$i]['EventConfirmation'];
-                    }
                     echo json_encode($data);
                 }else{
                     header(HTTP_CODE_204);
@@ -363,8 +351,6 @@ switch ($url[5]) {
                     ':eventConfirmation'   => $eventConfirmation,
                     ':eventAllDay'         => $eventAllDay
                 );
-
-                
 
                 if (isset($_POST['idEmployee'])) {
                     $idEmployee = $_POST['idEmployee'];
@@ -463,24 +449,8 @@ switch ($url[5]) {
             );
             
 
-            $initialPart = "UPDATE event_calendar SET EventTitle = :eventTitle, EventStart = :eventStart, EventEnd = :eventEnd, EventTask = :eventTask, EventAddress = :eventAddress, EventColorPrimary = :eventColorPrimary, EventColorSecundary = :eventColorSecundary, EventAvailability = :eventAvailability";
+            $initialPart = "UPDATE event_calendar SET EventTitle = :eventTitle, EventStart = :eventStart, EventEnd = :eventEnd, EventTask = :eventTask, EventAddress = :eventAddress, EventColorPrimary = :eventColorPrimary, EventColorSecundary = :eventColorSecundary, EventAvailability = :eventAvailability, EventConfirmation = :eventConfirmation, EventAllDay = :eventAllDay";
                 
-
-            $eventAllDay = 0;
-            if (isset($data['EventAllDay']) && trim($data['EventAllDay']) !== '') {
-                $eventAllDay = $data['EventAllDay'] ? 1 : 0;
-                $initialPart .= ", EventAllDay = :eventAllDay";
-                $params[':eventAllDay'] = $eventAllDay;
-            }
-
-
-            $eventConfirmation = 0;
-            if (isset($data['EventConfirmation']) && trim($data['EventConfirmation']) !== '') {
-                $eventConfirmation = $data['EventConfirmation'] ? 1 : 0;
-                $initialPart .= ", EventConfirmation = :eventConfirmation";
-                $params[':eventConfirmation'] = $eventConfirmation;
-            }
-
             if (isset($data['IdEmployee']) && trim($data['IdEmployee']) !== '') {
                 $idEmployee = $data['IdEmployee'];
                 $initialPart .= ", IdEmployee = :idEmployee";
