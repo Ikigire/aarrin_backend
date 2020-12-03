@@ -53,6 +53,10 @@ function saveFile(string $base64, string $path, string $name) {
     try {
         if (!file_exists($pathToSave)) {
             !mkdir($pathToSave, 0777, true);
+            $htaccess = fopen($pathToSave. '/.htaccess', 'w+b');
+            fwrite($htaccess, "Header set Access-Control-Allow-Origin \"aarrin.com\"");
+            fflush($htaccess);
+            fclose($htaccess);
          }
     
         if(file_put_contents($pathToSave. '/'. $name, base64_decode($data)) === false) {
@@ -253,7 +257,7 @@ switch ($url[5]) {
             $auxData = DBManager::query($query, array(':idProposal' => $data['IdProposal']))[0];
 
             $cancel = false;
-            $folder = str_replace(' ', '_', $auxData['ServiceStandard']) . '/'. str_replace(' ', '_', $auxData['CompanyName']);
+            $folder = base64_encode($auxData['ServiceStandard']) . '/'. base64_encode($auxData['CompanyName']);
             $path = saveFile($data['File'], $folder, base64_encode('Contract'));
             if ($path === false){
                 $cancel = true;
@@ -323,7 +327,7 @@ switch ($url[5]) {
             $query = "SELECT comp.CompanyName, ser.ServiceStandard FROM proposals AS prop JOIN days_calculation AS dc on prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp on app.IdCompany = comp.IdCompany JOIN services AS ser on app.IdService WHERE prop.IdProposal = :idProposal";
             $auxData = DBManager::query($query, array(':idProposal' => $data['IdProposal']))[0];
 
-            $folder = str_replace(' ', '_', $auxData['ServiceStandard']) . '/'. str_replace(' ', '_', $auxData['CompanyName']);
+            $folder = base64_encode($auxData['ServiceStandard']) . '/'. base64_encode($auxData['CompanyName']);
 
             $params = array(
                 ':idContract' => $idContract,
@@ -398,47 +402,42 @@ switch ($url[5]) {
                 $query .= ", PurchaseOrder = null";
             }
 
-            if(isset($data['ReviewReport'])){
-                $params[':reviewReport'] = strpos($data['ReviewReport'], '://aarrin.com') > 0 ? $data['ReviewReport'] : saveFile($data['ReviewReport'], $folder, base64_encode('Review_Report_by_Admin'));
-                $query .= ", ReviewReport = :reviewReport";
+            if (isset($data['Stage1Date'])) {
+                $params[':stage1Date'] = $data['Stage1Date'];
+                $query .= ", Stage1Date = :stage1Date";
             } else {
-                $query .= ", ReviewReport = null";
+                $query .= ", Stage1Date = null";
             }
-
-            if(isset($data['InternalAuditReport'])){
-                $params[':internalAuditReport'] = strpos($data['InternalAuditReport'], '://aarrin.com') > 0 ? $data['InternalAuditReport'] : saveFile($data['InternalAuditReport'], $folder, base64_encode('Internal_Audit_Report'));
-                $query .= ", InternalAuditReport = :internalAuditReport";
+            
+            if (isset($data['Stage2Date'])) {
+                $params[':stage2Date'] = $data['Stage2Date'];
+                $query .= ", Stage2Date = :stage2Date";
             } else {
-                $query .= ", InternalAuditReport = null";
+                $query .= ", Stage2Date = null";
             }
-
-            if(isset($data['ProcessManual'])){
-                $params[':processManual'] = strpos($data['ProcessManual'], '://aarrin.com') > 0 ? $data['ProcessManual'] : saveFile($data['ProcessManual'], $folder, base64_encode('Process_Manual'));
-                $query .= ", ProcessManual = :processManual";
+            
+            if (isset($data['Surveillance1Date'])) {
+                $params[':surveillance1Date'] = $data['Surveillance1Date'];
+                $query .= ", Surveillance1Date = :surveillance1Date";
             } else {
-                $query .= ", ProcessManual = null";
+                $query .= ", Surveillance1Date = null";
             }
-
-            if(isset($data['ProcessInteractionMap'])){
-                $params[':processInteractionMap'] = strpos($data['ProcessInteractionMap'], '://aarrin.com') > 0 ? $data['ProcessInteractionMap'] : saveFile($data['ProcessInteractionMap'], $folder, base64_encode('Proccess_Iteraction_Map'));
-                $query .= ", ProcessInteractionMap = :processInteractionMap";
+            
+            if (isset($data['Surveillance2Date'])) {
+                $params[':surveillance2Date'] = $data['Surveillance2Date'];
+                $query .= ", Surveillance2Date = :surveillance2Date";
             } else {
-                $query .= ", ProcessInteractionMap = null";
+                $query .= ", Surveillance2Date = null";
             }
-
-            if(isset($data['OperationalControls'])){
-                $params[':operationalControls'] = strpos($data['OperationalControls'], '://aarrin.com') > 0 ? $data['OperationalControls'] : saveFile($data['OperationalControls'], $folder, base64_encode('Operational_Controls'));
-                $query .= ", OperationalControls = :operationalControls";
+            
+            if (isset($data['RecertificationDate'])) {
+                $params[':recertificationDate'] = $data['RecertificationDate'];
+                $query .= ", RecertificationDate = :recertificationDate";
             } else {
-                $query .= ", OperationalControls = null";
+                $query .= ", RecertificationDate = null";
             }
-
-            if(isset($data['HazardAnalysis'])){
-                $params[':hazardAnalysis'] = strpos($data['HazardAnalysis'], '://aarrin.com') > 0 ? $data['HazardAnalysis'] : saveFile($data['HazardAnalysis'], $folder, base64_encode('Hazard_Analisys'));
-                $query .= ", HazardAnalysis = :hazardAnalysis";
-            } else {
-                $query .= ", HazardAnalysis = null";
-            }
+            
+            
 
             $query .= " WHERE IdContract = :idContract;";
             if (DBManager::query($query, $params)){
@@ -446,8 +445,6 @@ switch ($url[5]) {
                 echo json_encode(array('result' => 'Updated'));
             }else {
                 header(HTTP_CODE_409);
-                echo "<p>$query</p>";
-                print_r($params);
             }
         } else {
             header(HTTP_CODE_401);
