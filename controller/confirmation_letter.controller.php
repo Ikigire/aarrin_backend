@@ -180,9 +180,12 @@ switch ($url[5]) {
             $data = DBManager::query($query, $params);
             if ($data) {
                 $letterData = $data[0];
-                $letterData[$i]['LetterApproved'] = (bool) $letterData[$i]['LetterApprove'];
-                $letterData[$i]['LetterClientApprove'] = (bool) $letterData[$i]['LetterClientApprove'];
-                $letterData[$i]['IsBackToBack'] = (bool) $letterData[$i]['IsBackToBack'];
+                $letterData['LetterApproved'] = (bool) $letterData['LetterApprove'];
+                $letterData['LetterClientApprove'] = (bool) $letterData['LetterClientApprove'];
+                $letterData['IsBackToBack'] = (bool) $letterData['IsBackToBack'];
+                $letterData['Auditors'] = json_decode($letterData['Auditors'], true);
+                $letterData['TecnicalExperts'] = json_decode($letterData['TecnicalExperts'], true);
+                $letterData['Observers'] = json_decode($letterData['Observers'], true);
                 header(HTTP_CODE_200);
                 echo json_encode($contractData);
             }
