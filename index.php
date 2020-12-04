@@ -319,12 +319,12 @@ if ($url[3] === 'v1-2') {
 
         /**
          *   ______________________________
-         *  /           CONTRATOS          \
+         *  /           CALENDARIO         \
          * |                                |
          * |  TABLA PARA EL MANEJO DE       |
-         * |  CONTRATOS ENTRE LAS COMPAÑÍAS |
+         * |  EVENTOS CALENDARIZADOS PARA   |
+         * |  AUDITORÍAS ENTRE EL CLIENTE   |
          * |  Y ARI                         |
-         * |                                |
          *  \______________________________/
          * 
          */
@@ -337,13 +337,27 @@ if ($url[3] === 'v1-2') {
          *  /           CONTRATOS          \
          * |                                |
          * |  TABLA PARA EL MANEJO DE LOS   |
-         * |     EVENTOS DEL CALENDARIO     |
+         * |     CONTRATOS DE ADITORÍA      |
          * |                                |
          *  \______________________________/
          * 
          */
         case 'contracts':
             require_once('controller/contracts.controller.php');
+            break;
+
+        /**
+         *   ______________________________
+         *  /    CARTAS DE CONFIRMACIÓN    \
+         * |                                |
+         * |  TABLA PARA EL MANEJO DE LOS   |
+         * |     EVENTOS DEL CALENDARIO     |
+         * |                                |
+         *  \______________________________/
+         * 
+         */
+        case 'confirmation_letters':
+            require_once('controller/confirmation_letter.controller.php');
             break;
 
         default:
