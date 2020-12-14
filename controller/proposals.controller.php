@@ -332,6 +332,11 @@ switch ($url[5]) {
                     $initialPart .= ", IssueRR";
                     $values .= ", :issueRR";
                 }
+                if(isset($data['InitialYear'])){
+                    $params[':initialYear'] = $data['InitialYear'];
+    
+                    $query .= ", InitialYear = :initialYear";
+                }
 
                 $query = $initialPart. ") ". $values. ")";
 
@@ -457,7 +462,7 @@ switch ($url[5]) {
                 $query .= ", LegalRepresentative = :legalRepresentative";
             }
             if(isset($data['InitialYear'])){
-                $params[':initialYear'] = json_encode($data['InitialYear']);
+                $params[':initialYear'] = $data['InitialYear'];
 
                 $query .= ", InitialYear = :initialYear";
             }
