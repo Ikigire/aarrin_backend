@@ -530,6 +530,20 @@ switch ($url[5]) {
         }
         break;
 
+    case 'token_validator':
+        if ($method !== 'GET') {
+            header('HTTP/1.1 405 Allow; GET');
+            exit();
+        }
+
+        if (!isset($token)) {
+            header(HTTP_CODE_412);
+            exit();
+        }
+        
+        echo json_encode(array('IsValid' => TokenTool::isValid($token)));
+        break;
+    
     default:
         header(HTTP_CODE_404);
         break;

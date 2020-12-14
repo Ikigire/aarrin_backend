@@ -11,6 +11,8 @@
 
 * Solicitar la información de un contrato-> url: .../api/v1-2/contracts/get/:idContract, metodo: GET, datos-solicitados: {}
 
+* Cambiar la plantilla-> url: .../api/v1-2/contracts/upload, metodo: POST, datos-solicitados: {upload: File}
+
 * Crear un nuevo contrato-> url: .../api/v1-2/contracts/add, metodo: POST, datos-solicitados: {data: jsonString}
 
 * Editar la información de un contrato-> url: .../api/v1-2/contracts/edit/:idContract, metodo: PUT, datos-solicitados: {data: jsonString}
@@ -25,19 +27,19 @@
 /**
  * Función para guardar archivos decodificados en base64
  * @param string $base64 Datos del archivo (debe contener la extensión del archivo)
- * @param string $path Ruta de la carpeta enla que va a guardar el archivo
- * @param string $name Nombre con el que será guardado el archivo
+ * @param string $folder Ruta de la carpeta enla que va a guardar el archivo
+ * @param string $name Nombre con el que será guardado el archivo sin extensión
  * @return string|bool Regresa la URL con la que se accede al archivo o false en caso de fallar
  */
-function saveFile(string $base64, string $path, string $name) {
+function saveFile(string $base64, string $folder, string $name) {
     $extFiles = array(
         'png' => '.png',
         'pdf' => '.pdf',
         'jpeg' => '.jpg'
     );
 
-    $pathToFile = 'https://aarrin.com/mobile/app_resources/contracts/'.$path;
-    $pathToSave = __DIR__. "/../../app_resources/contracts/". $path;
+    $pathToFile = 'https://aarrin.com/mobile/app_resources/contracts/'.$folder;
+    $pathToSave = __DIR__. "/../../app_resources/contracts/". $folder;
 
     $start = strpos($base64, '/');
     $end = strpos($base64, ';');
@@ -194,10 +196,10 @@ switch ($url[5]) {
         break;
 
     /**
-     * Crear un nuevo contrato-> 
-     * url: .../api/v1-2/contracts/add, 
+     * Cambiar la plantilla-> 
+     * url: .../api/v1-2/contracts/upload, 
      * metodo: POST, 
-     * datos-solicitados: {data: jsonString}
+     * datos-solicitados: {upload: File}
      */
     case 'upload':
         if ($method !== 'POST') {
@@ -252,13 +254,16 @@ switch ($url[5]) {
         }
 
         if (TokenTool::isValid($token)){
+            $date = new DateTime("now");
+            $currentDate = $date->format('Y-m-d H:i:s');
+
             $query = "SELECT comp.CompanyName, ser.ServiceStandard FROM proposals AS prop JOIN days_calculation AS dc on prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp on app.IdCompany = comp.IdCompany JOIN services AS ser on app.IdService WHERE prop.IdProposal = :idProposal";
             
             $auxData = DBManager::query($query, array(':idProposal' => $data['IdProposal']))[0];
 
             $cancel = false;
             $folder = base64_encode($auxData['ServiceStandard']) . '/'. base64_encode($auxData['CompanyName']);
-            $path = saveFile($data['File'], $folder, base64_encode('Contract'));
+            $path = saveFile($data['File'], $folder, base64_encode("Contract ($currentDate)"));
             if ($path === false){
                 $cancel = true;
             }
@@ -267,9 +272,6 @@ switch ($url[5]) {
                 header(HTTP_CODE_409);
                 exit();
             }
-            
-            $date = new DateTime("now");
-            $currentDate = $date->format('Y-m-d H:i:s');
 
             $params = array(
                 ':idProposal'   => $data['IdProposal'],
@@ -342,7 +344,7 @@ switch ($url[5]) {
             if ($data['Approve']) {
                 $params[':approve'] = (int) $data['Approve'];
                 $params[':approveDate'] = $currentDate;
-                $params[':ultimateFile'] = strpos($data['UltimateFile'], '://aarrin.com') >0 ? $data['UltimateFile'] : saveFile($data['UltimateFile'], $folder, base64_encode('Contract(Final)(Approved)'));
+                $params[':ultimateFile'] = strpos($data['UltimateFile'], '://aarrin.com') >0 ? $data['UltimateFile'] : saveFile($data['UltimateFile'], $folder, base64_encode("Contract(Final)(Approved)($currentDate)"));
                 $query .= ", Approve = :approve, ApproveDate = :approveDate, UltimateFile = :ultimateFile";
             } else {
                 $params[':approve'] = (int) $data['Approve'];
@@ -352,7 +354,7 @@ switch ($url[5]) {
             if ($data['ClientApprove']) {
                 $params[':clientApprove'] = (int) $data['ClientApprove'];
                 $params[':clientApproveDate'] = $currentDate;
-                $params[':clientFile'] = strpos($data['ClientFile'], '://aarrin.com') >0 ? $data['ClientFile'] : saveFile($data['ClientFile'], $folder, base64_encode('Contract(Client_Approved)'));
+                $params[':clientFile'] = strpos($data['ClientFile'], '://aarrin.com') >0 ? $data['ClientFile'] : saveFile($data['ClientFile'], $folder, base64_encode("Contract(Client_Approved)($currentDate)"));
                 $query .= ", ClientApprove = :clientApprove, ClientApproveDate = :clientApproveDate, ClientFile = :clientFile";
             } else {
                 $params[':clientApprove'] = (int) $data['ClientApprove'];
@@ -361,42 +363,42 @@ switch ($url[5]) {
 
             #### Sección para el manejo de archivos del cliente
             if(isset($data['File'])){
-                $params[':file'] = strpos($data['File'], '://aarrin.com') > 0 ? $data['File'] : saveFile($data['File'], $folder, base64_encode('Contract'));
+                $params[':file'] = strpos($data['File'], '://aarrin.com') > 0 ? $data['File'] : saveFile($data['File'], $folder, base64_encode("Contract ($currentDate)"));
                 $query .= ", File = :file";
             } else {
                 $query .= ", File = null";
             }
 
             if(isset($data['LegalRepresentativeID'])){
-                $params[':legalRepresentativeID'] = strpos($data['LegalRepresentativeID'], '://aarrin.com') > 0 ? $data['LegalRepresentativeID'] : saveFile($data['LegalRepresentativeID'], $folder, base64_encode('Legal_Representative_ID'));
+                $params[':legalRepresentativeID'] = strpos($data['LegalRepresentativeID'], '://aarrin.com') > 0 ? $data['LegalRepresentativeID'] : saveFile($data['LegalRepresentativeID'], $folder, base64_encode('Legal_Representative_ID_'. $data['IdContract']));
                 $query .= ", LegalRepresentativeID = :legalRepresentativeID";
             } else {
                 $query .= ", LegalRepresentativeID = null";
             }
 
             if(isset($data['RFCFile'])){
-                $params[':rfcFile'] = strpos($data['RFCFile'], '://aarrin.com') > 0 ? $data['RFCFile'] : saveFile($data['RFCFile'], $folder, base64_encode('RFC_copy'));
+                $params[':rfcFile'] = strpos($data['RFCFile'], '://aarrin.com') > 0 ? $data['RFCFile'] : saveFile($data['RFCFile'], $folder, base64_encode('RFC_copy_'. $data['IdContract']));
                 $query .= ", RFCFile = :rfcFile";
             } else {
                 $query .= ", RFCFile = null";
             }
 
             if(isset($data['OriginAccount'])){
-                $params[':originAccount'] = strpos($data['OriginAccount'], '://aarrin.com') > 0 ? $data['OriginAccount'] : saveFile($data['OriginAccount'], $folder, base64_encode('Account_data'));
+                $params[':originAccount'] = strpos($data['OriginAccount'], '://aarrin.com') > 0 ? $data['OriginAccount'] : saveFile($data['OriginAccount'], $folder, base64_encode('Account_data_'. $data['IdContract']));
                 $query .= ", OriginAccount = :originAccount";
             } else {
                 $query .= ", OriginAccount = null";
             }
 
             if(isset($data['ProofAddress'])){
-                $params[':proofAddress'] = strpos($data['ProofAddress'], '://aarrin.com') > 0 ? $data['ProofAddress'] : saveFile($data['ProofAddress'], $folder, base64_encode('Proof_address'));
+                $params[':proofAddress'] = strpos($data['ProofAddress'], '://aarrin.com') > 0 ? $data['ProofAddress'] : saveFile($data['ProofAddress'], $folder, base64_encode('Proof_address_'. $data['IdContract']));
                 $query .= ", ProofAddress = :proofAddress";
             } else {
                 $query .= ", ProofAddress = null";
             }
 
             if(isset($data['PurchaseOrder'])){
-                $params[':purchaseOrder'] = strpos($data['PurchaseOrder'], '://aarrin.com') > 0 ? $data['PurchaseOrder'] : saveFile($data['PurchaseOrder'], $folder, base64_encode('Purchase_Order'));
+                $params[':purchaseOrder'] = strpos($data['PurchaseOrder'], '://aarrin.com') > 0 ? $data['PurchaseOrder'] : saveFile($data['PurchaseOrder'], $folder, base64_encode('Purchase_Order_'. $data['IdContract']));
                 $query .= ", PurchaseOrder = :purchaseOrder";
             } else {
                 $query .= ", PurchaseOrder = null";

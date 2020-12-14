@@ -53,6 +53,52 @@ $totalInvestment = -1;
  */
 $daysCalculationDetail = array();
 
+/**
+ * Función para guardar archivos decodificados en base64
+ * @param string $base64 Datos del archivo (debe contener la extensión del archivo)
+ * @param string $folder Ruta de la carpeta enla que va a guardar el archivo
+ * @param string $name Nombre con el que será guardado el archivo
+ * @return string|bool Regresa la URL con la que se accede al archivo o false en caso de fallar
+ */
+function saveFile(string $base64, string $folder, string $name) {
+    $extFiles = array(
+        'png' => '.png',
+        'pdf' => '.pdf',
+        'jpeg' => '.jpg'
+    );
+
+    $pathToFile = 'https://aarrin.com/mobile/app_resources/proposals/'.$folder;
+    $pathToSave = __DIR__. "/../../app_resources/proposals/". $folder;
+
+    $start = strpos($base64, '/');
+    $end = strpos($base64, ';');
+
+    $ext = substr($base64, $start+1, $end - $start -1);
+    $ext = $extFiles[$ext];
+    $name .= $ext;
+
+    $pathToFile .= '/'. $name;
+
+    $start = strpos($base64, ',');
+    $data = substr($base64, $start+1);
+    try {
+        if (!file_exists($pathToSave)) {
+            !mkdir($pathToSave, 0777, true);
+            $htaccess = fopen($pathToSave. '/.htaccess', 'w+b');
+            fwrite($htaccess, "Header set Access-Control-Allow-Origin \"aarrin.com\"");
+            fflush($htaccess);
+            fclose($htaccess);
+         }
+    
+        if(file_put_contents($pathToSave. '/'. $name, base64_decode($data)) === false) {
+            $pathToFile = false;
+        }
+    } catch (\Throwable $th) {
+        echo $th;
+    }
+    return $pathToFile;
+}
+
 switch ($url[5]) {
     /**
      * Solicitar todas las propuestas-> 
@@ -358,6 +404,16 @@ switch ($url[5]) {
             }
             if (isset($data['ProposalClientApproved'])) {
                 if ($data['ProposalClientApproved']) {
+                    if (strpos($data['File'], '://aarrin.com') <= 0 ) {
+                        $auxQuery = "SELECT comp.CompanyName, ser.ServiceStandard FROM proposals AS prop JOIN days_calculation AS dc on prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp on app.IdCompany = comp.IdCompany JOIN services AS ser on app.IdService WHERE prop.IdProposal = :idProposal";
+                    
+                        $auxData = DBManager::query($auxQuery, array(':idProposal' => $idProposal))[0];
+
+                        $folder = base64_encode($auxData['ServiceStandard']) . '/'. base64_encode($auxData['CompanyName']);
+
+                        $data['File'] = saveFile($data['File'], $folder, base64_encode("Proposal_(Acepted)_". $idProposal));
+                    }
+
                     $params[':file'] = $data['File'];
 
                     $params[':clientApprovedDate'] = $date->format('Y-m-d H:i:s');
@@ -399,6 +455,11 @@ switch ($url[5]) {
                 $params[':legalRepresentative'] = json_encode($data['LegalRepresentative']);
 
                 $query .= ", LegalRepresentative = :legalRepresentative";
+            }
+            if(isset($data['InitialYear'])){
+                $params[':initialYear'] = json_encode($data['InitialYear']);
+
+                $query .= ", InitialYear = :initialYear";
             }
 
             $query .= " WHERE IdProposal = :idProposal";

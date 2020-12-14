@@ -25,19 +25,19 @@
 /**
  * Función para guardar archivos decodificados en base64
  * @param string $base64 Datos del archivo (debe contener la extensión del archivo)
- * @param string $path Ruta de la carpeta enla que va a guardar el archivo
- * @param string $name Nombre con el que será guardado el archivo
+ * @param string $folder Ruta de la carpeta enla que va a guardar el archivo
+ * @param string $name Nombre con el que será guardado el archivo sin extensión
  * @return string|bool Regresa la URL con la que se accede al archivo o false en caso de fallar
  */
-function saveFile(string $base64, string $path, string $name) {
+function saveFile(string $base64, string $folder, string $name) {
     $extFiles = array(
         'png' => '.png',
         'pdf' => '.pdf',
         'jpeg' => '.jpg'
     );
 
-    $pathToFile = 'https://aarrin.com/mobile/app_resources/confirmation_letters/'.$path;
-    $pathToSave = __DIR__. "/../../app_resources/confirmation_letters/". $path;
+    $pathToFile = 'https://aarrin.com/mobile/app_resources/confirmation_letters/'.$folder;
+    $pathToSave = __DIR__. "/../../app_resources/confirmation_letters/". $folder;
 
     $start = strpos($base64, '/');
     $end = strpos($base64, ';');
@@ -187,7 +187,7 @@ switch ($url[5]) {
                 $letterData['TecnicalExperts'] = json_decode($letterData['TecnicalExperts'], true);
                 $letterData['Observers'] = json_decode($letterData['Observers'], true);
                 header(HTTP_CODE_200);
-                echo json_encode($contractData);
+                echo json_encode($letterData);
             }
         } else {
             header(HTTP_CODE_401);
@@ -281,11 +281,15 @@ switch ($url[5]) {
 
             $query = "UPDATE confirmation_letters SET IdContract = :idContract, LetterStatus = :letterStatus";
 
+            if ($data['IdLetterReviewer']) {
+                $params[':idLetterReviewer'] = $data['IdLetterReviewer'];
+                $query .= ", IdLetterReviewer = :idLetterReviewer";
+            }
+            
             if ($data['LetterApproved']) {
                 $params[':letterApproved'] = (int) $data['LetterApproved'];
                 $params[':letterApprovedDate'] = $currentDate;
-                $params[':idLetterReviewer'] = $data['IdLetterReviewer'];
-                $query .= ", LetterApproved = :letterApproved, LetterApprovedDate = :letterApprovedDate, IdLetterReviewer = :idLetterReviewer";
+                $query .= ", LetterApproved = :letterApproved, LetterApprovedDate = :letterApprovedDate";
             } else {
                 $params[':approved'] = (int) $data['Approved'];
                 $query .= ", LetterApproved = :letterApproved, LetterApprovedDate = null, IdLetterReviewer = :idLetterReviewer";
@@ -338,42 +342,42 @@ switch ($url[5]) {
 
             #### Sección para el manejo de archivos del cliente
             if(isset($data['ReviewReport'])){
-                $params[':reviewReport'] = strpos($data['ReviewReport'], '://aarrin.com') > 0 ? $data['ReviewReport'] : saveFile($data['ReviewReport'], $folder, base64_encode('Review_Report_by_Admin'));
+                $params[':reviewReport'] = strpos($data['ReviewReport'], '://aarrin.com') > 0 ? $data['ReviewReport'] : saveFile($data['ReviewReport'], $folder, base64_encode('Review_Report_by_Admin_'. $data['IdLetter']));
                 $query .= ", ReviewReport = :reviewReport";
             } else {
                 $query .= ", ReviewReport = null";
             }
 
             if(isset($data['InternalAuditReport'])){
-                $params[':internalAuditReport'] = strpos($data['InternalAuditReport'], '://aarrin.com') > 0 ? $data['InternalAuditReport'] : saveFile($data['InternalAuditReport'], $folder, base64_encode('Internal_Audit_Report'));
+                $params[':internalAuditReport'] = strpos($data['InternalAuditReport'], '://aarrin.com') > 0 ? $data['InternalAuditReport'] : saveFile($data['InternalAuditReport'], $folder, base64_encode('Internal_Audit_Report_'. $data['IdLetter']));
                 $query .= ", InternalAuditReport = :internalAuditReport";
             } else {
                 $query .= ", InternalAuditReport = null";
             }
 
             if(isset($data['ProcessManual'])){
-                $params[':processManual'] = strpos($data['ProcessManual'], '://aarrin.com') > 0 ? $data['ProcessManual'] : saveFile($data['ProcessManual'], $folder, base64_encode('Process_Manual'));
+                $params[':processManual'] = strpos($data['ProcessManual'], '://aarrin.com') > 0 ? $data['ProcessManual'] : saveFile($data['ProcessManual'], $folder, base64_encode('Process_Manual_'. $data['IdLetter']));
                 $query .= ", ProcessManual = :processManual";
             } else {
                 $query .= ", ProcessManual = null";
             }
 
             if(isset($data['ProcessInteractionMap'])){
-                $params[':processInteractionMap'] = strpos($data['ProcessInteractionMap'], '://aarrin.com') > 0 ? $data['ProcessInteractionMap'] : saveFile($data['ProcessInteractionMap'], $folder, base64_encode('Proccess_Iteraction_Map'));
+                $params[':processInteractionMap'] = strpos($data['ProcessInteractionMap'], '://aarrin.com') > 0 ? $data['ProcessInteractionMap'] : saveFile($data['ProcessInteractionMap'], $folder, base64_encode('Proccess_Iteraction_Map_'. $data['IdLetter']));
                 $query .= ", ProcessInteractionMap = :processInteractionMap";
             } else {
                 $query .= ", ProcessInteractionMap = null";
             }
 
             if(isset($data['OperationalControls'])){
-                $params[':operationalControls'] = strpos($data['OperationalControls'], '://aarrin.com') > 0 ? $data['OperationalControls'] : saveFile($data['OperationalControls'], $folder, base64_encode('Operational_Controls'));
+                $params[':operationalControls'] = strpos($data['OperationalControls'], '://aarrin.com') > 0 ? $data['OperationalControls'] : saveFile($data['OperationalControls'], $folder, base64_encode('Operational_Controls_'. $data['IdLetter']));
                 $query .= ", OperationalControls = :operationalControls";
             } else {
                 $query .= ", OperationalControls = null";
             }
 
             if(isset($data['HazardAnalysis'])){
-                $params[':hazardAnalysis'] = strpos($data['HazardAnalysis'], '://aarrin.com') > 0 ? $data['HazardAnalysis'] : saveFile($data['HazardAnalysis'], $folder, base64_encode('Hazard_Analisys'));
+                $params[':hazardAnalysis'] = strpos($data['HazardAnalysis'], '://aarrin.com') > 0 ? $data['HazardAnalysis'] : saveFile($data['HazardAnalysis'], $folder, base64_encode('Hazard_Analisys_'. $data['IdLetter']));
                 $query .= ", HazardAnalysis = :hazardAnalysis";
             } else {
                 $query .= ", HazardAnalysis = null";
