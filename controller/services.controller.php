@@ -210,9 +210,9 @@ switch ($url[5]) {
         }
 
         if (TokenTool::isValid($token)){
-            $serviceStandard    = $data['serviceStandard'];
-            $serviceShortName   = trim($data['serviceShortname']);
-            $description        = $data['serviceDescription'];
+            $serviceStandard    = $data['ServiceStandard'];
+            $serviceShortName   = trim($data['ServiceShortname']);
+            $description        = $data['ServiceDescription'];
 
             $params = array(
                 ':idService'          => $idService,
