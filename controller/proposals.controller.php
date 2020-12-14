@@ -335,7 +335,8 @@ switch ($url[5]) {
                 if(isset($data['InitialYear'])){
                     $params[':initialYear'] = $data['InitialYear'];
     
-                    $query .= ", InitialYear = :initialYear";
+                    $initialPart .= ", InitialYear";
+                    $values .= ", :initialYear";
                 }
 
                 $query = $initialPart. ") ". $values. ")";
