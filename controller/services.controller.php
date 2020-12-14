@@ -224,7 +224,7 @@ switch ($url[5]) {
             $query = "UPDATE services SET ServiceStandard = :serviceStandard, ServiceShortName = :serviceShortName, ServiceDescription = :serviceDescription";
             
             if(isset($data['ServiceStatus'])){
-                $serviceStatus            = $data['serviceStatus'];
+                $serviceStatus            = $data['ServiceStatus'];
                 $query                    .= ", ServiceStatus = :serviceStatus";
                 $params[':serviceStatus'] = $serviceStatus;
             }
