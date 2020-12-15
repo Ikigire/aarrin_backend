@@ -4,22 +4,20 @@
 *
 * Manejo de acciones sobre la tabla eventcalendar
 * Operaciones a utilizar y descripción a utilizar:
-
-* Solicitar todos los eventcalendars-> url: .../api/v1-2/eventcalendar/all, metodo: GET, datos-solicitados: {}
-
-* Solicitar todos los eventcalendars activos (Esta opción no necesitará token)-> url: .../api/v1-2/eventcalendar/allactive, metodo: GET, datos-solicitados: {}
-
-* Solicitar datos completos de un eventcalendar (ISO)-> url: .../api/v1-2/eventcalendar/get/:idEvent, metodo: GET, datos-solicitados: {}
-
-* Crear un nuevo eventcalendar-> url: .../api/v1-2/eventcalendar/add, metodo: POST, datos-solicitados: {standard: string, shortmane: string, description: string}
-
-* Editar los datos de un eventcalendar-> url: .../api/v1-2/eventcalendar/edit/:idEvent, metodo: PUT, datos-solicitados: {data: jsonString}
 *
-* @author Yael Alejandro Santana Michel
-* @author ya_el1995@hotmail.com
-*
+* Solicitar todos los eventcalendar de la fecha actual en adelante -> url: .../api/v1-2/eventcalendar/allmondeyyear metodo: GET
+* Solicita todos los eventCalendar del mes anterior, actual y posterior -> url: .../api/v1-2/eventcalendar/allcalendar metodo: GET
+* Solicita todos los notificaciones -> url: .../api/v1-2/eventcalendar/notificationcalendar  metodo: GET
+* Solicitar todos los Eventos del calentadarios proximos -> url: .../api/v1-2/eventcalendar/getall metodo: GET
+* Busqueda por ID de el calendario -> url: .../api/v1-2/eventcalendar/get metodo: GET
+* Crear un nuevo eventcalendar -> url: .../api/v1-2/eventcalendar/add metodo: POST
+* Editar los datos de un eventcalendar -> url: .../api/v1-2/eventcalendar/edit/:idEvent metodo: PUT
+* Editar el registro de la fecha del calendario url: .../api/v1-2/eventcalendar/editDate/:idEvent metodo: PUT
+* Eliminacion del registo del calendario url: .../api/v1-2/eventcalendar/delete/:idEvent metodo: DELETE
 * @package ari-mobile-api
 */
+
+
 /** 
  * @var int $idEvent ID Evento Calendar
  */
@@ -64,14 +62,29 @@ $eventColorPrimary = '';
  * @var string $eventColorSecundary color secundario de evento
  */
 $eventColorSecundary = '';
+
+/**
+ * @var string $eventAvailability
+ */
+$eventAvailability = ''; 
+/**
+ * @var string $eventConfirmation
+ */
+$eventConfirmation = ''; 
+/**
+ * @var string $eventAllDay 
+ */
+$eventAllDay = '';
 	
 switch ($url[5]) {
     /**
-     * Solicitar todos los eventcalendar-> 
-     * url: .../api/v1-2/eventcalendar/all, 
-     * metodo: GET, 
-     * datos-solicitados: {}
-     * @return jsonString Todos los registros
+     * Solicitar todos los eventcalendar de la fecha actual en adelante
+     * url: .../api/v1-2/eventcalendar/allmondeyyear,
+     * metodo: GET
+     * @param int idEmployee- ID del empleado, deberá ir al final de la url
+     * @param int idCompany- ID del empleado, deberá ir al final de la url
+     * @param date eventStart mes actual de la busqueda
+     * @return JsonString|null datos los proximos eventos
      */
     case 'allmondeyyear':
         if ($method !== 'GET') {
@@ -102,7 +115,13 @@ switch ($url[5]) {
         }
         break;
     /**
-     * 
+     * Solicita todos los eventCalendar del mes anterior, actual y posterior
+     * url: .../api/v1-2/eventcalendar/allcalendar,
+     * metodo: GET
+     * @param int idEmployee- ID del empleado, deberá ir al final de la url
+     * @param int idCompany- ID del compañia, deberá ir al final de la url
+     * @param date eventStart mes actual de la busqueda
+     * @return JsonString|null datos los proximos eventos
      */
     case 'allcalendar':
         if ($method !== 'GET') {
@@ -155,7 +174,13 @@ switch ($url[5]) {
         }
         break;
     /**
-     * 
+     * Solicita todos los notificaciones
+     * url: .../api/v1-2/eventcalendar/notificationcalendar,
+     * metodo: GET
+     * @param int idEmployee- ID del empleado, deberá ir al final de la url
+     * @param int idCompany- ID del compañia, deberá ir al final de la url
+     * @param date eventStart mes actual de la busqueda
+     * @return JsonString|null datos los proximos eventos
      */
     case 'notificationcalendar':
         if ($method !== 'GET') {
@@ -167,6 +192,13 @@ switch ($url[5]) {
             $eventStart = $_GET['eventStart'];
             if (TokenTool::isValid($token)){
                 $query = "SELECT `IdEvent`, personal.IdEmployee, personal.EmployeeName, personal.EmployeeLastName, personal.EmployeeEmail, personal.EmployeeRFC, companies.IdCompany,companies.CompanyName,companies.CompanyRFC, companies.CompanyLogo,companies.CompanyWebsite, event_calendar.IdLocalidad, `EventTitle`, `EventStart`, `EventEnd`, `EventTask`, `EventAddress`, `EventColorPrimary`, `EventColorSecundary`, `EventAvailability`, `EventConfirmation` FROM `event_calendar` INNER JOIN personal on personal.IdEmployee =  event_calendar.IdEmployee INNER JOIN companies on companies.IdCompany = event_calendar.IdCompany WHERE event_calendar.EventStart >= '$eventStart'";
+                if (isset($_GET['idCompany'])){
+                    $idCompany = $_GET['idCompany'];
+                    $query .= " AND `IdCompany` = $idCompany";
+                } else if (isset($_GET['idEmployee'])) {
+                    $IdEmployee = $_GET['idEmployee'];
+                    $query .= " AND `IdEmployee` = $IdEmployee";
+                }
                 $data = DBManager::query($query);
                 if ($data) {
                     header(HTTP_CODE_200);
@@ -180,69 +212,14 @@ switch ($url[5]) {
         }
         break;
     /**
-     * 
-     */
-    case 'notificationcalendaremployee':
-        if ($method !== 'GET') {
-            header('HTTP/1.1 405 Allow; GET');
-            exit();
-        }
-        if(isset($_GET['eventStart']) && isset($_GET['idEmployee'])){
-            
-            $eventStart = $_GET['eventStart'];
-            $idEmployee = (int) $_GET['idEmployee'];
-            if (TokenTool::isValid($token)){
-                $query = "SELECT `IdEvent`, personal.IdEmployee, personal.EmployeeName, personal.EmployeeLastName, personal.EmployeeEmail, personal.EmployeeRFC, companies.IdCompany,companies.CompanyName,companies.CompanyRFC, companies.CompanyLogo,companies.CompanyWebsite, event_calendar.IdLocalidad, `EventTitle`, `EventStart`, `EventEnd`, `EventTask`, `EventAddress`, `EventColorPrimary`, `EventColorSecundary` FROM `event_calendar` INNER JOIN personal on personal.IdEmployee =  event_calendar.IdEmployee INNER JOIN companies on companies.IdCompany = event_calendar.IdCompany WHERE companies.CompanyStatus = 'Active' and event_calendar.EventStart >= '$eventstart' AND personal.IdEmployee = $idEmployee";
-                $data = DBManager::query($query);
-                if ($data) {
-                    header(HTTP_CODE_200);
-                    echo json_encode($data);
-                }else{
-                    header(HTTP_CODE_204);
-                }
-            }
-        }
-        else {
-            header(HTTP_CODE_401);
-        }
-        break;
-
-
-    /**
-     * 
-     */
-    case 'notificationcalendarcompany':
-            if ($method !== 'GET') {
-                header('HTTP/1.1 405 Allow; GET');
-                exit();
-            }
-            if(isset($_GET['eventStart']) && isset($_GET['idCompany'])){
-                
-                $eventStart = $_GET['eventStart'];
-                $idCompany = (int) $_GET['idCompany'];
-                if (TokenTool::isValid($token)){
-                    $query = "SELECT `IdEvent`, personal.IdEmployee, personal.EmployeeName, personal.EmployeeLastName, personal.EmployeeEmail, personal.EmployeeRFC, companies.IdCompany,companies.CompanyName,companies.CompanyRFC, companies.CompanyLogo,companies.CompanyWebsite, event_calendar.IdLocalidad, `EventTitle`, `EventStart`, `EventEnd`, `EventTask`, `EventAddress`, `EventColorPrimary`, `EventColorSecundary`, `EventAvailability`, `EventConfirmation` FROM `event_calendar` INNER JOIN personal on personal.IdEmployee =  event_calendar.IdEmployee INNER JOIN companies on companies.IdCompany = event_calendar.IdCompany WHERE event_calendar.EventStart >= '$eventStart' AND companies.IdCompany = $idCompany";
-                    $data = DBManager::query($query);
-                    if ($data) {
-                        header(HTTP_CODE_200);
-                        echo json_encode($data);
-                    }else{
-                        header(HTTP_CODE_204);
-                    }
-                }
-            }
-            else {
-                header(HTTP_CODE_401);
-            }
-            break;
-    /**
-     * Solicitar datos completos de un eventcalendar (ISO)-> 
-     * url: .../api/v1-2/eventcalendar/get/:idEvent, 
-     * metodo: GET, 
-     * datos-solicitados: {}
-     * @param int idEvent- Id del eventcalendar, el cual deberá ir al final de la URL
-     * @return jsonString|null Los datos del eventcalendar con ese ID, 
-     */
+     * Solicitar todos los Eventos del calentadarios proximos
+     * url: .../api/v1-2/eventcalendar/getall,
+     * metodo: GET 
+     * @param int idEmployee- ID del empleado, deberá ir al final de la url
+     * @param int idCompany- ID del compañia, deberá ir al final de la url
+     * @param date eventStart mes actual de la busqueda
+     * @return JsonString|null datos los proximos eventos
+     */ 
     case 'getall':
         if ($method !== 'GET') {
             header('HTTP/1.1 405 Allow; GET');
@@ -276,7 +253,11 @@ switch ($url[5]) {
         }
         break;
     /**
-     * 
+     * busqueda por ID de el calendario
+     * url: .../api/v1-2/eventcalendar/get,
+     * metodo: GET
+     * @param int IdEvent- ID del evento, deberá ir al final de la url
+     * @return JsonString|null datos los proximos eventos
      */
     case 'get':
         if ($method !== 'GET') {
@@ -291,13 +272,13 @@ switch ($url[5]) {
         $idEvent = (int) $url[6];
 
         if (TokenTool::isValid($token)){
-            $query = "SELECT idEvent,eventcolorPrimary,eventcolorSecundary,eventstart,eventend FROM eventcalendar";
-            $data = DBManager::query($query, array(':id' => $idEvent));
+            $query = "SELECT `IdEvent`, `IdEmployee`, `IdCompany`, `IdLocalidad`, `EventTitle`, `EventStart`, `EventEnd`, `EventTask`, `EventAddress`, `EventColorPrimary`, `EventColorSecundary`, `EventAvailability`, `EventConfirmation`,`EventAllDay` FROM `event_calendar` WHERE IdEvent = :idEvent";
+            $data = DBManager::query($query, array(':idEvent' => $idEvent));
 
             if ($data) {
                 header(HTTP_CODE_200);
-                $companyData = $data[0];
-                echo json_encode($companyData);
+                $eventCalendarData = $data[0];
+                echo json_encode($eventCalendarData);
             } else {
                 header(HTTP_CODE_204);
             }
@@ -308,10 +289,10 @@ switch ($url[5]) {
 
 
     /**
-     * Crear un nuevo eventcalendar-> 
-     * url: .../api/v1-2/eventcalendar/add, 
-     * metodo: POST, 
-     * datos-solicitados: {eventstart: string, eventend: string, eventcolorPrimary: string, eventcolorSecundary: string}
+     * Crear un nuevo eventcalendar -> 
+     * url: .../api/v1-2/eventcalendar/add,
+     * metodo: POST
+     * datos-solicitados. {idEvent: int,idCompany: int,idLocalidad: int,idEmployee: int,eventTitle: string,eventStart: date,eventEnd: date,eventTask: string,eventAddress: string,eventColorPrimary: string,eventColorSecundary: string,eventAvailability: string,eventConfirmation: string,eventAllDay: string}
      */
     case 'add':
         if ($method !== 'POST') {
@@ -393,12 +374,12 @@ switch ($url[5]) {
 
 
     /**
-     * Editar los datos de un eventcalendar-> 
-     * url: .../api/v1-2/eventcalendar/edit/:idEvent, 
-     * metodo: PUT, 
-     * datos-solicitados: {data: jsonString}
-     * @param int idevent Id del eventcalendar, deberá ir al final de url
-     * @return jsonString Datos actualizados del eventcalendar ya actualizados
+     * Editar los datos de un eventcalendar -> 
+     * url: .../api/v1-2/eventcalendar/edit/:idEvent,
+     * metodo: PUT
+     * datos-solicitados. {data: jsonString} deberá ir en el cuerpo de la solicitud
+     * @param int IdEvent, deberá ir al final de la url
+     * @return jsonString Datos actualizados del calendario
      */
     case 'edit':
         if ($method !== 'PUT'){
@@ -486,8 +467,15 @@ switch ($url[5]) {
             header(HTTP_CODE_401);
         }        
 
-    break;
-
+        break;
+    /**
+     * Editar el registro de la fecha del calendario
+     * url: .../api/v1-2/eventcalendar/editDate/:idEvent,
+     * metodo: PUT
+     * datos-solicitados. {data: jsonString} deberá ir en el cuerpo de la solicitud
+     * @param int IdEvent, deberá ir al final de la url
+     * @return jsonString Datos actualizados del calendario
+     */
     case 'editDate':
         if ($method !== 'PUT'){
             header('HTTP/1.1 405 Allow: PUT');
@@ -537,8 +525,12 @@ switch ($url[5]) {
             header(HTTP_CODE_401);
         }        
 
-    break;
-
+        break;
+    /**
+     * Eliminacion del registo del calendario
+     * url: .../api/v1-2/eventcalendar/delete/:idEvent,
+     * metodo: DELETE
+     */
     case 'delete':
         if ($method !== 'DELETE') {
             header('HTTP/1.1 405 Allow: DELETE');
@@ -563,8 +555,10 @@ switch ($url[5]) {
         } else {
             header(HTTP_CODE_401);
         }
-    break;
-
+        break;
+    /**
+     * Error en la entrada
+     */
     default:
         header(HTTP_CODE_404);
         break;
