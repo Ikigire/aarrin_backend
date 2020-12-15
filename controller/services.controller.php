@@ -234,7 +234,7 @@ switch ($url[5]) {
                 $query = "SELECT IdService, ServiceStandard, ServiceShortName, ServiceStatus, ServiceDescription FROM services WHERE IdService = :idService";
                 $data = DBManager::query($query, array(':idService' => $idService));
                 header(HTTP_CODE_200);
-                echo json_encode($data[0]);
+                echo json_encode(array('Answer' => 'Actualized'));
             }else {
                 header(HTTP_CODE_409);
             }
