@@ -405,35 +405,75 @@ switch ($url[5]) {
             }
 
             if (isset($data['Stage1Date'])) {
-                $params[':stage1Date'] = $data['Stage1Date'];
+                $date = (string) $data['Stage1Date'];
+                if (!is_bool(strpos($date, 'T'))){
+                    $date = str_replace('T', ' ', $date);
+                }
+                if (!is_bool(strpos($date, '.'))) {
+                    $date = substr($date, 0, strrpos($date, '.'));
+                }
+                
+                $params[':stage1Date'] = $date;
                 $query .= ", Stage1Date = :stage1Date";
             } else {
                 $query .= ", Stage1Date = null";
             }
             
             if (isset($data['Stage2Date'])) {
-                $params[':stage2Date'] = $data['Stage2Date'];
+                $date = (string) $data['Stage2Date'];
+                if (!is_bool(strpos($date, 'T'))){
+                    $date = str_replace('T', ' ', $date);
+                }
+                if (!is_bool(strpos($date, '.'))) {
+                    $date = substr($date, 0, strrpos($date, '.'));
+                }
+
+                $params[':stage2Date'] = $date;
                 $query .= ", Stage2Date = :stage2Date";
             } else {
                 $query .= ", Stage2Date = null";
             }
             
             if (isset($data['Surveillance1Date'])) {
-                $params[':surveillance1Date'] = $data['Surveillance1Date'];
+                $date = (string) $data['Surveillance1Date'];
+                if (!is_bool(strpos($date, 'T'))){
+                    $date = str_replace('T', ' ', $date);
+                }
+                if (!is_bool(strpos($date, '.'))) {
+                    $date = substr($date, 0, strrpos($date, '.'));
+                }
+
+                $params[':surveillance1Date'] = $date;
                 $query .= ", Surveillance1Date = :surveillance1Date";
             } else {
                 $query .= ", Surveillance1Date = null";
             }
             
             if (isset($data['Surveillance2Date'])) {
-                $params[':surveillance2Date'] = $data['Surveillance2Date'];
+                $date = (string) $data['Surveillance2Date'];
+                if (!is_bool(strpos($date, 'T'))){
+                    $date = str_replace('T', ' ', $date);
+                }
+                if (!is_bool(strpos($date, '.'))) {
+                    $date = substr($date, 0, strrpos($date, '.'));
+                }
+
+                $params[':surveillance2Date'] = $date;
                 $query .= ", Surveillance2Date = :surveillance2Date";
             } else {
                 $query .= ", Surveillance2Date = null";
             }
             
             if (isset($data['RecertificationDate'])) {
-                $params[':recertificationDate'] = $data['RecertificationDate'];
+                $date = (string) $data['RecertificationDate'];
+                if (!is_bool(strpos($date, 'T'))){
+                    $date = str_replace('T', ' ', $date);
+                }
+                if (!is_bool(strpos($date, '.'))) {
+                    $date = substr($date, 0, strrpos($date, '.'));
+                }
+
+                $params[':recertificationDate'] = $date;
                 $query .= ", RecertificationDate = :recertificationDate";
             } else {
                 $query .= ", RecertificationDate = null";

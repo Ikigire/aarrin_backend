@@ -99,7 +99,7 @@ switch ($url[5]) {
             $data = DBManager::query($query);
             if ($data) {
                 for ($i=0; $i < count($data); $i++) { 
-                    $data[$i]['LetterApproved'] = (bool) $data[$i]['LetterApprove'];
+                    $data[$i]['LetterApproved'] = (bool) $data[$i]['LetterApproved'];
                     $data[$i]['LetterClientApprove'] = (bool) $data[$i]['LetterClientApprove'];
                     $data[$i]['IsBackToBack'] = (bool) $data[$i]['IsBackToBack'];
                 }
@@ -140,7 +140,7 @@ switch ($url[5]) {
 
             if ($data) {
                 for ($i=0; $i < count($data); $i++) { 
-                    $data[$i]['LetterApproved'] = (bool) $data[$i]['LetterApprove'];
+                    $data[$i]['LetterApproved'] = (bool) $data[$i]['LetterApproved'];
                     $data[$i]['LetterClientApprove'] = (bool) $data[$i]['LetterClientApprove'];
                     $data[$i]['IsBackToBack'] = (bool) $data[$i]['IsBackToBack'];
                 }
@@ -180,7 +180,7 @@ switch ($url[5]) {
             $data = DBManager::query($query, $params);
             if ($data) {
                 $letterData = $data[0];
-                $letterData['LetterApproved'] = (bool) $letterData['LetterApprove'];
+                $letterData['LetterApproved'] = (bool) $letterData['LetterApproved'];
                 $letterData['LetterClientApprove'] = (bool) $letterData['LetterClientApprove'];
                 $letterData['IsBackToBack'] = (bool) $letterData['IsBackToBack'];
                 $letterData['Auditors'] = json_decode($letterData['Auditors'], true);
@@ -265,9 +265,9 @@ switch ($url[5]) {
             $date = new DateTime("now");
             $currentDate = $date->format('Y-m-d H:i:s');
 
-            $query = "SELECT comp.CompanyName, ser.ServiceStandard FROM contracts AS con JOIN proposals AS prop on con.IdProposal=con.IdProposal JOIN days_calculation AS dc on prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp on app.IdCompany = comp.IdCompany JOIN services AS ser on app.IdService WHERE con.IdContract = :idContract";
+            $query = "SELECT com.CompanyName, ser.ServiceStandard FROM contracts AS con JOIN proposals AS pro ON pro.IdProposal = con.IdProposal JOIN days_calculation AS day ON day.IdDayCalculation = pro.IdDayCalculation JOIN applications AS app ON app.IdApp = day.IdApp JOIN companies AS com ON com.IdCompany = app.IdCompany JOIN services AS ser ON ser.IdService = app.IdService WHERE con.IdContract = :idContract";
             
-            $auxData = DBManager::query($query, array(':idProposal' => $data['IdContract']))[0];
+            $auxData = DBManager::query($query, array(':idContract' => $data['IdContract']))[0];
 
             $cancel = false;
 
@@ -291,8 +291,8 @@ switch ($url[5]) {
                 $params[':letterApprovedDate'] = $currentDate;
                 $query .= ", LetterApproved = :letterApproved, LetterApprovedDate = :letterApprovedDate";
             } else {
-                $params[':approved'] = (int) $data['Approved'];
-                $query .= ", LetterApproved = :letterApproved, LetterApprovedDate = null, IdLetterReviewer = :idLetterReviewer";
+                $params[':letterApproved'] = (int) $data['LetterApproved'];
+                $query .= ", LetterApproved = :letterApproved, LetterApprovedDate = null, IdLetterReviewer = null";
             }
 
             if ($data['LetterClientApprove']) {
@@ -301,7 +301,7 @@ switch ($url[5]) {
                 $query .= ", LetterClientApprove = :clientApprove, LetterClientApproveDate = :clientApproveDate";
             } else {
                 $params[':clientApprove'] = (int) $data['LetterClientApprove'];
-                $query .= ", LetterClientApprove = :clientApprove, LetterClientApproveDate = null, ClientFile = null";
+                $query .= ", LetterClientApprove = :clientApprove, LetterClientApproveDate = null";
             }
 
             if (isset($data['IdAuditLeader'])) {
