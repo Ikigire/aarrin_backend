@@ -100,7 +100,7 @@ switch ($url[5]) {
         $idSector = (int) $url[6];
 
         if (TokenTool::isValid($token)){
-            $query = "SELECT ml.IdMasterList, ml.ServiceShortName, sec.*, per.IdEmployee, per.EmployeeName, per.EmployeeLastName, per.EmployeeDegree, per.EmployeeRFC, per.EmployeePhoto FROM master_list AS ml JOIN sectors AS sec ON ml.IdSector = sec.IdSector JOIN personal AS per ON ml.IdEmployee = per.IdEmployee WHERE ml.IdSector = :idSector ORDER BY sec.IAF_MD5, sec.SectorRiskLevel, sec.SectorCategory, sec.SectorSubcategory, sec.SectorCluster";
+            $query = "SELECT ml.IdMasterList, per.IdEmployee, per.EmployeeName, per.EmployeeLastName, per.EmployeeDegree, per.EmployeeRFC, per.EmployeePhoto, per.EmployeeStatus FROM master_list AS ml JOIN sectors AS sec ON ml.IdSector = sec.IdSector JOIN personal AS per ON ml.IdEmployee = per.IdEmployee WHERE ml.IdSector = :idSector ORDER BY sec.IAF_MD5, sec.SectorRiskLevel, sec.SectorCategory, sec.SectorSubcategory, sec.SectorCluster";
 
             $data = DBManager::query($query, array(':idSector' => $idSector));
             if ($data) {
