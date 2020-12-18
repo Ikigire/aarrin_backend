@@ -292,7 +292,7 @@ switch ($url[5]) {
                 $query .= ", LetterApproved = :letterApproved, LetterApprovedDate = :letterApprovedDate";
             } else {
                 $params[':letterApproved'] = (int) $data['LetterApproved'];
-                $query .= ", LetterApproved = :letterApproved, LetterApprovedDate = null, IdLetterReviewer = null";
+                $query .= ", LetterApproved = :letterApproved, LetterApprovedDate = null";
             }
 
             if ($data['LetterClientApprove']) {
@@ -389,8 +389,6 @@ switch ($url[5]) {
                 echo json_encode(array('result' => 'Updated'));
             }else {
                 header(HTTP_CODE_409);
-                echo "<p>$query</p>";
-                print_r($params);
             }
         } else {
             header(HTTP_CODE_401);
