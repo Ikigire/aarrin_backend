@@ -248,7 +248,7 @@ switch ($url[5]) {
         }
 
         $data = json_decode(file_get_contents('php://input'), true);
-        if (!isset($data) || !isset($data['IdProposal']) || !isset($data['IdPersonal']) || !isset($data['IdService']) || !isset($data['File'])) {
+        if (!isset($data) || !isset($data['IdProposal']) || !isset($data['IdPersonal']) || !isset($data['IdService']) || !isset($data['File']) || !isset($data['CurrentStage'])) {
             header(HTTP_CODE_412);
             exit();
         }
@@ -278,10 +278,11 @@ switch ($url[5]) {
                 ':idPersonal'   => $data['IdPersonal'],
                 ':idService'    => $data['IdService'],
                 ':creationDate' => $currentDate,
+                ':currentStage' => $data['CurrentStage'],
                 ':file'         => $path
             );
 
-            $query = "INSERT INTO contracts (IdContract, IdProposal, IdPersonal, IdService, CreationDate, File) VALUES(null, :idProposal, :idPersonal, :idService, :creationDate, :file)";
+            $query = "INSERT INTO contracts (IdContract, IdProposal, IdPersonal, IdService, CreationDate, File, CurrentStage) VALUES(null, :idProposal, :idPersonal, :idService, :creationDate, :file. :currentStage)";
 
             $response = DBManager::query($query, $params);
             if ($response) {
@@ -336,10 +337,11 @@ switch ($url[5]) {
                 ':idProposal' => $data['IdProposal'],
                 ':idPersonal' => $data['IdPersonal'],
                 ':idService' => $data['IdService'],
-                ':contractStatus' => $data['ContractStatus']
+                ':contractStatus' => $data['ContractStatus'],
+                ':currentStage' => $data['CurrentStage']
             );
 
-            $query = "UPDATE contracts SET IdProposal = :idProposal, IdPersonal = :idPersonal, IdService = :idService, ContractStatus = :contractStatus";
+            $query = "UPDATE contracts SET IdProposal = :idProposal, IdPersonal = :idPersonal, IdService = :idService, ContractStatus = :contractStatus, CurrentStage = :currentStage";
 
             if ($data['Approve']) {
                 $params[':approve'] = (int) $data['Approve'];
