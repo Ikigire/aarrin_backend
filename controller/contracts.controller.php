@@ -282,7 +282,7 @@ switch ($url[5]) {
                 ':file'         => $path
             );
 
-            $query = "INSERT INTO contracts (IdContract, IdProposal, IdPersonal, IdService, CreationDate, File, CurrentStage) VALUES(null, :idProposal, :idPersonal, :idService, :creationDate, :file. :currentStage)";
+            $query = "INSERT INTO contracts (IdContract, IdProposal, IdPersonal, IdService, CreationDate, File, CurrentStage) VALUES(null, :idProposal, :idPersonal, :idService, :creationDate, :file, :currentStage)";
 
             $response = DBManager::query($query, $params);
             if ($response) {
