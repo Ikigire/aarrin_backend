@@ -142,6 +142,59 @@ switch ($url[5]) {
      * metodo: POST, 
      * datos-solicitados: {Message: string, URL: string, Role_Type: string}
      */
+
+    case 'getlimit':
+        if ($method !== 'GET') {
+            header('HTTP/1.1 405 Allow; GET');
+            exit();
+        }
+
+        if (TokenTool::isValid($token)){
+            $query = "SELECT IdNotification, IdEmployee, IdCompany, Role_Type, Message, URL, Viewed, NotificationDate FROM notifications";
+
+            if (isset($_GET['IdEmployee']) && trim($_GET['IdEmployee']) !== '') {
+                $idEmployee = $_GET['IdEmployee'];
+                $query .= " Where IdEmployee = :idEmployee";
+                $params[':idEmployee'] = $idEmployee;
+
+                if (isset($_GET['Role_Type'])) {
+                    $role = $_GET['Role_Type'];
+                    $query .= " OR Role_Type = :roleType";
+                    $params[':roleType'] = $role;
+                }
+            }
+
+            if (isset($_GET['IdCompany']) && trim($_GET['IdCompany']) !== '') {
+                $idCompany = $_GET['IdCompany'];
+                $query .= " Where IdCompany = :idCompany";
+                $params[':idCompany'] = $idCompany;
+            }
+
+            $registro = 0;
+            $limit = 0;
+            $query .= " ORDER BY NotificationDate DESC LIMIT ";
+            $registro = $_GET['registro'];
+            $query .= $registro;
+
+            $limit = $_GET['limit'];
+            $query .= ",";
+            $query .= $limit;
+
+            $data = DBManager::query($query, $params);
+
+            if ($data) {
+                header(HTTP_CODE_200);
+                for ($i=0; $i < count($data); $i++) { 
+                    $data[$i]['Viewed'] = (bool) $data[$i]['Viewed'];
+                }
+                echo json_encode($data);
+            } else {
+                header(HTTP_CODE_204);
+            }
+        } else {
+            header(HTTP_CODE_401);
+        }
+        break;
     case 'add':
         if ($method !== 'POST') {
             header('HTTP/1.1 405 Allow: POST');
