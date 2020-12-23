@@ -10,11 +10,11 @@
 
 switch ($url[5]) {
     /**
-     * 
+     * trae todos los datos del empleado y de la carta confirmacion
      * url: .../api/v1-2/,
      * metodo: GET
      */
-    case 'get':
+    case 'getall':
         if ($method !== 'GET') {
             header('HTTP/1.1 405 Allow; GET');
             exit();
@@ -42,6 +42,33 @@ switch ($url[5]) {
         }
         break;
 
+        case 'get':
+            if ($method !== 'GET') {
+                header('HTTP/1.1 405 Allow; GET');
+                exit();
+            }
+    
+            if (!isset($url[6])) {
+                header(HTTP_CODE_412);
+                exit();
+            }
+            $idEvent = (int) $url[6];
+    
+            if (TokenTool::isValid($token)){
+                $query = "SELECT `IdAuditPlan`, `IdLetter`, `AuditPlanDateStart`, `AuditPlanDateEnd`, `AuditPlanStatus`, `audit_planDatil`, `Technical_Report`, `Positive_Issues`, `Oppor_impro`, `Audit_Plant_Recommendation` FROM `audit_plan`";
+                $data = DBManager::query($query, array(':' => $idEvent));
+    
+                if ($data) {
+                    header(HTTP_CODE_200);
+                    $eventCalendarData = $data[0];
+                    echo json_encode($eventCalendarData);
+                } else {
+                    header(HTTP_CODE_204);
+                }
+            } else {
+                header(HTTP_CODE_401);
+            }
+            break;
 
     /**
      * 
@@ -56,64 +83,42 @@ switch ($url[5]) {
         }
 
         if(TokenTool::isValid($token)){
-            if(isset($_POST['eventStart']) && isset($_POST['eventEnd']) && isset($_POST['eventColorPrimary']) && isset($_POST['eventColorSecundary']) && isset($_POST['eventAllDay'])){
-                $eventTitle           = $_POST['eventTitle'];
-                $dateStart            = $_POST['eventStart'];
-                $eventStart           = date("Y-m-d H:i:s", strtotime($dateStart));           
-                $dateEnd              = $_POST['eventEnd'];
-                $eventEnd             = date("Y-m-d H:i:s", strtotime($dateEnd));           
-                $eventTask            = $_POST['eventTask'];
-                $eventAddress         = $_POST['eventAddress'];
-                $eventColorPrimary    = $_POST['eventColorPrimary'];
-                $eventColorSecundary  = $_POST['eventColorSecundary'];
-                $eventAvailability    = $_POST['eventAvailability'];
-                $eventConfirmation    = $_POST['eventConfirmation'];
-                $eventAllDay          = $_POST['eventAllDay'];
-
+            if( isset($_POST['auditPlanDateStart']) && isset($_POST['auditPlanDateEnd']) && isset($_POST['auditPlanStatus']) && isset($_POST['audit_planDatil'])){isset($_POST['technical_Report'])){isset($_POST['positive_Issues'])){isset($_POST['Oppor_impro'])){isset($_POST['audit_Plant_Recommendation'])){
                 
 
-                $initialPart = "INSERT INTO event_calendar(EventTitle, EventStart, EventEnd, EventTask, EventAddress, EventColorPrimary, EventColorSecundary, EventAvailability, EventConfirmation, EventAllDay";
-                $values = "VALUES (:eventTitle, :eventStart, :eventEnd, :eventTask, :eventAddress, :eventColorPrimary, :eventColorSecundary, :eventAvailability, :eventConfirmation, :eventAllDay";
+                $idLetter                   = $_POST['idLetter']) 
+                $auditPlanDateStart         = $_POST['auditPlanDateStart'];
+                $auditPlanDateStart         = date("Y-m-d H:i:s", strtotime($auditPlanDateStart));           
+                $auditPlanDateEnd           = $_POST['auditPlanDateEnd']; 
+                $auditPlanDateEnd           = date("Y-m-d H:i:s", strtotime($auditPlanDateEnd)); 
+                $auditPlanStatus            = $_POST['auditPlanStatus'];
+                $audit_planDatil            = $_POST['audit_planDatil'];
+                $technical_Report           = $_POST['technical_Report'];
+                $positive_Issues            = $_POST['positive_Issues'];
+                $oppor_impro                = $_POST['Oppor_impro'];
+                $audit_Plant_Recommendation = $_POST['audit_Plant_Recommendation'];
+                
+
+                $initialPart = "INSERT INTO `audit_plan`(`IdAuditPlan`, `IdLetter`, `AuditPlanDateStart`, `AuditPlanDateEnd`, `AuditPlanStatus`, `audit_planDatil`, `Technical_Report`, `Positive_Issues`, `Oppor_impro`, `Audit_Plant_Recommendation`";
+                $values = "VALUES ( :IdAuditPlan :IdLetter :AuditPlanDateStart :AuditPlanDateEnd :AuditPlanStatus :audit_planDatil :Technical_Report :Positive_Issues :Oppor_impro, :Audit_Plant_Recommendation";
 
                 $params = array(
-                    ':eventTitle'          => $eventTitle,
-                    ':eventStart'          => $eventStart,
-                    ':eventEnd'            => $eventEnd,
-                    ':eventTask'           => $eventTask,
-                    ':eventAddress'        => $eventAddress,
-                    ':eventColorPrimary'   => $eventColorPrimary,
-                    ':eventColorSecundary' => $eventColorSecundary,
-                    ':eventAvailability'   => $eventAvailability,
-                    ':eventConfirmation'   => $eventConfirmation,
-                    ':eventAllDay'         => $eventAllDay
+                    ':idLetter'                  = $idLetter,
+                    ':auditPlanDateStart'        = $auditPlanDateStart,
+                    ':auditPlanDateEnd'          = $auditPlanDateEnd,
+                    ':auditPlanStatus'           = $auditPlanStatus,
+                    ':audit_planDatil'           = $audit_planDatil,
+                    ':technical_Report'          = $technical_Report, 
+                    ':positive_Issues'           = $positive_Issues,
+                    ':oppor_impro'               = $Oppor_impro,
+                    ':audit_Plant_Recommendatio' = $audit_Plant_Recommendatio,
                 );
-
-                if (isset($_POST['idEmployee'])) {
-                    $idEmployee = $_POST['idEmployee'];
-                    $initialPart .= ", IdEmployee";
-                    $values .= ", :idEmployee";
-                    $params[':idEmployee'] = $idEmployee;
-                }
-
-                if (isset($_POST['idCompany'])) {
-                    $idCompany = $_POST['idCompany'];
-                    $initialPart .= ", IdCompany";
-                    $values .= ", :idCompany";
-                    $params[':idCompany'] = $idCompany;
-                }
-
-                if (isset($_POST['idLocalidad'])) {
-                    $idLocalidad = $_POST['idLocalidad'];
-                    $initialPart .= ", IdLocalidad";
-                    $values .= ", :idLocalidad";
-                    $params[':idLocalidad'] = $idLocalidad;
-                }
 
                 $query = $initialPart. ") ". $values. ")";
                 $response = DBManager::query($query, $params);
                 if ($response) {
                     header(HTTP_CODE_201);
-                    echo json_encode(array('IdEvent' => $response));
+                    echo json_encode(array('IdAuditPlan' => $response));
                 }else {
                     header(HTTP_CODE_409);
                 }
@@ -148,7 +153,7 @@ switch ($url[5]) {
         }
 
         
-        $idEvent = (int) $url[6];
+        $idLetter = (int) $url[6];
 
         $data = json_decode(file_get_contents('php://input'), true);
 
@@ -158,58 +163,39 @@ switch ($url[5]) {
         }
 
         if (TokenTool::isValid($token)){
-            $eventTitle           = $data['EventTitle'];
-            $dateStart            = $data['EventStart'];
-            $eventStart           = date("Y-m-d H:i:s", strtotime($dateStart));           
-            $dateEnd              = $data['EventEnd'];
-            $eventEnd             = date("Y-m-d H:i:s", strtotime($dateEnd));           
-            $eventTask            = $data['EventTask'];
-            $eventAddress         = $data['EventAddress'];
-            $eventColorPrimary    = $data['EventColorPrimary'];
-            $eventColorSecundary  = $data['EventColorSecundary'];
-            $eventAvailability    = $data['EventAvailability'];
-            $eventConfirmation    = $data['EventConfirmation'];
-            $eventAllDay          = $data['EventAllDay'];
+            $idLetter                   = $data['idLetter']) 
+            $auditPlanDateStart         = $data['auditPlanDateStart'];
+            $auditPlanDateStart         = date("Y-m-d H:i:s", strtotime($auditPlanDateStart));           
+            $auditPlanDateEnd           = $data['auditPlanDateEnd']; 
+            $auditPlanDateEnd           = date("Y-m-d H:i:s", strtotime($auditPlanDateEnd)); 
+            $auditPlanStatus            = $data['auditPlanStatus'];
+            $audit_planDatil            = $data['audit_planDatil'];
+            $technical_Report           = $data['technical_Report'];
+            $positive_Issues            = $data['positive_Issues'];
+            $oppor_impro                = $data['Oppor_impro'];
+            $audit_Plant_Recommendation = $data['audit_Plant_Recommendation'];
 
             $params = array(
-                ':eventTitle'          => $eventTitle,
-                ':eventStart'          => $eventStart,
-                ':eventEnd'            => $eventEnd,
-                ':eventTask'           => $eventTask,
-                ':eventAddress'        => $eventAddress,
-                ':eventColorPrimary'   => $eventColorPrimary,
-                ':eventColorSecundary' => $eventColorSecundary,
-                ':eventAvailability'   => $eventAvailability,
-                ':eventConfirmation'   => $eventConfirmation,
-                ':eventAllDay'         => $eventAllDay
+                ':idLetter' = $idLetter,
+                ':auditPlanDateStart' = $auditPlanDateStart,
+                ':auditPlanDateEnd' = $auditPlanDateEnd,
+                ':auditPlanStatus' = $auditPlanStatus
+                ':audit_planDatil' = $audit_planDatil, 
+                ':technical_Report' = $technical_Report, 
+                ':positive_Issues' = $positive_Issues,
+                ':oppor_impro' = $Oppor_impro,
+                ':audit_Plant_Recommendatio' = $audit_Plant_Recommendatio,
             );
             
 
-            $initialPart = "UPDATE event_calendar SET EventTitle = :eventTitle, EventStart = :eventStart, EventEnd = :eventEnd, EventTask = :eventTask, EventAddress = :eventAddress, EventColorPrimary = :eventColorPrimary, EventColorSecundary = :eventColorSecundary, EventAvailability = :eventAvailability, EventConfirmation = :eventConfirmation, EventAllDay = :eventAllDay";
-                
-            if (isset($data['IdEmployee']) && trim($data['IdEmployee']) !== '') {
-                $idEmployee = $data['IdEmployee'];
-                $initialPart .= ", IdEmployee = :idEmployee";
-                $params[':idEmployee'] = $idEmployee;
-            }
-
-            if (isset($data['IdCompany']) && trim($data['IdCompany']) !== '') {
-                $idCompany = $data['IdCompany'];
-                $initialPart .= ", IdCompany = :idCompany";
-                $params[':idCompany'] = $idCompany;
-            }
-
-            if (isset($data['IdLocalidad']) && trim($data['IdLocalidad']) !== '') {
-                $idLocalidad = $data['IdLocalidad'];
-                $initialPart .= ", IdLocalidad = :idLocalidad";
-                $params[':idLocalidad'] = $idLocalidad;
-            }
+            $initialPart = "UPDATE `audit_plan` SET `IdLetter`= :idLetter,`AuditPlanDateStart`= :auditPlanDateStart,`AuditPlanDateEnd`= :auditPlanDateEnd,`AuditPlanStatus`= :auditPlanStatus,`audit_planDatil`=:audit_planDati,`Technical_Report`=:Technical_Report,`Positive_Issues`=:positive_Issues,`Oppor_impro`=:oppor_impro,`Audit_Plant_Recommendation`= :audit_Plant_Recommendation";
+           
 
             $query = $initialPart;
             
 
-            $query .= " WHERE IdEvent = :idEvent";
-            $params[':idEvent'] = $idEvent;
+            $query .= " WHERE IdAuditPlan = :IdAuditPlan";
+            $params[':IdAuditPlan'] = $IdAuditPlan;
 
             if (DBManager::query($query, $params)){
                 header(HTTP_CODE_200);
@@ -253,14 +239,14 @@ switch ($url[5]) {
         }
 
         if (TokenTool::isValid($token)){
-            $dateStart            = $data['EventStart'];
-            $eventStart           = date("Y-m-d H:i:s", strtotime($dateStart));           
-            $dateEnd              = $data['EventEnd'];
-            $eventEnd             = date("Y-m-d H:i:s", strtotime($dateEnd));
+            $auditPlanDateStart = $data['auditPlanDateStart'];
+            $auditPlanDateStart = date("Y-m-d H:i:s", strtotime($auditPlanDateStart));           
+            $auditPlanDateEnd   = $data['auditPlanDateEnd']; 
+            $auditPlanDateEnd   = date("Y-m-d H:i:s", strtotime($auditPlanDateEnd)); 
 
             $params = array(
-                ':eventStart'          => $eventStart,
-                ':eventEnd'            => $eventEnd,
+                ':auditPlanDateStart' = $auditPlanDateStart,
+                ':auditPlanDateEnd' = $auditPlanDateEnd,
             );
             
 
