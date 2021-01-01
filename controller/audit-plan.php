@@ -8,6 +8,24 @@
 * @package ari-mobile-api
 */
 
+
+/**
+ * Método para convertir fechas de otros lenguages a PHP
+ * @param string $date Fecha a convertir
+ * @return string Retorna la fecha seteada y lista para enviar a la BD
+ */
+function convertDateTime(string $date){
+    $date = (string) $date;
+    if (!is_bool(strpos($date, 'T'))){
+        $date = str_replace('T', ' ', $date);
+    }
+    if (!is_bool(strpos($date, '.'))) {
+        $date = substr($date, 0, strrpos($date, '.'));
+    }
+
+    return $date;
+}
+
 switch ($url[5]) {
     /**
      * trae todos los datos del empleado y de la carta confirmacion
@@ -82,39 +100,27 @@ switch ($url[5]) {
             exit();
         }
 
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        if (!isset($data)){
+            header(HTTP_CODE_412);
+            exit();
+        }
+
         if(TokenTool::isValid($token)){
-            if( isset($_POST['auditPlanDateStart']) && isset($_POST['auditPlanDateEnd']) && isset($_POST['auditPlanStatus']) && isset($_POST['audit_planDatil'])){isset($_POST['technical_Report'])){isset($_POST['positive_Issues'])){isset($_POST['Oppor_impro'])){isset($_POST['audit_Plant_Recommendation'])){
-                
+            if(isset($data['IdLetter']) && isset($data['AuditPlanDateStart']) && isset($data['AuditPlanDateEnd']) && isset($data['Activities'])){
 
-                $idLetter                   = $_POST['idLetter']) 
-                $auditPlanDateStart         = $_POST['auditPlanDateStart'];
-                $auditPlanDateStart         = date("Y-m-d H:i:s", strtotime($auditPlanDateStart));           
-                $auditPlanDateEnd           = $_POST['auditPlanDateEnd']; 
-                $auditPlanDateEnd           = date("Y-m-d H:i:s", strtotime($auditPlanDateEnd)); 
-                $auditPlanStatus            = $_POST['auditPlanStatus'];
-                $audit_planDatil            = $_POST['audit_planDatil'];
-                $technical_Report           = $_POST['technical_Report'];
-                $positive_Issues            = $_POST['positive_Issues'];
-                $oppor_impro                = $_POST['Oppor_impro'];
-                $audit_Plant_Recommendation = $_POST['audit_Plant_Recommendation'];
-                
-
-                $initialPart = "INSERT INTO `audit_plan`(`IdAuditPlan`, `IdLetter`, `AuditPlanDateStart`, `AuditPlanDateEnd`, `AuditPlanStatus`, `audit_planDatil`, `Technical_Report`, `Positive_Issues`, `Oppor_impro`, `Audit_Plant_Recommendation`";
-                $values = "VALUES ( :IdAuditPlan :IdLetter :AuditPlanDateStart :AuditPlanDateEnd :AuditPlanStatus :audit_planDatil :Technical_Report :Positive_Issues :Oppor_impro, :Audit_Plant_Recommendation";
+                $initialPart = "INSERT INTO audit_plan(IdLetter, AuditPlanDateStart, AuditPlanDateEnd, Activities)";
+                $values = "VALUES (:IdLetter :auditPlanDateStart, :auditPlanDateEnd, :activities)";
 
                 $params = array(
-                    ':idLetter'                  = $idLetter,
-                    ':auditPlanDateStart'        = $auditPlanDateStart,
-                    ':auditPlanDateEnd'          = $auditPlanDateEnd,
-                    ':auditPlanStatus'           = $auditPlanStatus,
-                    ':audit_planDatil'           = $audit_planDatil,
-                    ':technical_Report'          = $technical_Report, 
-                    ':positive_Issues'           = $positive_Issues,
-                    ':oppor_impro'               = $Oppor_impro,
-                    ':audit_Plant_Recommendatio' = $audit_Plant_Recommendatio,
+                    ':idLetter'           => $data['IdLetter'],
+                    ':auditPlanDateStart' => convertDateTime($data['AuditPlanDateStart']),
+                    ':auditPlanDateEnd'   => convertDateTime($data['AuditPlanDateEnd']),
+                    ':activities'         => $data['Activities'],
                 );
 
-                $query = $initialPart. ") ". $values. ")";
+                $query = $initialPart. $values;
                 $response = DBManager::query($query, $params);
                 if ($response) {
                     header(HTTP_CODE_201);
@@ -163,39 +169,63 @@ switch ($url[5]) {
         }
 
         if (TokenTool::isValid($token)){
-            $idLetter                   = $data['idLetter']) 
-            $auditPlanDateStart         = $data['auditPlanDateStart'];
+            $idLetter                   = $data['IdLetter'];
+            $auditPlanDateStart         = $data['AuditPlanDateStart'];
             $auditPlanDateStart         = date("Y-m-d H:i:s", strtotime($auditPlanDateStart));           
             $auditPlanDateEnd           = $data['auditPlanDateEnd']; 
             $auditPlanDateEnd           = date("Y-m-d H:i:s", strtotime($auditPlanDateEnd)); 
-            $auditPlanStatus            = $data['auditPlanStatus'];
-            $audit_planDatil            = $data['audit_planDatil'];
-            $technical_Report           = $data['technical_Report'];
-            $positive_Issues            = $data['positive_Issues'];
+            $auditPlanStatus            = $data['AuditPlanStatus'];
+            $audit_planDatil            = $data['Activities'];
+            $technical_Report           = $data['Technical_Report'];
+            $positive_Issues            = $data['Positive_Issues'];
             $oppor_impro                = $data['Oppor_impro'];
-            $audit_Plant_Recommendation = $data['audit_Plant_Recommendation'];
+            $audit_Plant_Recommendation = $data['Audit_Plant_Recommendation'];
+
 
             $params = array(
-                ':idLetter' = $idLetter,
-                ':auditPlanDateStart' = $auditPlanDateStart,
-                ':auditPlanDateEnd' = $auditPlanDateEnd,
-                ':auditPlanStatus' = $auditPlanStatus
-                ':audit_planDatil' = $audit_planDatil, 
-                ':technical_Report' = $technical_Report, 
-                ':positive_Issues' = $positive_Issues,
-                ':oppor_impro' = $Oppor_impro,
-                ':audit_Plant_Recommendatio' = $audit_Plant_Recommendatio,
+                ':auditPlanDateStart' => convertDateTime($data['AuditPlanDateStart']),
+                ':auditPlanDateEnd'   => convertDateTime($data['AuditPlanDateEnd']),
+                ':activities'         => $data['Activities'],
             );
             
 
-            $initialPart = "UPDATE `audit_plan` SET `IdLetter`= :idLetter,`AuditPlanDateStart`= :auditPlanDateStart,`AuditPlanDateEnd`= :auditPlanDateEnd,`AuditPlanStatus`= :auditPlanStatus,`audit_planDatil`=:audit_planDati,`Technical_Report`=:Technical_Report,`Positive_Issues`=:positive_Issues,`Oppor_impro`=:oppor_impro,`Audit_Plant_Recommendation`= :audit_Plant_Recommendation";
-           
+            $query = "UPDATE audit_plan SET AuditPlanDateStart= :auditPlanDateStart, AuditPlanDateEnd = :auditPlanDateEnd";
 
-            $query = $initialPart;
-            
+            if(isset($data['AuditPlanStatus'])){
+                $params[':auditPlanStatus'] = $data['AuditPlanStatus']; 
+                $query .= ", AuditPlanStatus = :auditPlanStatus";
+            }
 
-            $query .= " WHERE IdAuditPlan = :IdAuditPlan";
-            $params[':IdAuditPlan'] = $IdAuditPlan;
+            if(isset($data['Technical_Report'])){
+                $params[':technical_Report'] = $data['Technical_Report'];
+                $query .= ", Technical_Report = :technical_Report";
+            } else {
+                $query .= ", Technical_Report = null";
+            }
+
+            if(isset($data['Positive_Issues'])){
+                $params[':positive_Issues'] = $data['Positive_Issues'];
+                $query .= ", Positive_Issues = :positive_Issues";
+            } else {
+                $query .= ", Positive_Issues = null";
+            }
+
+            if(isset($data['Oppor_Improve'])){
+                $params[':oppor_Improve'] = $data['Oppor_Improve'];
+                $query .= ", Oppor_Improve = :oppor_Improve";
+            } else {
+                $query .= ", Oppor_Improve = null";
+            }
+
+            if(isset($data['Audit_Plan_Recommendation'])){
+                $params[':audit_Plan_Recommendation'] = $data['Audit_Plan_Recommendation'];
+                $query .= ", Audit_Plan_Recommendation = :audit_Plan_Recommendation";
+            } else {
+                $query .= ", Audit_Plan_Recommendation = null";
+            }            
+
+            $query .= " WHERE IdAuditPlan = :idAuditPlan";
+            $params[':idAuditPlan'] = $IdAuditPlan;
 
             if (DBManager::query($query, $params)){
                 header(HTTP_CODE_200);
@@ -209,64 +239,7 @@ switch ($url[5]) {
         }        
 
         break;
-    /**
-     * 
-     * url: .../api/v1-2/
-     * metodo: PUT
-     * datos-solicitados. {data: jsonString} deberá ir en el cuerpo de la solicitud
-     * @param int
-     * @return jsonString
-     */
-    case 'editDate':
-        if ($method !== 'PUT'){
-            header('HTTP/1.1 405 Allow: PUT');
-            exit();
-        }
 
-        if (!isset($url[6])) {
-            header(HTTP_CODE_412);
-            exit();
-        }
-
-        
-        $idEvent = (int) $url[6];
-
-        $data = json_decode(file_get_contents('php://input'), true);
-
-        if (!isset($data)){
-            header(HTTP_CODE_412);
-            exit();
-        }
-
-        if (TokenTool::isValid($token)){
-            $auditPlanDateStart = $data['auditPlanDateStart'];
-            $auditPlanDateStart = date("Y-m-d H:i:s", strtotime($auditPlanDateStart));           
-            $auditPlanDateEnd   = $data['auditPlanDateEnd']; 
-            $auditPlanDateEnd   = date("Y-m-d H:i:s", strtotime($auditPlanDateEnd)); 
-
-            $params = array(
-                ':auditPlanDateStart' = $auditPlanDateStart,
-                ':auditPlanDateEnd' = $auditPlanDateEnd,
-            );
-            
-
-            $query = "UPDATE event_calendar SET EventStart = :eventStart, EventEnd = :eventEnd";
-                            
-            $query .= " WHERE IdEvent = :idEvent";
-            $params[':idEvent'] = $idEvent;
-
-            if (DBManager::query($query, $params)){
-                header(HTTP_CODE_200);
-                echo json_encode($data);
-            }else {
-                header(HTTP_CODE_409);
-            }
-
-        } else {
-            header(HTTP_CODE_401);
-        }        
-
-        break;
     /**
      * Error en la entrada
      */

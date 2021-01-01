@@ -25,6 +25,23 @@
 
 
 /**
+ * Método para convertir fechas de otros lenguages a PHP
+ * @param string $date Fecha a convertir
+ * @return string Retorna la fecha seteada y lista para enviar a la BD
+ */
+function convertDateTime(string $date){
+    $date = (string) $date;
+    if (!is_bool(strpos($date, 'T'))){
+        $date = str_replace('T', ' ', $date);
+    }
+    if (!is_bool(strpos($date, '.'))) {
+        $date = substr($date, 0, strrpos($date, '.'));
+    }
+
+    return $date;
+}
+
+/**
  * Función para guardar archivos decodificados en base64
  * @param string $base64 Datos del archivo (debe contener la extensión del archivo)
  * @param string $folder Ruta de la carpeta enla que va a guardar el archivo
@@ -407,75 +424,35 @@ switch ($url[5]) {
             }
 
             if (isset($data['Stage1Date'])) {
-                $date = (string) $data['Stage1Date'];
-                if (!is_bool(strpos($date, 'T'))){
-                    $date = str_replace('T', ' ', $date);
-                }
-                if (!is_bool(strpos($date, '.'))) {
-                    $date = substr($date, 0, strrpos($date, '.'));
-                }
-                
-                $params[':stage1Date'] = $date;
+                $params[':stage1Date'] = convertDateTime($data['Stage1Date']);
                 $query .= ", Stage1Date = :stage1Date";
             } else {
                 $query .= ", Stage1Date = null";
             }
             
             if (isset($data['Stage2Date'])) {
-                $date = (string) $data['Stage2Date'];
-                if (!is_bool(strpos($date, 'T'))){
-                    $date = str_replace('T', ' ', $date);
-                }
-                if (!is_bool(strpos($date, '.'))) {
-                    $date = substr($date, 0, strrpos($date, '.'));
-                }
-
-                $params[':stage2Date'] = $date;
+                $params[':stage2Date'] = convertDateTime($data['Stage2Date']);
                 $query .= ", Stage2Date = :stage2Date";
             } else {
                 $query .= ", Stage2Date = null";
             }
             
             if (isset($data['Surveillance1Date'])) {
-                $date = (string) $data['Surveillance1Date'];
-                if (!is_bool(strpos($date, 'T'))){
-                    $date = str_replace('T', ' ', $date);
-                }
-                if (!is_bool(strpos($date, '.'))) {
-                    $date = substr($date, 0, strrpos($date, '.'));
-                }
-
-                $params[':surveillance1Date'] = $date;
+                $params[':surveillance1Date'] = convertDateTime($data['Surveillance1Date']);
                 $query .= ", Surveillance1Date = :surveillance1Date";
             } else {
                 $query .= ", Surveillance1Date = null";
             }
             
             if (isset($data['Surveillance2Date'])) {
-                $date = (string) $data['Surveillance2Date'];
-                if (!is_bool(strpos($date, 'T'))){
-                    $date = str_replace('T', ' ', $date);
-                }
-                if (!is_bool(strpos($date, '.'))) {
-                    $date = substr($date, 0, strrpos($date, '.'));
-                }
-
-                $params[':surveillance2Date'] = $date;
+                $params[':surveillance2Date'] = convertDateTime($data['Surveillance2Date']);
                 $query .= ", Surveillance2Date = :surveillance2Date";
             } else {
                 $query .= ", Surveillance2Date = null";
             }
             
             if (isset($data['RecertificationDate'])) {
-                $date = (string) $data['RecertificationDate'];
-                if (!is_bool(strpos($date, 'T'))){
-                    $date = str_replace('T', ' ', $date);
-                }
-                if (!is_bool(strpos($date, '.'))) {
-                    $date = substr($date, 0, strrpos($date, '.'));
-                }
-
-                $params[':recertificationDate'] = $date;
+                $params[':recertificationDate'] = convertDateTime($data['RecertificationDate']);
                 $query .= ", RecertificationDate = :recertificationDate";
             } else {
                 $query .= ", RecertificationDate = null";
