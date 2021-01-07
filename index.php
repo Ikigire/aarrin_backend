@@ -360,6 +360,21 @@ if ($url[3] === 'v1-2') {
             require_once('controller/confirmation_letter.controller.php');
             break;
 
+
+        /**
+         *   ______________________________
+         *  /    CARTAS DE CONFIRMACIÓN    \
+         * |                                |
+         * |  TABLA PARA EL MANEJO DE LOS   |
+         * |     EVENTOS DEL CALENDARIO     |
+         * |                                |
+         *  \______________________________/
+         * 
+         */
+        case 'audit_plans':
+            require_once('controller/audit-plan.controller.php');
+            break;
+
         default:
             header(HTTP_CODE_404);
             break;
