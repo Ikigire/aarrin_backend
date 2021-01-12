@@ -73,7 +73,7 @@ function saveFile(string $base64, string $folder, string $name) {
         if (!file_exists($pathToSave)) {
             !mkdir($pathToSave, 0777, true);
             $htaccess = fopen($pathToSave. '/.htaccess', 'w+b');
-            fwrite($htaccess, "Header set Access-Control-Allow-Origin \"aarrin.com\"");
+            fwrite($htaccess, "Header set Access-Control-Allow-Origin \"https://aarrin.com\"");
             fflush($htaccess);
             fclose($htaccess);
          }

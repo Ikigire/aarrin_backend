@@ -41,11 +41,16 @@ switch ($url[5]) {
         }
 
         if (TokenTool::isValid($token)) {
-            $query = "SELECT * FROM audit_plan_listview";
+            $query = "SELECT ap.IdAuditPlan, con.IdContract, cl.IdLetter, ap.AuditPlanApproved, ap.AuditPlanReviewDate, ap.AuditPlanCreationDate, ap.AuditPlanStatus, cl.Auditors, cl.TecnicalExperts, comp.*, ser.*, sec.* FROM audit_plan AS ap JOIN confirmation_letters AS cl ON ap.IdLetter = cl.IdLetter JOIN contracts AS con ON cl.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector ORDER BY ap.AuditPlanCreationDate DESC";
             $data = DBManager::query($query);
 
             if ($data) {
                 header(HTTP_CODE_200);
+                for ($i=0; $i < count($data); $i++) { 
+                    $data[$i]['IdAuditPlan']           = (int) $data[$i]['IdAuditPlan'];
+                    $data[$i]['IdLetter']              = (int) $data[$i]['IdLetter'];
+                    $data[$i]['AuditPlanApproved']     = (bool) $data[$i]['AuditPlanApproved'];
+                }
                 echo json_encode($data);
             } else {
                 header(HTTP_CODE_204);
@@ -73,13 +78,17 @@ switch ($url[5]) {
         $idCompany = (int) $url[6];
 
         if (TokenTool::isValid($token)) {
-            $query = "SELECT * FROM audit_plan_listview WHERE IdCompany = :idCompany";
+            $query = "SELECT ap.IdAuditPlan, con.IdContract, cl.IdLetter, ap.AuditPlanApproved, ap.AuditPlanReviewDate, ap.AuditPlanCreationDate, ap.AuditPlanStatus, comp.*, ser.*, sec.* FROM audit_plan AS ap JOIN confirmation_letters AS cl ON ap.IdLetter = cl.IdLetter JOIN contracts AS con ON cl.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector WHERE comp.IdCompany = :idCompany ORDER BY ap.AuditPlanCreationDate DESC";
             $data = DBManager::query($query, array(':idCompany' => $idCompany));
 
             if ($data) {
                 header(HTTP_CODE_200);
-                $eventCalendarData = $data[0];
-                echo json_encode($eventCalendarData);
+                for ($i=0; $i < count($data); $i++) { 
+                    $data[$i]['IdAuditPlan']           = (int) $data[$i]['IdAuditPlan'];
+                    $data[$i]['IdLetter']              = (int) $data[$i]['IdLetter'];
+                    $data[$i]['AuditPlanApproved']     = (bool) $data[$i]['AuditPlanApproved'];
+                }
+                echo json_encode($data);
             } else {
                 header(HTTP_CODE_204);
             }
@@ -114,12 +123,9 @@ switch ($url[5]) {
                 $auditPlan['IdAuditPlan'] = (int) $auditPlan['IdAuditPlan'];
                 $auditPlan['IdLetter'] = (int) $auditPlan['IdLetter'];
                 $auditPlan['IdPlanReviewer'] = $auditPlan['IdPlanReviewer'] ? (int) $auditPlan['IdPlanReviewer'] : null;
-                $auditPlan['AuditPlanReviewDate'] = $auditPlan['AuditPlanReviewDate'] ? new DateTime($auditPlan['AuditPlanReviewDate']) : null;
                 $auditPlan['AuditPlanApproved'] = (bool) $auditPlan['AuditPlanApproved'];
-                $auditPlan['AuditPlanCreationDate'] = new DateTime($auditPlan['AuditPlanCreationDate']);
-                $auditPlan['AuditPlanDateStart'] = new DateTime($auditPlan['AuditPlanDateStart']);
-                $auditPlan['AuditPlanDateEnd'] = new DateTime($auditPlan['AuditPlanDateEnd']);
                 $auditPlan['AuditPlanActivities'] = json_decode($auditPlan['AuditPlanActivities']);
+                $auditPlan['AuditPlanSitesDate'] = json_decode($auditPlan['AuditPlanSitesDate']);
                 echo json_encode($auditPlan);
             } else {
                 header(HTTP_CODE_404);
@@ -149,18 +155,18 @@ switch ($url[5]) {
         }
 
         if (TokenTool::isValid($token)) {
-            if (isset($data['IdLetter']) && isset($data['AuditPlanDateStart']) && isset($data['AuditPlanDateEnd']) && isset($data['AuditPlanActivities'])) {
+            if (isset($data['IdLetter']) && isset($data['AuditPlanSitesDate']) && isset($data['AuditPlanObjetives']) && isset($data['AuditPlanActivities'])) {
                 $date = new DateTime("now");
                 $currentDate = $date->format('Y-m-d H:i:s');
 
-                $initialPart = "INSERT INTO audit_plan(IdLetter, AuditPlanCreationDate, AuditPlanDateStart, AuditPlanDateEnd, AuditPlanActivities";
-                $values = "VALUES (:idLetter, :planCreationDate, :auditPlanDateStart, :auditPlanDateEnd, :activities";
+                $initialPart = "INSERT INTO audit_plan(IdLetter, AuditPlanCreationDate, AuditPlanSitesDate, AuditPlanObjetives, AuditPlanActivities";
+                $values = "VALUES (:idLetter, :planCreationDate, :auditPlanSitesDate, :auditPlanObjetives, :activities";
 
                 $params = array(
                     ':idLetter'           => $data['IdLetter'],
                     ':planCreationDate'   => $currentDate,
-                    ':auditPlanDateStart' => convertDateTime($data['AuditPlanDateStart']),
-                    ':auditPlanDateEnd'   => convertDateTime($data['AuditPlanDateEnd']),
+                    ':auditPlanSitesDate' => json_encode($data['AuditPlanSitesDate']),
+                    ':auditPlanObjetives' => $data['AuditPlanObjetives'],
                     ':activities'         => json_encode($data['AuditPlanActivities']),
                 );
 
@@ -213,48 +219,83 @@ switch ($url[5]) {
         }
 
         if (TokenTool::isValid($token)) {
-            $date = new DateTime("now");
-            $currentDate = $date->format('Y-m-d H:i:s');
+            if (isset($data['IdLetter']) && isset($data['AuditPlanSitesDate']) && isset($data['AuditPlanObjetives']) && isset($data['AuditPlanActivities'])) {
+                $date = new DateTime("now");
+                $currentDate = $date->format('Y-m-d H:i:s');
 
 
-            $params = array(
-                ':auditPlanDateStart' => convertDateTime($data['AuditPlanDateStart']),
-                ':auditPlanDateEnd'   => convertDateTime($data['AuditPlanDateEnd']),
-                ':activities'         => json_encode($data['AuditPlanActivities']),
-            );
+                $params = array(
+                    ':auditPlanSitesDate' => json_encode($data['AuditPlanSitesDate']),
+                    ':auditPlanObjetives' => $data['AuditPlanObjetives'],
+                    ':activities'         => json_encode($data['AuditPlanActivities']),
+                );
 
 
-            $query = "UPDATE audit_plan SET AuditPlanDateStart= :auditPlanDateStart, AuditPlanDateEnd = :auditPlanDateEnd, AuditPlanActivities = :activities";
+                $query = "UPDATE audit_plan SET AuditPlanSitesDate= :auditPlanSitesDate, AuditPlanObjetives = :auditPlanObjetives, AuditPlanActivities = :activities";
 
-            if (isset($data['AuditPlanStatus'])) {
-                $params[':auditPlanStatus'] = $data['AuditPlanStatus'];
-                $query .= ", AuditPlanStatus = :auditPlanStatus";
-            }
+                if (isset($data['AuditPlanStatus'])) {
+                    $params[':auditPlanStatus'] = $data['AuditPlanStatus'];
+                    $query .= ", AuditPlanStatus = :auditPlanStatus";
+                }
 
-            if (isset($data['AuditPlanApproved'])) {
-                $params[':auditPlanApproved'] = (int) $data['AuditPlanApproved'];
-                $params[':idPlanReviewer'] = $data['IdPlanReviewer'];
-                $params[':approvedDate'] = $currentDate;
-                $query .= ", AuditPlanApproved = :auditPlanApproved, IdPlanReviewer = :idPlanReviewer, AuditPlanReviewDate = :approvedDate";
+                if (isset($data['AuditPlanApproved'])) {
+                    $params[':auditPlanApproved'] = (int) $data['AuditPlanApproved'];
+                    $params[':idPlanReviewer'] = $data['IdPlanReviewer'];
+                    $params[':approvedDate'] = $currentDate;
+                    $query .= ", AuditPlanApproved = :auditPlanApproved, IdPlanReviewer = :idPlanReviewer, AuditPlanReviewDate = :approvedDate";
+                } else {
+                    $params[':auditPlanApproved'] = (int) $data['AuditPlanApproved'];
+                    $query .= ", AuditPlanApproved = :auditPlanApproved, IdPlanReviewer = null, AuditPlanReviewDate = null";
+                }
+
+                $query .= " WHERE IdAuditPlan = :idAuditPlan";
+                $params[':idAuditPlan'] = $idAuditPlan;
+
+                if (DBManager::query($query, $params)) {
+                    header(HTTP_CODE_200);
+                    echo json_encode($data);
+                } else {
+                    header(HTTP_CODE_409);
+                }
             } else {
-                $params[':auditPlanApproved'] = (int) $data['AuditPlanApproved'];
-                $query .= ", AuditPlanApproved = :auditPlanApproved, IdPlanReviewer = null, AuditPlanReviewDate = null";
-            }
-
-            $query .= " WHERE IdAuditPlan = :idAuditPlan";
-            $params[':idAuditPlan'] = $idAuditPlan;
-
-            if (DBManager::query($query, $params)) {
-                header(HTTP_CODE_200);
-                echo json_encode($data);
-            } else {
-                header(HTTP_CODE_409);
+                header(HTTP_CODE_412);
             }
         } else {
             header(HTTP_CODE_401);
         }
 
         break;
+
+        case 'delete':
+            if ($method !== 'DELETE') {
+                header('HTTP/1.1 405 Allow: PUT');
+                exit();
+            }
+    
+            if (!isset($url[6])) {
+                $idAuditPlan = (int)$url[6];
+                header(HTTP_CODE_412);
+                exit();
+            }
+
+            if (TokenTool::isValid($token)) {
+                $params = array(
+                    ':id' => $idAuditPlan
+                );
+
+                $query = "DELETE FROM audit_plan WHERE IdAuditPlan = :id";
+
+                if (DBManager::query($query, $params)) {
+                    header(HTTP_CODE_200);
+                    echo json_encode(array('Deleted' => true));
+                } else {
+                    header(HTTP_CODE_409);
+                }
+            } else {
+                header(HTTP_CODE_401);
+            }
+    
+            break;
 
         /**
          * Error en la entrada
