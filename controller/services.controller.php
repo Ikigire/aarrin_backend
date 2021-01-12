@@ -137,7 +137,41 @@ switch ($url[5]) {
             header(HTTP_CODE_401);
         }
         break;
+    /**
+     * Solicitar datos completos de un servicio (ISO)-> 
+     * url: .../api/v1-2/services/get/:ServiceShortName, 
+     * metodo: GET, 
+     * datos-solicitados: {}
+     * @param int ServiceShortName- nombre del servicio, el cual deberá ir al final de la URL
+     * @return jsonString|null Los datos del servicio con ese ID, 
+     */
+    case 'getName':
+        if ($method !== 'GET') {
+            header('HTTP/1.1 405 Allow; GET');
+            exit();
+        }
 
+        if (!isset($url[6])) {
+            header(HTTP_CODE_412);
+            exit();
+        }
+        $ServiceShortName = $url[6];
+
+        if (TokenTool::isValid($token)){
+            $query = "SELECT IdService, ServiceStandard, ServiceShortName, ServiceStatus, ServiceDescription FROM services WHERE ServiceShortName = :ServiceShortName";
+            $data = DBManager::query($query, array(':ServiceShortName' => $ServiceShortName));
+
+            if ($data) {
+                header(HTTP_CODE_200);
+                $companyData = $data[0];
+                echo json_encode($companyData);
+            } else {
+                header(HTTP_CODE_204);
+            }
+        } else {
+            header(HTTP_CODE_401);
+        }
+        break;
 
     /**
      * Crear un nuevo servicio-> 
