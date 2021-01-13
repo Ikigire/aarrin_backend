@@ -50,6 +50,8 @@ switch ($url[5]) {
                     $data[$i]['IdAuditPlan']           = (int) $data[$i]['IdAuditPlan'];
                     $data[$i]['IdLetter']              = (int) $data[$i]['IdLetter'];
                     $data[$i]['AuditPlanApproved']     = (bool) $data[$i]['AuditPlanApproved'];
+                    $data[$i]['Auditors']     = json_decode($data[$i]['Auditors']);
+                    $data[$i]['TecnicalExperts']     = json_decode($data[$i]['TecnicalExperts']);
                 }
                 echo json_encode($data);
             } else {

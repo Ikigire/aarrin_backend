@@ -94,7 +94,7 @@ switch ($url[5]) {
         }
 
         if (TokenTool::isValid($token)){
-            $query = "SELECT con.IdContract, cl.IdLetter, cl.LetterCreationDate, cl.LetterApproved, cl.LetterApprovedDate, cl.LetterClientApprove, cl.LetterClientApproveDate, cl.IsBackToBack, cl.LetterStatus, comp.*, ser.*, sec.* FROM confirmation_letters AS cl JOIN contracts AS con ON cl.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector ORDER BY cl.LetterCreationDate DESC";
+            $query = "SELECT con.IdContract, cl.IdLetter, cl.LetterCreationDate, cl.LetterApproved, cl.LetterApprovedDate, cl.LetterClientApprove, cl.LetterClientApproveDate, cl.IsBackToBack, cl.LetterStatus, cl.Auditors, cl.TecnicalExperts, comp.*, ser.*, sec.* FROM confirmation_letters AS cl JOIN contracts AS con ON cl.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector ORDER BY cl.LetterCreationDate DESC";
 
             $data = DBManager::query($query);
             if ($data) {
@@ -102,6 +102,8 @@ switch ($url[5]) {
                     $data[$i]['LetterApproved'] = (bool) $data[$i]['LetterApproved'];
                     $data[$i]['LetterClientApprove'] = (bool) $data[$i]['LetterClientApprove'];
                     $data[$i]['IsBackToBack'] = (bool) $data[$i]['IsBackToBack'];
+                    $data[$i]['Auditors'] = json_decode($data[$i]['Auditors']);
+                    $data[$i]['TecnicalExperts'] = json_decode($data[$i]['TecnicalExperts']);
                 }
                 header(HTTP_CODE_200);
                 echo json_encode($data);
