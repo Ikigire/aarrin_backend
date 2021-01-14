@@ -1098,6 +1098,36 @@ INSERT INTO `validation_keys` (`IdKey`, `ValidationCode`, `ValidationDate`, `Val
 (26, 'OV7RN6', '2020-11-26 12:23:27', 'mary_sele06@hotmail.com'),
 (27, '0CW2SJ', '2020-11-26 12:30:36', 'handergarciatores@gmail.com');
 
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `tech_report`
+--
+
+CREATE TABLE `tech_report` (
+  `idTechReport` int(100) NOT NULL,
+  `idAuditPlan` int(100) NOT NULL,
+  `idQuestion` int(100) NOT NULL,
+  `st1` text,
+  `st1compliance` tinyint(1) DEFAULT '0',
+  `st2` text,
+  `st2compliance` tinyint(1) DEFAULT '0',
+  `surv1` text,
+  `surv1compliance` tinyint(1) DEFAULT '0',
+  `surv2` text,
+  `surv2compliance` tinyint(1) DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Volcado de datos para la tabla `tech_report`
+--
+
+INSERT INTO `tech_report` (`idTechReport`, `idAuditPlan`, `idQuestion`, `st1`, `st1compliance`, `st2`, `st2compliance`, `surv1`, `surv1compliance`, `surv2`, `surv2compliance`) VALUES
+(2, 1, 2, 'hander', 0, 'garcia ', 0, NULL, 1, 'Torres', 0),
+(3, 1, 5, 'hander', 1, '', 0, '', 1, 'ojñjñj', 0),
+(4, 1, 6, 'hander', 1, NULL, 0, NULL, 1, 'ojñjñj', 0),
+(5, 1, 8, '<p>yael esta bien feo</p>', 0, '', 0, '', 0, '', 0);
+
 --
 -- Índices para tablas volcadas
 --
@@ -1208,6 +1238,12 @@ ALTER TABLE `validation_keys`
   ADD PRIMARY KEY (`IdKey`);
 
 --
+-- Indices de la tabla `tech_report`
+--
+ALTER TABLE `tech_report`
+  ADD PRIMARY KEY (`idTechReport`);
+
+--
 -- AUTO_INCREMENT de las tablas volcadas
 --
 
@@ -1312,6 +1348,13 @@ ALTER TABLE `services`
 --
 ALTER TABLE `validation_keys`
   MODIFY `IdKey` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+COMMIT;
+
+--
+-- AUTO_INCREMENT de la tabla `tech_report`
+--
+ALTER TABLE `tech_report`
+  MODIFY `idTechReport` int(100) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
