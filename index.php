@@ -375,6 +375,20 @@ if ($url[3] === 'v1-2') {
             require_once('controller/audit-plan.controller.php');
             break;
 
+        /**
+         *   ______________________________
+         *  /          TECH REPORT         \
+         * |                                |
+         * |  TABLA PARA EL MANEJO DE LAS   |
+         * |    PREGUNTAS DE TECH REPORT    |
+         * |                                |
+         *  \______________________________/
+         * 
+         */
+        case 'tech_report':
+            require_once('controller/tech_report.controller.php');
+            break;
+
         default:
             header(HTTP_CODE_404);
             break;
