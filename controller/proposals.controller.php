@@ -483,6 +483,33 @@ switch ($url[5]) {
         }        
 
         break;
+    case 'fileFailedProposal':
+            if ($method !== 'PUT'){
+                header('HTTP/1.1 405 Allow: PUT');
+                exit();
+            }
+    
+            if (!isset($url[6])) {
+                header(HTTP_CODE_412);
+                exit();
+            }
+            $idProposal = (int) $url[6];
+
+            if (TokenTool::isValid($token)){
+
+                $query = "UPDATE proposals SET ProposalStatus = 'Waiting for client approvement' WHERE IdProposal = :idProposal";
+                $params = array(':idProposal' => $idProposal);
+                // $response = DBManager::query($query, $params);
+                if (DBManager::query($query, $params)) {
+                    header(HTTP_CODE_200);
+                    echo json_encode($data);
+                } else {
+                    header(HTTP_CODE_409);
+                }
+            } else {
+                header(HTTP_CODE_401);
+            }
+        break;
 
     default:
         header(HTTP_CODE_404);
