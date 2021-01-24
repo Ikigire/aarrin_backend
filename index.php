@@ -32,6 +32,7 @@ define('HTTP_CODE_201', "HTTP/1.1 201 Created");
 define('HTTP_CODE_204', "HTTP/1.1 204 Not Found");
 define('HTTP_CODE_205', 'HTTP/1.1 205 Reset Content');
 define('HTTP_CODE_401', "HTTP/1.1 401 Unauthorized");
+define('HTTP_CODE_400', "HTTP/1.1 400 Bad Request");
 define('HTTP_CODE_403', 'HTTP/1.1 403 Forbidden');
 define('HTTP_CODE_404', "HTTP/1.1 404 Not Found");
 define('HTTP_CODE_409', "HTTP/1.1 409 Conflict with the Server");
@@ -387,6 +388,20 @@ if ($url[3] === 'v1-2') {
          */
         case 'tech_report':
             require_once('controller/tech_report.controller.php');
+            break;
+
+        /**
+         *   ______________________________
+         *  /     REPORTE DE AUDITORÍA     \
+         * |                                |
+         * |  TABLA PARA EL MANEJO DE LOS   |
+         * |     REPORTES DE AUDITORÍAS     |
+         * |           REALIZADAS           |
+         *  \______________________________/
+         * 
+         */
+        case 'audit_reports':
+            require_once('controller/audit_report.controller.php');
             break;
 
         default:

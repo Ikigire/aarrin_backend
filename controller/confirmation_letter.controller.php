@@ -9,6 +9,8 @@
 
 * Solicitar las cartas de confirmación de una compañía-> url: .../api/v1-2/confimation_letters/company/:idCompany, metodo: GET, datos-solicitados: {}
 
+* Solicitrar las cartas de confirmación asociadas con un contrato-> .../api/v1-2/confirmation_letter/contract/:idContract, método: GET, datos-solicitados: {}
+
 * Solicitar la información de una carta de confirmación-> url: .../api/v1-2/confimation_letters/get/:idLetter, metodo: GET, datos-solicitados: {}
 
 * Crear una nueva carta de confirmación-> url: .../api/v1-2/confimation_letters/add, metodo: POST, datos-solicitados: {data: jsonString}
@@ -102,6 +104,7 @@ switch ($url[5]) {
                     $data[$i]['LetterApproved'] = (bool) $data[$i]['LetterApproved'];
                     $data[$i]['LetterClientApprove'] = (bool) $data[$i]['LetterClientApprove'];
                     $data[$i]['IsBackToBack'] = (bool) $data[$i]['IsBackToBack'];
+                    $data[$i]['IsClosureAudit'] = (bool) $data[$i]['IsClosureAudit'];
                     $data[$i]['Auditors'] = json_decode($data[$i]['Auditors']);
                     $data[$i]['TecnicalExperts'] = json_decode($data[$i]['TecnicalExperts']);
                 }
@@ -145,6 +148,49 @@ switch ($url[5]) {
                     $data[$i]['LetterApproved'] = (bool) $data[$i]['LetterApproved'];
                     $data[$i]['LetterClientApprove'] = (bool) $data[$i]['LetterClientApprove'];
                     $data[$i]['IsBackToBack'] = (bool) $data[$i]['IsBackToBack'];
+                    $data[$i]['IsClosureAudit'] = (bool) $data[$i]['IsClosureAudit'];
+                }
+                header(HTTP_CODE_200);
+                echo json_encode($data);
+            }
+        } else {
+            header(HTTP_CODE_401);
+        }
+        break;
+    
+    /**
+     * Solicitrar las cartas de confirmación asociadas con un contrato->
+     * .../api/v1-2/confirmation_letters/contract/:idContract, 
+     * método: GET, 
+     * datos-solicitados: {}
+     * @param int idContract ID del contrato a buscar, deberá ir al final de la URL
+     * @return jsonString|null Todas las cartas de confirmación asociadas a un contrato
+     */
+    case 'contract':
+        if ($method !== 'GET') {
+            header('HTTP/1.1 405 Allow; GET');
+            exit();
+        }
+
+        if (!isset($url[6])) {
+            header(HTTP_CODE_412);
+            exit();
+        }
+        $idContract = (int) $url[6];
+
+        if (TokenTool::isValid($token)){
+            $query = "SELECT con.IdContract, cl.IdLetter, cl.LetterCreationDate, cl.LetterApproved, cl.LetterApprovedDate, cl.LetterClientApprove, cl.LetterClientApproveDate, cl.IsBackToBack, cl.LetterStatus, comp.*, ser.*, sec.* FROM confirmation_letters AS cl JOIN contracts AS con ON cl.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector WHERE con.IdContract = :idContract ORDER BY cl.LetterCreationDate DESC";
+
+            $params = array(':idContract' => $idContract);
+
+            $data = DBManager::query($query, $params);
+
+            if ($data) {
+                for ($i=0; $i < count($data); $i++) { 
+                    $data[$i]['LetterApproved'] = (bool) $data[$i]['LetterApproved'];
+                    $data[$i]['LetterClientApprove'] = (bool) $data[$i]['LetterClientApprove'];
+                    $data[$i]['IsBackToBack'] = (bool) $data[$i]['IsBackToBack'];
+                    $data[$i]['IsClosureAudit'] = (bool) $data[$i]['IsClosureAudit'];
                 }
                 header(HTTP_CODE_200);
                 echo json_encode($data);
@@ -156,7 +202,7 @@ switch ($url[5]) {
 
     /**
      * Solicitar la información de una carta de confirmación-> 
-     * url: .../api/v1-2/confimation_letters/get/:idLetter, 
+     * url: .../api/v1-2/confirmation_letters/get/:idLetter, 
      * metodo: GET, 
      * datos-solicitados: {}
      * @param int IdLetter ID de la carta de confirmación solicitada, deberá ir al final de la url
@@ -185,6 +231,7 @@ switch ($url[5]) {
                 $letterData['LetterApproved'] = (bool) $letterData['LetterApproved'];
                 $letterData['LetterClientApprove'] = (bool) $letterData['LetterClientApprove'];
                 $letterData['IsBackToBack'] = (bool) $letterData['IsBackToBack'];
+                $letterData['IsClosureAudit'] = (bool) $letterData['IsClosureAudit'];
                 $letterData['Auditors'] = json_decode($letterData['Auditors'], true);
                 $letterData['TecnicalExperts'] = json_decode($letterData['TecnicalExperts'], true);
                 $letterData['Observers'] = json_decode($letterData['Observers'], true);
@@ -209,7 +256,7 @@ switch ($url[5]) {
         }
 
         $data = json_decode(file_get_contents('php://input'), true);
-        if (!isset($data) || !isset($data['IdContract'])) {
+        if (!isset($data) || !isset($data['IdContract']) || !isset($data['AuditStage']) || !isset($data['IsClosureAudit'])) {
             header(HTTP_CODE_412);
             exit();
         }
@@ -218,12 +265,84 @@ switch ($url[5]) {
             $date = new DateTime("now");
             $currentDate = $date->format('Y-m-d H:i:s');
 
+            $initialPart = "INSERT INTO confirmation_letters (IdLetter, IdContract, LetterCreationDate, AuditStage, IsClosureAudit";
+            $valuesPart  = "Values (null, :idContract, :letterCreationDate, :auditStage, :isClosureAudit";
+
             $params = array(
-                ':idContract'   => $data['IdContract'],
-                ':letterCreationDate' => $currentDate
+                ':idContract'         => $data['IdContract'],
+                ':letterCreationDate' => $currentDate,
+                ':auditStage'         => (int) $data['AuditStage'],
+                ':isClosureAudit'     => (int) $data['IsClosureAudit'],
             );
 
-            $query = "INSERT INTO confirmation_letters (IdLetter, IdContract, LetterCreationDate) VALUES(null, :idContract, :letterCreationDate)";
+            if ($data['IdLetterReviewer']) {
+                $params[':idLetterReviewer'] = $data['IdLetterReviewer'];
+                $initialPart .= ", IdLetterReviewer";
+                $valuesPart  .= ", :idLetterReviewer";
+            }
+
+            if (isset($data['IdAuditLeader'])) {
+                $params[':idAuditLeader'] = $data['IdAuditLeader'];
+                $initialPart .= ", IdAuditLeader";
+                $valuesPart  .= ", :idAuditLeader";
+            }
+
+            if (isset($data['Auditors'])) {
+                $params[':auditors'] = json_encode($data['Auditors']);
+                $initialPart .= ", Auditors";
+                $valuesPart  .= ", :auditors";
+            }
+
+            if (isset($data['TecnicalExperts'])) {
+                $params[':tecnicalExperts'] = json_encode($data['TecnicalExperts']);
+                $initialPart .= ", TecnicalExperts";
+                $valuesPart  .= ", :tecnicalExperts";
+            }
+
+            if (isset($data['Observers'])) {
+                $params[':observers'] = json_encode($data['Observers']);
+                $initialPart .= ", Observers";
+                $valuesPart  .= ", :observers";
+            }
+
+            #### Sección para el manejo de archivos del cliente
+            if(isset($data['ReviewReport'])){
+                $params[':reviewReport'] = strpos($data['ReviewReport'], '://aarrin.com') > 0 ? $data['ReviewReport'] : saveFile($data['ReviewReport'], $folder, base64_encode('Review_Report_by_Admin_'. $data['IdLetter']));
+                $initialPart .= ", ReviewReport";
+                $valuesPart  .= ", :reviewReport";
+            }
+
+            if(isset($data['InternalAuditReport'])){
+                $params[':internalAuditReport'] = strpos($data['InternalAuditReport'], '://aarrin.com') > 0 ? $data['InternalAuditReport'] : saveFile($data['InternalAuditReport'], $folder, base64_encode('Internal_Audit_Report_'. $data['IdLetter']));
+                $initialPart .= ", InternalAuditReport";
+                $valuesPart  .= ", :internalAuditReport";
+            }
+
+            if(isset($data['ProcessManual'])){
+                $params[':processManual'] = strpos($data['ProcessManual'], '://aarrin.com') > 0 ? $data['ProcessManual'] : saveFile($data['ProcessManual'], $folder, base64_encode('Process_Manual_'. $data['IdLetter']));
+                $initialPart .= ", ProcessManual";
+                $valuesPart  .= ", :processManual";
+            }
+
+            if(isset($data['ProcessInteractionMap'])){
+                $params[':processInteractionMap'] = strpos($data['ProcessInteractionMap'], '://aarrin.com') > 0 ? $data['ProcessInteractionMap'] : saveFile($data['ProcessInteractionMap'], $folder, base64_encode('Proccess_Iteraction_Map_'. $data['IdLetter']));
+                $initialPart .= ", ProcessInteractionMap";
+                $valuesPart  .= ", :processInteractionMap";
+            }
+
+            if(isset($data['OperationalControls'])){
+                $params[':operationalControls'] = strpos($data['OperationalControls'], '://aarrin.com') > 0 ? $data['OperationalControls'] : saveFile($data['OperationalControls'], $folder, base64_encode('Operational_Controls_'. $data['IdLetter']));
+                $initialPart .= ", OperationalControls";
+                $valuesPart  .= ", :operationalControls";
+            }
+
+            if(isset($data['HazardAnalysis'])){
+                $params[':hazardAnalysis'] = strpos($data['HazardAnalysis'], '://aarrin.com') > 0 ? $data['HazardAnalysis'] : saveFile($data['HazardAnalysis'], $folder, base64_encode('Hazard_Analisys_'. $data['IdLetter']));
+                $initialPart .= ", HazardAnalysis";
+                $valuesPart  .= ", :hazardAnalysis";
+            }
+
+            $query = $initialPart. ") ". $valuesPart. ")";
 
             $response = DBManager::query($query, $params);
             if ($response) {
