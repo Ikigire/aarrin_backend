@@ -96,7 +96,7 @@ switch ($url[5]) {
         }
 
         if (TokenTool::isValid($token)){
-            $query = "SELECT con.IdContract, cl.IdLetter, cl.LetterCreationDate, cl.LetterApproved, cl.LetterApprovedDate, cl.LetterClientApprove, cl.LetterClientApproveDate, cl.IsBackToBack, cl.LetterStatus, cl.Auditors, cl.TecnicalExperts, comp.*, ser.*, sec.* FROM confirmation_letters AS cl JOIN contracts AS con ON cl.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector ORDER BY cl.LetterCreationDate DESC";
+            $query = "SELECT con.IdContract, cl.IdLetter, cl.LetterCreationDate, cl.LetterApproved, cl.LetterApprovedDate, cl.LetterClientApprove, cl.LetterClientApproveDate, cl.IsBackToBack, cl.IsClosureAudit, cl.LetterStatus, cl.Auditors, cl.TecnicalExperts, comp.*, ser.*, sec.* FROM confirmation_letters AS cl JOIN contracts AS con ON cl.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector ORDER BY cl.LetterCreationDate DESC";
 
             $data = DBManager::query($query);
             if ($data) {
@@ -137,7 +137,7 @@ switch ($url[5]) {
         $idCompany = (int) $url[6];
 
         if (TokenTool::isValid($token)){
-            $query = "SELECT con.IdContract, cl.IdLetter, cl.LetterCreationDate, cl.LetterApproved, cl.LetterApprovedDate, cl.LetterClientApprove, cl.LetterClientApproveDate, cl.IsBackToBack, cl.LetterStatus, comp.*, ser.*, sec.* FROM confirmation_letters AS cl JOIN contracts AS con ON cl.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector WHERE comp.IdCompany = :idCompany ORDER BY cl.LetterCreationDate DESC";
+            $query = "SELECT con.IdContract, cl.IdLetter, cl.LetterCreationDate, cl.LetterApproved, cl.LetterApprovedDate, cl.LetterClientApprove, cl.LetterClientApproveDate, cl.IsBackToBack, cl.IsClosureAudit, cl.LetterStatus, comp.*, ser.*, sec.* FROM confirmation_letters AS cl JOIN contracts AS con ON cl.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector WHERE comp.IdCompany = :idCompany ORDER BY cl.LetterCreationDate DESC";
 
             $params = array(':idCompany' => $idCompany);
 
@@ -179,7 +179,7 @@ switch ($url[5]) {
         $idContract = (int) $url[6];
 
         if (TokenTool::isValid($token)){
-            $query = "SELECT con.IdContract, cl.IdLetter, cl.LetterCreationDate, cl.LetterApproved, cl.LetterApprovedDate, cl.LetterClientApprove, cl.LetterClientApproveDate, cl.IsBackToBack, cl.LetterStatus, comp.*, ser.*, sec.* FROM confirmation_letters AS cl JOIN contracts AS con ON cl.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector WHERE con.IdContract = :idContract ORDER BY cl.LetterCreationDate DESC";
+            $query = "SELECT con.IdContract, cl.IdLetter, cl.LetterCreationDate, cl.LetterApproved, cl.LetterApprovedDate, cl.LetterClientApprove, cl.LetterClientApproveDate, cl.IsBackToBack, cl.IsClosureAudit, cl.LetterStatus, comp.*, ser.*, sec.* FROM confirmation_letters AS cl JOIN contracts AS con ON cl.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector WHERE con.IdContract = :idContract ORDER BY cl.LetterCreationDate DESC";
 
             $params = array(':idContract' => $idContract);
 
