@@ -71,6 +71,23 @@ function saveFile(string $base64, string $folder, string $name) {
 }
 
 /**
+ * Método para convertir fechas de otros lenguages a PHP
+ * @param string $date Fecha a convertir
+ * @return string Retorna la fecha seteada y lista para enviar a la BD
+ */
+function convertDateTime(string $date){
+    $date = (string) $date;
+    if (!is_bool(strpos($date, 'T'))){
+        $date = str_replace('T', ' ', $date);
+    }
+    if (!is_bool(strpos($date, '.'))) {
+        $date = substr($date, 0, strrpos($date, '.'));
+    }
+
+    return $date;
+}
+
+/**
  * @var int $idLetter ID de la carta de confirmación
  */
 $idLetter = -1;
@@ -256,7 +273,7 @@ switch ($url[5]) {
         }
 
         $data = json_decode(file_get_contents('php://input'), true);
-        if (!isset($data) || !isset($data['IdContract']) || !isset($data['AuditStage']) || !isset($data['IsClosureAudit'])) {
+        if (!isset($data) || !isset($data['IdContract']) || !isset($data['AuditStage'])) {
             header(HTTP_CODE_412);
             exit();
         }
@@ -401,6 +418,12 @@ switch ($url[5]) {
             );
 
             $query = "UPDATE confirmation_letters SET IdContract = :idContract, LetterStatus = :letterStatus";
+
+
+            if ($data['IsClosureAudit']) {
+                $params[':closureAuditDate'] = convertDateTime($data['ClosureAuditDate']);
+                $query .= ", ClosureAuditDate = :closureAuditDate";
+            }
 
             if ($data['IdLetterReviewer']) {
                 $params[':idLetterReviewer'] = $data['IdLetterReviewer'];

@@ -9,6 +9,8 @@
 
 * Solicitar la información de un reporte de auditoría por su ID-> url: .../api/v1-2/audit_reports/audit_report/:idAuditReport, metodo: GET, datos-solicitados: {}
 
+* Solicitar la información de un reporte de auditoría por su Contrato y Etapa de auditoría-> url: .../api/v1-2/audit_reports/contract_stage/:idContract/:auditStage, metodo: GET, datos-solicitados: {}
+
 * Registrar un nuevo reporte de auditoría-> url: .../api/v1-2/audit_reports/create, metodo: POST, datos-solicitados: {auditReport: jsonString}
 
 * Editar los datos de un reporte de auditoría ya registrado-> url: .../api/v1-2/audit_reports/edit/:idAuditReport, metodo: PUT, datos-solicitados: {auditReport: jsonString}
@@ -69,6 +71,23 @@ function saveFile(string $base64, string $folder, string $name) {
 }
 
 /**
+ * Método para convertir fechas de otros lenguages a PHP
+ * @param string $date Fecha a convertir
+ * @return string Retorna la fecha seteada y lista para enviar a la BD
+ */
+function convertDateTime(string $date){
+    $date = (string) $date;
+    if (!is_bool(strpos($date, 'T'))){
+        $date = str_replace('T', ' ', $date);
+    }
+    if (!is_bool(strpos($date, '.'))) {
+        $date = substr($date, 0, strrpos($date, '.'));
+    }
+
+    return $date;
+}
+
+/**
  * @var int $idAuditReport ID del reporte de auditoría
  */
 $idAuditReport = 0;
@@ -115,6 +134,7 @@ switch ($url[5]) {
                 $auditReport['ExtraAuditObjetives'] = json_decode($auditReport['ExtraAuditObjetives'], true);
                 $auditReport['Acceptance'] = json_decode($auditReport['Acceptance'], true);
                 $auditReport['AuditProgram'] = json_decode($auditReport['AuditProgram'], true);
+                $auditReport['CompanyRepresentative'] = json_decode($auditReport['CompanyRepresentative'], true);
                 $auditReport['ContinueNextStage'] = (bool) $auditReport['ContinueNextStage'];
                 $auditReport['ContinueAfterIssuesSolved'] = (bool) $auditReport['ContinueAfterIssuesSolved'];
                 $auditReport['ClosureAuditNeeded'] = (bool) $auditReport['ClosureAuditNeeded'];
@@ -166,6 +186,7 @@ switch ($url[5]) {
                 $auditReport['ExtraAuditObjetives'] = json_decode($auditReport['ExtraAuditObjetives'], true);
                 $auditReport['Acceptance'] = json_decode($auditReport['Acceptance'], true);
                 $auditReport['AuditProgram'] = json_decode($auditReport['AuditProgram'], true);
+                $auditReport['CompanyRepresentative'] = json_decode($auditReport['CompanyRepresentative'], true);
                 $auditReport['ContinueNextStage'] = (bool) $auditReport['ContinueNextStage'];
                 $auditReport['ContinueAfterIssuesSolved'] = (bool) $auditReport['ContinueAfterIssuesSolved'];
                 $auditReport['ClosureAuditNeeded'] = (bool) $auditReport['ClosureAuditNeeded'];
@@ -182,6 +203,64 @@ switch ($url[5]) {
 
         break;
 
+    /**
+     * Solicitar la información de un reporte de auditoría por su Contrato y Etapa de auditoría-> 
+     * url: .../api/v1-2/audit_reports/contract_stage/:idContract/:auditStage, 
+     * metodo: GET, 
+     * datos-solicitados: {}
+     * @param int idContract ID del contrato al que pertenece el reporte de auditoría
+     * @param int auditStage Número de la etapa que se busca
+     * @return jsonString|null Respuesta con los datos solicitados
+     */
+    case 'contract_stage':
+        if ($method !== 'GET') {
+            header('HTTP/1.1 405 Allow; GET');
+            exit();
+        }
+
+        if(!isset($url[6])){
+            header(HTTP_CODE_412);
+            exit();
+        }
+        $idContract = (int) $url[6];
+
+        if(!isset($url[7])){
+            header(HTTP_CODE_412);
+            exit();
+        }
+        $auditStage = (int) $url[7];
+
+        if(TokenTool::isValid($token)){
+            $query = "SELECT ar.* FROM audit_report AS ar JOIN audit_plan AS ap on ar.IdAuditPlan = ap.IdAuditPlan JOIN confirmation_letters AS cl ON ap.IdLetter = cl.IdLetter JOIN contracts AS co ON cl.IdContract = co.IdContract Where co.IdContract = :idContract AND cl.AuditStage = :auditStage LIMIT 1";
+
+            $data = DBManager::query($query, array(':idContract' => $idContract, ':auditStage' => $auditStage));
+
+            if ($data) {
+                $auditReport = $data[0];
+                $auditReport['IdAuditReport'] = (int) $auditReport['IdAuditReport'];
+                $auditReport['IdAuditPlan'] = (int) $auditReport['IdAuditPlan'];
+                $auditReport['NonConformities'] = json_decode($auditReport['NonConformities'], true);
+                $auditReport['AreasOfConcern'] = json_decode($auditReport['AreasOfConcern'], true);
+                $auditReport['AuditObjetives'] = json_decode($auditReport['AuditObjetives'], true);
+                $auditReport['ExtraAuditObjetives'] = json_decode($auditReport['ExtraAuditObjetives'], true);
+                $auditReport['Acceptance'] = json_decode($auditReport['Acceptance'], true);
+                $auditReport['AuditProgram'] = json_decode($auditReport['AuditProgram'], true);
+                $auditReport['CompanyRepresentative'] = json_decode($auditReport['CompanyRepresentative'], true);
+                $auditReport['ContinueNextStage'] = (bool) $auditReport['ContinueNextStage'];
+                $auditReport['ContinueAfterIssuesSolved'] = (bool) $auditReport['ContinueAfterIssuesSolved'];
+                $auditReport['ClosureAuditNeeded'] = (bool) $auditReport['ClosureAuditNeeded'];
+                $auditReport['RestartCertificationProcess'] = (bool) $auditReport['RestartCertificationProcess'];
+
+                header(HTTP_CODE_200);
+                echo json_encode($auditReport);
+            } else {
+                header(HTTP_CODE_404);
+            }
+        } else{
+            header(HTTP_CODE_401);
+        }
+
+        break;
     
     /**
      * Registrar un nuevo reporte de auditoría-> 
@@ -205,7 +284,7 @@ switch ($url[5]) {
                 $params = array(
                     ':idAuditPlan'             => $data['IdAuditPlan'],
                     ':auditReportCreationDate' => $currentDate,
-                    ':companyRepresentative'   => $data['CompanyRepresentative'],
+                    ':companyRepresentative'   => json_encode($data['CompanyRepresentative']),
                     ':auditObjetives'          => json_encode($data['AuditObjetives']),
                     ':acceptance'              => json_encode($data['Acceptance']),
                 );
@@ -213,97 +292,95 @@ switch ($url[5]) {
                 $initPart = "INSERT INTO audit_report (IdAuditReport, IdAuditPlan, AuditReportCreationDate, CompanyRepresentative, AuditObjetives, Acceptance";
                 $valPart  = "VALUES (null, :idAuditPlan, :auditReportCreationDate, :companyRepresentative, :auditObjetives, :acceptance";
                 
-                if ($data['JustificationNotAllShiftAudited']) {
+                if (isset($data['JustificationNotAllShiftAudited'])) {
                     $params[':justificationNotAllShiftAudited'] = $data['JustificationNotAllShiftAudited'];
                     $initPart .= ", JustificationNotAllShiftAudited";
                     $valPart  .= ", :justificationNotAllShiftAudited";
                 }
 
-                if ($data['PossibleNonConformities']) {
+                if (isset($data['PossibleNonConformities'])) {
                     $params[':PossibleNonConformities'] = $data['PossibleNonConformities'];
                     $initPart .= ", PossibleNonConformities";
                     $valPart  .= ", :PossibleNonConformities";
                 }
 
-                if ($data['AreasOfConcern']) {
+                if (isset($data['AreasOfConcern'])) {
                     $params[':areasOfConcern'] = json_encode($data['AreasOfConcern']);
                     $initPart .= ", AreasOfConcern";
                     $valPart  .= ", :areasOfConcern";
                 }
 
-                if ($data['PositiveIssues']) {
+                if (isset($data['PositiveIssues'])) {
                     $params[':positiveIssues'] = $data['PositiveIssues'];
                     $initPart .= ", PositiveIssues";
                     $valPart  .= ", :positiveIssues";
                 }
 
-                if ($data['OportunitiesToImprove']) {
+                if (isset($data['OportunitiesToImprove'])) {
                     $params[':oportunitiesToImprove'] = $data['OportunitiesToImprove'];
                     $initPart .= ", OportunitiesToImprove";
                     $valPart  .= ", :oportunitiesToImprove";
                 }
 
-                if ($data['NonConformities']) {
+                if (isset($data['NonConformities'])) {
                     $params[':nonConformities'] = json_encode($data['NonConformities']);
                     $initPart .= ", NonConformities";
                     $valPart  .= ", :nonConformities";
-                }
 
-                if ($data['ActionPlanDueDate']) {
-                    $params[':actionPlanDueDate'] = $data['ActionPlanDueDate'];
+                    $params[':actionPlanDueDate'] = convertDateTime($data['ActionPlanDueDate']);
                     $initPart .= ", ActionPlanDueDate";
                     $valPart  .= ", :actionPlanDueDate";
                 }
 
-                if ($data['PendingIssues']) {
+                if (isset($data['PendingIssues'])) {
                     $params[':pendingIssues'] = $data['PendingIssues'];
                     $initPart .= ", PendingIssues";
                     $valPart  .= ", :pendingIssues";
                 }
 
-                if ($data['ExtraAuditObjetives']) {
+                if (isset($data['ExtraAuditObjetives'])) {
                     $params[':ExtraAuditObjetives'] = json_encode($data['ExtraAuditObjetives']);
                     $initPart .= ", ExtraAuditObjetives";
                     $valPart  .= ", :ExtraAuditObjetives";
                 }
 
-                if ($data['ContinueNextStage']) {
+                if (isset($data['ContinueNextStage'])) {
                     $params[':ContinueNextStage'] = (int) $data['ContinueNextStage'];
                     $initPart .= ", ContinueNextStage";
                     $valPart  .= ", :ContinueNextStage";
                 }
 
-                if ($data['ContinueAfterIssuesSolved']) {
+                if (isset($data['ContinueAfterIssuesSolved'])) {
                     $params[':ContinueAfterIssuesSolved'] = (int) $data['ContinueAfterIssuesSolved'];
                     $initPart .= ", ContinueAfterIssuesSolved";
                     $valPart  .= ", :ContinueAfterIssuesSolved";
                 }
 
-                if ($data['ClosureAuditNeeded']) {
+                if (isset($data['ClosureAuditNeeded'])) {
                     $params[':ClosureAuditNeeded'] = (int) $data['ClosureAuditNeeded'];
                     $initPart .= ", ClosureAuditNeeded";
                     $valPart  .= ", :ClosureAuditNeeded";
                 }
 
-                if ($data['RestartCertificationProcess']) {
+                if (isset($data['RestartCertificationProcess'])) {
                     $params[':RestartCertificationProcess'] = (int) $data['RestartCertificationProcess'];
                     $initPart .= ", RestartCertificationProcess";
                     $valPart  .= ", :RestartCertificationProcess";
                 }
 
-                if ($data['AuditProgram']) {
+                if (isset($data['AuditProgram'])) {
                     $params[':AuditProgram'] = json_encode($data['AuditProgram']);
                     $initPart .= ", AuditProgram";
                     $valPart  .= ", :AuditProgram";
                 }
 
-                if ($data['AuditProgramChangesJustification']) {
+                if (isset($data['AuditProgramChangesJustification'])) {
                     $params[':AuditProgramChangesJustification'] = $data['AuditProgramChangesJustification'];
                     $initPart .= ", AuditProgramChangesJustification";
                     $valPart  .= ", :AuditProgramChangesJustification";
                 }
 
-                if ($data['AuditReportStatus']) {
+                if (isset($data['AuditReportStatus'])) {
                     $params[':AuditReportStatus'] = $data['AuditReportStatus'];
                     $initPart .= ", AuditReportStatus";
                     $valPart  .= ", :AuditReportStatus";
@@ -360,7 +437,7 @@ switch ($url[5]) {
 
                 $params = array(
                     ':idAuditReport'           => $data['IdAuditReport'],
-                    ':companyRepresentative'   => $data['CompanyRepresentative'],
+                    ':companyRepresentative'   => json_encode($data['CompanyRepresentative']),
                     ':auditObjetives'          => json_encode($data['AuditObjetives']),
                     ':acceptance'              => json_encode($data['Acceptance']),
                     ':AuditReportStatus'       => $data['AuditReportStatus']
@@ -368,105 +445,105 @@ switch ($url[5]) {
 
                 $query = "UPDATE audit_report SET CompanyRepresentative = :companyRepresentative, AuditObjetives = :auditObjetives, Acceptance = :acceptance, AuditReportStatus = :AuditReportStatus";
                 
-                if ($data['JustificationNotAllShiftAudited']) {
+                if (isset($data['JustificationNotAllShiftAudited'])) {
                     $params[':justificationNotAllShiftAudited'] = $data['JustificationNotAllShiftAudited'];
                     $query .= ", JustificationNotAllShiftAudited = :justificationNotAllShiftAudited";
                 } else {
                     $query .= ", JustificationNotAllShiftAudited = null";
                 }
 
-                if ($data['PossibleNonConformities']) {
+                if (isset($data['PossibleNonConformities'])) {
                     $params[':possibleNonConformities'] = $data['PossibleNonConformities'];
                     $query .= ", PossibleNonConformities = :possibleNonConformities";
                 } else {
                     $query .= ", PossibleNonConformities = null";
                 }
 
-                if ($data['AreasOfConcern']) {
+                if (isset($data['AreasOfConcern'])) {
                     $params[':areasOfConcern'] = json_encode($data['AreasOfConcern']);
                     $query .= ", AreasOfConcern = :areasOfConcern";
                 } else {
                     $query .= ", AreasOfConcern = null";
                 }
 
-                if ($data['PositiveIssues']) {
+                if (isset($data['PositiveIssues'])) {
                     $params[':positiveIssues'] = $data['PositiveIssues'];
                     $query .= ", PositiveIssues = :positiveIssues";
                 } else {
                     $query .= ", PositiveIssues = null";
                 }
 
-                if ($data['OportunitiesToImprove']) {
+                if (isset($data['OportunitiesToImprove'])) {
                     $params[':oportunitiesToImprove'] = $data['OportunitiesToImprove'];
                     $query .= ", OportunitiesToImprove = :oportunitiesToImprove";
                 } else {
                     $query .= ", OportunitiesToImprove = null";
                 }
 
-                if ($data['NonConformities']) {
+                if (isset($data['NonConformities'])) {
                     $params[':nonConformities'] = json_encode($data['NonConformities']);
                     $query .= ", NonConformities = :nonConformities";
                 } else {
                     $query .= ", NonConformities = null";
                 }
 
-                if ($data['ActionPlanDueDate']) {
+                if (isset($data['ActionPlanDueDate'])) {
                     $params[':actionPlanDueDate'] = $data['ActionPlanDueDate'];
                     $query .= ", ActionPlanDueDate = :actionPlanDueDate";
                 } else {
                     $query .= ", ActionPlanDueDate = null";
                 }
 
-                if ($data['PendingIssues']) {
+                if (isset($data['PendingIssues'])) {
                     $params[':pendingIssues'] = $data['PendingIssues'];
                     $query .= ", PendingIssues = :pendingIssues";
                 } else {
                     $query .= ", PendingIssues = null";
                 }
 
-                if ($data['ExtraAuditObjetives']) {
+                if (isset($data['ExtraAuditObjetives'])) {
                     $params[':ExtraAuditObjetives'] = json_encode($data['ExtraAuditObjetives']);
                     $query .= ", ExtraAuditObjetives = :ExtraAuditObjetives";
                 } else {
                     $query .= ", ExtraAuditObjetives = null";
                 }
 
-                if ($data['ContinueNextStage']) {
+                if (isset($data['ContinueNextStage'])) {
                     $params[':ContinueNextStage'] = (int) $data['ContinueNextStage'];
                     $query .= ", ContinueNextStage = :ContinueNextStage";
                 } else {
                     $query .= ", ContinueNextStage = null";
                 }
 
-                if ($data['ContinueAfterIssuesSolved']) {
+                if (isset($data['ContinueAfterIssuesSolved'])) {
                     $params[':ContinueAfterIssuesSolved'] = (int) $data['ContinueAfterIssuesSolved'];
                     $query .= ", ContinueAfterIssuesSolved = :ContinueAfterIssuesSolved";
                 } else {
                     $query .= ", ContinueAfterIssuesSolved = null";
                 }
 
-                if ($data['ClosureAuditNeeded']) {
+                if (isset($data['ClosureAuditNeeded'])) {
                     $params[':ClosureAuditNeeded'] = (int) $data['ClosureAuditNeeded'];
                     $query .= ", ClosureAuditNeeded = :ClosureAuditNeeded";
                 } else {
                     $query .= ", ClosureAuditNeeded = null";
                 }
 
-                if ($data['RestartCertificationProcess']) {
+                if (isset($data['RestartCertificationProcess'])) {
                     $params[':RestartCertificationProcess'] = (int) $data['RestartCertificationProcess'];
                     $query .= ", RestartCertificationProcess = :RestartCertificationProcess";
                 } else {
                     $query .= ", RestartCertificationProcess = null";
                 }
 
-                if ($data['AuditProgram']) {
+                if (isset($data['AuditProgram'])) {
                     $params[':AuditProgram'] = json_encode($data['AuditProgram']);
                     $query .= ", AuditProgram = :AuditProgram";
                 } else {
                     $query .= ", AuditProgram = null";
                 }
 
-                if ($data['AuditProgramChangesJustification']) {
+                if (isset($data['AuditProgramChangesJustification'])) {
                     $params[':AuditProgramChangesJustification'] = $data['AuditProgramChangesJustification'];
                     $query .= ", AuditProgramChangesJustification = :AuditProgramChangesJustification";
                 } else {
