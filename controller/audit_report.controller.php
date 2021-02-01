@@ -195,7 +195,7 @@ switch ($url[5]) {
                 header(HTTP_CODE_200);
                 echo json_encode($auditReport);
             } else {
-                header(HTTP_CODE_404);
+                header(HTTP_CODE_204);
             }
         } else{
             header(HTTP_CODE_401);
@@ -254,7 +254,7 @@ switch ($url[5]) {
                 header(HTTP_CODE_200);
                 echo json_encode($auditReport);
             } else {
-                header(HTTP_CODE_404);
+                header(HTTP_CODE_204);
             }
         } else{
             header(HTTP_CODE_401);
