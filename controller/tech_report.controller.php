@@ -1,6 +1,16 @@
 <?php
 /**
+* Controlador de funciones para tabla tech_report
+*
+* Manejo de acciones sobre la tabla tech_report
 * Operaciones a utilizar y descripción a utilizar:
+
+* Solicitar la información de technical report por su plan de auditoría-> url: .../api/v1-2/tech_report/getauditplan/:idAuditPlan, metodo: GET, datos-solicitados: {}
+
+* Registra una respuesta de technical report -> url: .../api/v1-2/tech_report/add,metodo: POST, datos-solicitados: {}
+
+* Editar los datos de los registros technical report url: .../api/v1-2/tech_report/edit/:idTechReport, metodo: PUT, datos-solicitados: {tech_report: jsonString}
+*
 * @package ari-mobile-api
 */
 
@@ -8,8 +18,11 @@
 
 switch ($url[5]) {
     /**
+     * Solicita la informacion de la technical report por  su plan de auditoria
+     * url: .../api/v1-2/tech_report/getauditplan/:idAuditPlan
      * metodo: GET, 
      * datos-solicitados: {}
+     * @param int idAuditplan ID del plan de auditoría, deberá ir al final de de la URL
      * @return jsonString|null Todas los respuestas registradas
      */
     case 'getauditplan':
@@ -22,22 +35,57 @@ switch ($url[5]) {
             header(HTTP_CODE_412);
             exit();
         }
-        $idAuditPlan = (int) $url[6];
+        $IdAuditPlan = (int) $url[6];
 
         if (TokenTool::isValid($token)) {
             
-            $query = "SELECT idTechReport, idQuestion, st1, st1compliance, st2, st2compliance, surv1, surv1compliance, surv2, surv2compliance FROM tech_report WHERE idAuditPlan = :idAuditPlan";
-            $data = DBManager::query($query, array(':idAuditPlan' => $idAuditPlan));
+            $query = "SELECT IdTechReport, TechReportIdQuestion, TechReportSt1, TechReportSt1compliance, TechReportSt2, TechReportSt2compliance, TechReportSurv1, TechReportSurv1compliance, TechReportSurv2, TechReportSurv2compliance FROM tech_report WHERE IdAuditPlan = :idAuditPlan";
+            $data = DBManager::query($query, array(':idAuditPlan' => $IdAuditPlan));
 
             if ($data) {
                 for ($i=0; $i < count($data); $i++) { 
-                    $data[$i]['idTechReport']    = (int)   $data[$i]['idTechReport'];
-                    $data[$i]['idQuestion']      = (int)   $data[$i]['idQuestion'];
-                    $data[$i]['st1compliance']   = (bool)  $data[$i]['st1compliance'];
-                    $data[$i]['st2compliance']   = (bool)  $data[$i]['st2compliance'];
-                    $data[$i]['surv1compliance'] = (bool)  $data[$i]['surv1compliance'];
-                    $data[$i]['surv2compliance'] = (bool)  $data[$i]['surv2compliance'];
+                    $data[$i]['IdTechReport']              = (int)   $data[$i]['IdTechReport'];
+                    $data[$i]['TechReportIdQuestion']      = (int)   $data[$i]['TechReportIdQuestion'];
+                    $data[$i]['TechReportSt1compliance']   = (bool)  $data[$i]['TechReportSt1compliance'];
+                    $data[$i]['TechReportSt2compliance']   = (bool)  $data[$i]['TechReportSt2compliance'];
+                    $data[$i]['TechReportSurv1compliance'] = (bool)  $data[$i]['TechReportSurv1compliance'];
+                    $data[$i]['TechReportSurv2compliance'] = (bool)  $data[$i]['TechReportSurv2compliance'];
                 }
+                header(HTTP_CODE_200);
+                echo json_encode($data);
+            } else {
+                header(HTTP_CODE_204);
+            }
+        } else {
+            header(HTTP_CODE_401);
+        }
+    break;
+    /**
+     * Solicita el CurrentStage del contracto
+     * url: .../api/v1-2/tech_report/getCurrentStage/:idAuditPlan
+     * metodo: GET, 
+     * datos-solicitados: {}
+     * @param int idAuditplan ID del plan de auditoría, deberá ir al final de de la URL
+     * @return CurrentStage|null Todas los respuestas registradas
+     */
+    case 'getCurrentStage':
+        if ($method !== 'GET') {
+            header('HTTP/1.1 405 Allow; GET');
+            exit();
+        }
+
+        if (!isset($url[6])) {
+            header(HTTP_CODE_412);
+            exit();
+        }
+        $IdAuditPlan = (int) $url[6];
+
+        if (TokenTool::isValid($token)) {
+            
+            $query = "SELECT ctts.CurrentStage FROM audit_plan AS ap INNER JOIN confirmation_letters AS cl on cl.IdLetter = ap.IdLetter INNER JOIN contracts As ctts on ctts.IdContract = cl.IdContract WHERE ap.IdAuditPlan = :idAuditPlan LIMIT 1";
+            $data = DBManager::query($query, array(':idAuditPlan' => $IdAuditPlan));
+
+            if ($data) {
                 header(HTTP_CODE_200);
                 echo json_encode($data);
             } else {
@@ -49,10 +97,11 @@ switch ($url[5]) {
     break;
 
     /**
-     * 
-     * url: .../api/v1-2/
-     * metodo: POST
-     * datos-solicitados. {}
+     * Registra una respuesta de technical report ->
+     * url: .../api/v1-2/tech_report/add,
+     * metodo: POST, 
+     * datos-solicitados: {}
+     * @return JsonString respuesta de resultado de la acción
      */
     case 'add':
         if ($method !== 'POST') {
@@ -68,22 +117,22 @@ switch ($url[5]) {
         }
 
         if (TokenTool::isValid($token)) {
-            if (isset($data['idAuditPlan'])) {
+            if (isset($data['IdAuditPlan'])) {
                 
-                $initialPart = "INSERT INTO tech_report(idTechReport, idAuditPlan, idQuestion, st1, st1compliance, st2, st2compliance, surv1, surv1compliance, surv2, surv2compliance";
-                $values = "VALUES (null, :idAuditPlan, :idQuestion , :st1, :st1compliance, :st2, :st2compliance, :surv1, :surv1compliance, :surv2, :surv2compliance";
+                $initialPart = "INSERT INTO tech_report(IdTechReport, IdAuditPlan, TechReportIdQuestion, TechReportSt1, TechReportSt1compliance, TechReportSt2, TechReportSt2compliance, TechReportSurv1, TechReportSurv1compliance, TechReportSurv2, TechReportSurv2compliance";
+                $values = "VALUES (null, :idAuditPlan, :techReportIdQuestion , :techReportSt1, :techReportSt1compliance,  :techReportSt2, :techReportSt2compliance, :techReportSurv1, :techReportSurv1compliance, :techReportSurv2, :techReportSurv2compliance";
 
                 $params = array(
-                    ':idAuditPlan'     => $data['idAuditPlan'],
-                    ':idQuestion'      => $data['idQuestion'],
-                    ':st1'             => $data['st1'],
-                    ':st1compliance'   => (int) $data['st1compliance'],
-                    ':st2'             => $data['st2'],
-                    ':st2compliance'   => (int) $data['st2compliance'],
-                    ':surv1'           => $data['surv1'],
-                    ':surv1compliance' => (int) $data['surv1compliance'],
-                    ':surv2'           => $data['surv2'],
-                    ':surv2compliance' => (int) $data['surv2compliance'],
+                    ':idAuditPlan'               => $data['IdAuditPlan'],
+                    ':techReportIdQuestion'      => $data['TechReportIdQuestion'],
+                    ':techReportSt1'             => $data['TechReportSt1'],
+                    ':techReportSt1compliance'   => (int) $data['TechReportSt1compliance'],
+                    ':techReportSt2'             => $data['TechReportSt2'],
+                    ':techReportSt2compliance'   => (int) $data['TechReportSt2compliance'],
+                    ':techReportSurv1'           => $data['TechReportSurv1'],
+                    ':techReportSurv1compliance' => (int) $data['TechReportSurv1compliance'],
+                    ':techReportSurv2'           => $data['TechReportSurv2'],
+                    ':techReportSurv2compliance' => (int) $data['TechReportSurv2compliance'],
                 );
                 $query = $initialPart .")" .$values .");";
                 $response = DBManager::query($query, $params);
@@ -102,6 +151,14 @@ switch ($url[5]) {
             header(HTTP_CODE_401);
         }
     break;
+
+    /**
+     * Editar los datos de los registros technical report
+     * url: .../api/v1-2/tech_report/edit/:idTechReport,
+     * metodo: PUT,
+     * datos-solicitados: {tech_report: jsonString}
+     * @return JsonString respuesta de resultado de la acción
+     */
     case 'edit':
             if ($method !== 'PUT') {
                 header('HTTP/1.1 405 Allow: PUT');
@@ -114,7 +171,7 @@ switch ($url[5]) {
             }
     
     
-            $idTechReport = (int) $url[6];
+            $IdTechReport = (int) $url[6];
     
             $data = json_decode(file_get_contents('php://input'), true);
     
@@ -126,50 +183,50 @@ switch ($url[5]) {
             if (TokenTool::isValid($token)) {
             
                     $query = "UPDATE tech_report SET ";
+
+                    if (isset($data['TechReportSt1compliance'])) {
+                        $params[':techReportSt1compliance'] = (int) $data['TechReportSt1compliance'];
+                        $query .= "TechReportSt1compliance = :techReportSt1compliance";
+                    }
+
+                    if (isset($data['TechReportSt2compliance'])) {
+                        $params[':techReportSt2compliance'] = (int) $data['TechReportSt2compliance'];
+                        $query .= ", TechReportSt2compliance = :techReportSt2compliance";
+                    }
+
+                    if (isset($data['TechReportSurv1compliance'])) {
+                        $params[':techReportSurv1compliance'] = (int) $data['TechReportSurv1compliance'];
+                        $query .= ", TechReportSurv1compliance = :techReportSurv1compliance";
+                    }
+
+                    if (isset($data['TechReportSurv2compliance'])) {
+                        $params[':techReportSurv2compliance'] = (int) $data['TechReportSurv2compliance'];
+                        $query .= ", TechReportSurv2compliance = :techReportSurv2compliance";
+                    }
+
+                    if (isset($data['TechReportSt1'])) {
+                        $params[':techReportSt1'] = $data['TechReportSt1'];
+                        $query .= ", TechReportSt1 = :techReportSt1";
+                    }
+
+                    if (isset($data['TechReportSt2'])) {
+                        $params[':techReportSt2'] = $data['TechReportSt2'];
+                        $query .= ", TechReportSt2 = :techReportSt2";
+                    }
+
+                    if (isset($data['TechReportSurv1'])) {
+                        $params[':techReportSurv1'] = $data['TechReportSurv1'];
+                        $query .= ", TechReportSurv1 = :techReportSurv1";
+                    }
+
+                    if (isset($data['TechReportSurv2'])) {
+                        $params[':techReportSurv2'] = $data['TechReportSurv2'];
+                        $query .= ", TechReportSurv2 = :techReportSurv2";
+                    }
     
-                    if (isset($data['st1'])) {
-                        $params[':st1'] = $data['st1'];
-                        $query .= " st1 = :st1";
-                    }
-
-                    if (isset($data['st2'])) {
-                        $params[':st2'] = $data['st2'];
-                        $query .= ", st2 = :st2";
-                    }
-
-                    if (isset($data['st1compliance'])) {
-                        $params[':st1compliance'] = (int) $data['st1compliance'];
-                        $query .= ", st1compliance = :st1compliance";
-                    }
-
-                    if (isset($data['st2compliance'])) {
-                        $params[':st2compliance'] = (int) $data['st2compliance'];
-                        $query .= ", st2compliance = :st2compliance";
-                    }
-
-                    if (isset($data['surv1'])) {
-                        $params[':surv1'] = $data['surv1'];
-                        $query .= ", surv1 = :surv1";
-                    }
-
-                    if (isset($data['surv2'])) {
-                        $params[':surv2'] = $data['surv2'];
-                        $query .= ", surv2 = :surv2";
-                    }
-
-                    if (isset($data['surv1compliance'])) {
-                        $params[':surv1compliance'] = (int) $data['surv1compliance'];
-                        $query .= ", surv1compliance = :surv1compliance";
-                    }
-
-                    if (isset($data['surv2compliance'])) {
-                        $params[':surv2compliance'] = (int) $data['surv2compliance'];
-                        $query .= ", surv2compliance = :surv2compliance";
-                    }
-    
-                    $query .= " WHERE idTechReport = :idTechReport";
-                    $params[':idTechReport'] = $idTechReport;
-    
+                    $query .= " WHERE IdTechReport = :idTechReport";
+                    $params[':idTechReport'] = $IdTechReport;
+                    // echo $params;
                     if (DBManager::query($query, $params)) {
                         header(HTTP_CODE_200);
                         echo json_encode($data);
