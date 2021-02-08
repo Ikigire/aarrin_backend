@@ -82,7 +82,7 @@ switch ($url[5]) {
 
         if (TokenTool::isValid($token)) {
             
-            $query = "SELECT ctts.CurrentStage FROM audit_plan AS ap INNER JOIN confirmation_letters AS cl on cl.IdLetter = ap.IdLetter INNER JOIN contracts As ctts on ctts.IdContract = cl.IdContract WHERE ap.IdAuditPlan = :idAuditPlan LIMIT 1";
+            $query = "SELECT  ctts.CurrentStage, cl.IdAuditLeader FROM audit_plan AS ap INNER JOIN confirmation_letters AS cl on cl.IdLetter = ap.IdLetter INNER JOIN contracts As ctts on ctts.IdContract = cl.IdContract WHERE ap.IdAuditPlan = :idAuditPlan LIMIT 1";
             $data = DBManager::query($query, array(':idAuditPlan' => $IdAuditPlan));
 
             if ($data) {
