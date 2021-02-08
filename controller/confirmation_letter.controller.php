@@ -281,6 +281,7 @@ switch ($url[5]) {
         if (TokenTool::isValid($token)){
             $date = new DateTime("now");
             $currentDate = $date->format('Y-m-d H:i:s');
+            $folder = base64_encode('Confirmation_Letter_For_Contract'. $data['IdContract']);
 
             $initialPart = "INSERT INTO confirmation_letters (IdLetter, IdContract, LetterCreationDate, AuditStage, IsClosureAudit";
             $valuesPart  = "Values (null, :idContract, :letterCreationDate, :auditStage, :isClosureAudit";
@@ -403,13 +404,7 @@ switch ($url[5]) {
             $date = new DateTime("now");
             $currentDate = $date->format('Y-m-d H:i:s');
 
-            $query = "SELECT com.CompanyName, ser.ServiceStandard FROM contracts AS con JOIN proposals AS pro ON pro.IdProposal = con.IdProposal JOIN days_calculation AS day ON day.IdDayCalculation = pro.IdDayCalculation JOIN applications AS app ON app.IdApp = day.IdApp JOIN companies AS com ON com.IdCompany = app.IdCompany JOIN services AS ser ON ser.IdService = app.IdService WHERE con.IdContract = :idContract";
-            
-            $auxData = DBManager::query($query, array(':idContract' => $data['IdContract']))[0];
-
-            $cancel = false;
-
-            $folder = base64_encode($auxData['ServiceStandard']) . '/'. base64_encode($auxData['CompanyName']);
+            $folder = base64_encode('Confirmation_Letter_For_Contract'. $data['IdContract']);
 
             $params = array(
                 ':idLetter' => $idLetter,

@@ -33,9 +33,10 @@
  */
 function saveFile(string $base64, string $folder, string $name) {
     $extFiles = array(
-        'png' => '.png',
-        'pdf' => '.pdf',
-        'jpeg' => '.jpg'
+        'png'  => '.png',
+        'pdf'  => '.pdf',
+        'jpeg' => '.jpg',
+        'zip'  => '.zip'
     );
 
     $pathToFile = 'https://aarrin.com/mobile/app_resources/audit_plans/non_conformities/'.$folder;
@@ -481,6 +482,13 @@ switch ($url[5]) {
                 }
 
                 if (isset($data['NonConformities'])) {
+                    if (is_array($data['NonConformities'])) {
+                        $folder = base64_encode('Audit_Report_For_AuditPlan_'. $data['IdAuditPlan']);
+
+                        for ($i=0; $i < count($data['NonConformities']); $i++) { 
+                            $data['NonConformities'][$i]['EvidenceFiles'] = strpos($data['NonConformities'][$i]['EvidenceFiles'], '://aarrin.com') > 0 ? $data['NonConformities'][$i]['EvidenceFiles'] : saveFile($data['NonConformities'][$i]['EvidenceFiles'], $folder, base64_encode('Evidence_Files_'. $i));
+                        }
+                    }
                     $params[':nonConformities'] = json_encode($data['NonConformities']);
                     $query .= ", NonConformities = :nonConformities";
                 } else {
