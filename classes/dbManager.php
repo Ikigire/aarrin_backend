@@ -64,7 +64,7 @@
 
             $connection = self::connect();
             $connection->beginTransaction();
-
+            $stmt = null;
             try {
                 $stmt = $connection->prepare($query);
                 $stmt->execute($params);
@@ -83,10 +83,11 @@
                 }
                 $connection->commit();
             } catch (\Throwable $th) {
-                echo $th;
                 $connection->rollBack();
+                self::disconnect($connection, $stmt);
                 return false;
             }
+            self::disconnect($connection, $stmt);
             return $response;
         }
         
@@ -123,8 +124,21 @@
                 $connection->rollBack();
                 return false;
             }
-
+            self::disconnect($connection, $stmt);
             return true;
+        }
+
+        /**
+         * Método que cierra la conexión con la base de datos para evitar saturación en la misma
+         * @param PDO $connection Conección con la base de datos a cerrar
+         * @param PDOStatement $stm Sentencia ejecutada a cerrar
+         */
+        private static function disconnect(PDO $connection, PDOStatement $stm){
+            if ($stm) {
+                $stm->closeCursor();
+            }
+            $stm = null;
+            $connection = null;
         }
     }
 ?>
