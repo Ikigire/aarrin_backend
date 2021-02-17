@@ -38,7 +38,7 @@ switch ($url[5]) {
         $idAuditPlant = (int) $url[6];
 
         if (TokenTool::isValid($token)){
-            $query ="SELECT IdCertification, IdAuditPlant, CertificationReviewEmployee, CertificationCheckListAdmin, CertificationCheckListTech, CertificationInitialDate, CertificationDecisionDate, CertificationExpirationDate, CertificationStatus FROM certification_checklist WHERE IdAuditPlant= :idAuditPlant;";
+            $query ="SELECT IdCertification, IdAuditPlant, CertificationReviewEmployee, CertificationCheckListAdmin, CertificationCheckListTech, CertificationInitialDate, CertificationDecisionDate, CertificationExpirationDate, CertificationStatus FROM certification_checklist WHERE IdAuditPlant= :idAuditPlant";
 
             $params = array(':idAuditPlant' => $idAuditPlant);
 
@@ -198,6 +198,63 @@ switch ($url[5]) {
         }
 
     break;
+
+    /**
+     * Editar los datos de los registros technical report
+     * url: .../api/v1-2/tech_report/edit/:IdCertification,
+     * metodo: PUT,
+     * datos-solicitados: {tech_report: jsonString}
+     * @return JsonString respuesta de resultado de la acción
+     */
+    case 'editStatus':
+        if ($method !== 'PUT') {
+            header('HTTP/1.1 405 Allow: PUT');
+            exit();
+        }
+
+        if (!isset($url[6])) {
+            header(HTTP_CODE_412);
+            exit();
+        }
+
+
+        $idCertification = (int) $url[6];
+
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        if (!isset($data)) {
+            header(HTTP_CODE_412);
+            exit();
+        }
+
+        if (!isset($data['CertificationStatus'])){
+            header(HTTP_CODE_412);
+            exit();
+        }
+
+        if (TokenTool::isValid($token)) {
+
+            $params = array(
+                ':certificationStatus' => json_encode($data['CertificationStatus']),
+            );
+        
+            $query = "UPDATE certification_checklist SET CertificationStatus = :certificationStatus";
+
+            $query .= " WHERE IdCertification = :idCertification";
+            $params[':idCertification'] = $idCertification;
+            // echo $params;
+            if (DBManager::query($query, $params)) {
+                header(HTTP_CODE_200);
+                echo json_encode($data);
+            } else {
+                header(HTTP_CODE_409);
+            }
+        } else {
+            header(HTTP_CODE_401);
+        }
+
+    break;
+
     default:
         header(HTTP_CODE_404);
         break;

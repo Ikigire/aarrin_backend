@@ -471,7 +471,47 @@ switch ($url[5]) {
             header(HTTP_CODE_401);
         }
 
-        break;
+    break;
+    case 'editCheckCertiDate':
+        if ($method !== 'PUT'){
+            header('HTTP/1.1 405 Allow: PUT');
+            exit();
+        }
+
+        if (!isset($url[6])) {
+            header(HTTP_CODE_412);
+            exit();
+        }
+        $idContract = (int) $url[6];
+
+        $data = json_decode(file_get_contents('php://input'), true);
+        if (!isset($data) || !isset($data['CertificationCLInitialDate']) || !isset($data['CertificationCLExpirationDate'])) {
+            header(HTTP_CODE_412);
+            exit();
+        }
+
+        if (TokenTool::isValid($token)){
+
+            $params = array(
+                ':idContract' => $idContract,
+                ':certificationCLInitialDate' => date("Y-m-d H:i:s", strtotime($data['CertificationCLInitialDate'])),
+                ':certificationCLExpirationDate' => date("Y-m-d H:i:s", strtotime($data['CertificationCLExpirationDate']))
+            );
+
+            $query = "UPDATE contracts SET CertificationCLInitialDate = :certificationCLInitialDate, CertificationCLExpirationDate = :certificationCLExpirationDate ";
+
+            $query .= " WHERE IdContract = :idContract";
+            if (DBManager::query($query, $params)){
+                header(HTTP_CODE_200);
+                echo json_encode($data);
+            }else {
+                header(HTTP_CODE_409);
+            }
+        } else {
+            header(HTTP_CODE_401);
+        }
+
+    break;
 
     default:
         header(HTTP_CODE_404);
