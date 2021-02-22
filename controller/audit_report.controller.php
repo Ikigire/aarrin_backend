@@ -100,6 +100,42 @@ $idAuditPlan = 0;
 
 
 switch ($url[5]) {
+     /**
+     * trae todos la lista de audit report
+     * url: .../api/v1-2/,
+     * metodo: GET
+     */
+    case 'getall':
+        if ($method !== 'GET') {
+            header('HTTP/1.1 405 Allow; GET');
+            exit();
+        }
+
+        if (TokenTool::isValid($token)) {
+            $query = "SELECT ar.IdAuditReport, ap.IdAuditPlan, con.IdContract, cl.IdLetter, ar.ActionPlanDueDate, ar.Acceptance, ar.AuditReportCreationDate, ar.AuditReportStatus, cl.Auditors, cl.TecnicalExperts, comp.*, ser.*, sec.* FROM audit_plan AS ap JOIN confirmation_letters AS cl ON ap.IdLetter = cl.IdLetter JOIN contracts AS con ON cl.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector JOIN audit_report AS ar on ar.IdAuditPlan = ap.IdAuditPlan ORDER BY ap.AuditPlanCreationDate DESC";
+            $data = DBManager::query($query);
+
+            if ($data) {
+                header(HTTP_CODE_200);
+                for ($i=0; $i < count($data); $i++) { 
+                    $data[$i]['IdAuditReport']           = (int) $data[$i]['IdAuditReport'];
+                    $data[$i]['IdAuditPlan']           = (int) $data[$i]['IdAuditPlan'];
+                    $data[$i]['IdLetter']              = (int) $data[$i]['IdLetter'];
+                    $data[$i]['AuditPlanApproved']     = (bool) $data[$i]['AuditPlanApproved'];
+                    $data[$i]['Acceptance']     = json_decode($data[$i]['Acceptance']);
+                    $data[$i]['Auditors']     = json_decode($data[$i]['Auditors']);
+                    $data[$i]['TecnicalExperts']     = json_decode($data[$i]['TecnicalExperts']);
+                }
+                echo json_encode($data);
+            } else {
+                header(HTTP_CODE_204);
+            }
+        } else {
+            header(HTTP_CODE_401);
+        }
+        break;
+
+    
     /**
      * Solicitar la información de reportes de auditoría por su plan de auditoría-> 
      * url: .../api/v1-2/audit_reports/audit_plan/:idAuditPlan, 

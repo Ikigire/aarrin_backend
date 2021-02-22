@@ -17,6 +17,42 @@
 
 
 switch ($url[5]) {
+
+     /**
+     * trae todos la lista de audit report
+     * url: .../api/v1-2/,
+     * metodo: GET
+     */
+    case 'getall':
+        if ($method !== 'GET') {
+            header('HTTP/1.1 405 Allow; GET');
+            exit();
+        }
+
+        if (TokenTool::isValid($token)) {
+            $query = "SELECT cc.IdCertification, ap.IdAuditPlan, con.IdContract, cl.IdLetter, con.CertificationCLInitialDate, con.CertificationCLExpirationDate,cc.CertificationDecisionDate, cc.CertificationStatus, comp.*, ser.*, sec.* FROM audit_plan AS ap JOIN confirmation_letters AS cl ON ap.IdLetter = cl.IdLetter JOIN contracts AS con ON cl.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector JOIN certification_checklist AS cc on cc.IdAuditPlant = ap.IdAuditPlan ORDER BY ap.AuditPlanCreationDate DESC";
+            $data = DBManager::query($query);
+
+            if ($data) {
+                header(HTTP_CODE_200);
+                for ($i=0; $i < count($data); $i++) { 
+                    $data[$i]['IdCertification']           = (int) $data[$i]['IdAuditReport'];
+                    $data[$i]['IdAuditPlan']           = (int) $data[$i]['IdAuditPlan'];
+                    $data[$i]['IdLetter']              = (int) $data[$i]['IdLetter'];
+                    $data[$i]['IdContract']              = (int) $data[$i]['IdContract'];
+                }
+                echo json_encode($data);
+            } else {
+                header(HTTP_CODE_204);
+            }
+        } else {
+            header(HTTP_CODE_401);
+        }
+        break;
+
+    
+    
+
     /**
      * Solicita la informacion de la technical report por  su plan de auditoria
      * url: .../api/v1-2/tech_report/getauditplan/:idAuditPlan

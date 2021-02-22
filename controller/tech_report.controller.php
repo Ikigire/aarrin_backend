@@ -17,6 +17,40 @@
 
 
 switch ($url[5]) {
+
+    /**
+     * trae todos la lista de Tech Report
+     * url: .../api/v1-2/,
+     * metodo: GET
+     */
+    case 'getall':
+        if ($method !== 'GET') {
+            header('HTTP/1.1 405 Allow; GET');
+            exit();
+        }
+
+        if (TokenTool::isValid($token)) {
+            $query = "SELECT tr.IdTechReport, tr.TechReportCreationDate, tr.TechReportStatus, ap.IdAuditPlan, con.IdContract, cl.IdLetter, cl.Auditors, cl.TecnicalExperts, comp.*, ser.*, sec.* FROM audit_plan AS ap JOIN confirmation_letters AS cl ON ap.IdLetter = cl.IdLetter JOIN contracts AS con ON cl.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector JOIN tech_report AS tr on tr.IdContract = con.IdContract ORDER BY ap.AuditPlanCreationDate DESC";
+            $data = DBManager::query($query);
+
+            if ($data) {
+                header(HTTP_CODE_200);
+                for ($i=0; $i < count($data); $i++) { 
+                    $data[$i]['IdTechReport']           = (int) $data[$i]['IdTechReport'];
+                    $data[$i]['IdContract']           = (int) $data[$i]['IdContract'];
+                    $data[$i]['IdLetter']              = (int) $data[$i]['IdLetter'];
+                    $data[$i]['AuditPlanApproved']     = (bool) $data[$i]['AuditPlanApproved'];
+                    $data[$i]['Auditors']     = json_decode($data[$i]['Auditors']);
+                    $data[$i]['TecnicalExperts']     = json_decode($data[$i]['TecnicalExperts']);
+                }
+                echo json_encode($data);
+            } else {
+                header(HTTP_CODE_204);
+            }
+        } else {
+            header(HTTP_CODE_401);
+        }
+        break;
     /**
      * Solicita la informacion de la technical report por su contrato
      * url: .../api/v1-2/tech_report/getContract/:idContract

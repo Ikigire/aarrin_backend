@@ -72,7 +72,7 @@ switch ($url[5]) {
         }
 
         if (TokenTool::isValid($token)){
-            $query = "SELECT IdSector, SectorISO, IAF_MD5, SectorCluster, SectorCategory, SectorSubcategory, SectorRiskLevel, SectorStatus FROM sectors ORDER BY SectorISO, IAF_MD5, SectorRiskLevel, SectorCategory, SectorSubcategory, SectorCluster";
+            $query = "SELECT IdSector, SectorISO, IAF_MD5, SectorCluster, SectorCategory, SectorSubcategory, SectorRiskLevel, SectorStatus FROM sectors ORDER BY SectorISO";
             $data = DBManager::query($query);
 
             if ($data) {
@@ -279,8 +279,8 @@ switch ($url[5]) {
                 $query                       .= ", SectorSubcategory = :sectorSubcategory";
                 $params[':sectorSubcategory'] = $sectorSubcategory;
             }
-            if (isset($data['SectorRisklevel'])) {
-                $sectorRiskLevel            = $data['SectorRisklevel'];
+            if (isset($data['SectorRiskLevel'])) {
+                $sectorRiskLevel            = $data['SectorRiskLevel'];
                 $query                     .= ", SectorRiskLevel = :sectorRiskLevel";
                 $params[':sectorRiskLevel'] = $sectorRiskLevel;
             }
@@ -293,10 +293,10 @@ switch ($url[5]) {
             $query .= " WHERE IdSector = :idSector;";
             
             if (DBManager::query($query, $params)){
-                $query = "SELECT IdSector, SectorISO, IAF_MD5, SectorCluster, SectorCategory, SectorSubcategory, SectorRiskLevel, SectorStatus FROM sectors  WHERE IdSector = :id";
-                $data = DBManager::query($query, array(':id' => $idSector));
+                $query = "SELECT IdSector, SectorISO, IAF_MD5, SectorCluster, SectorCategory, SectorSubcategory, SectorRiskLevel, SectorStatus FROM sectors ORDER BY SectorISO";
+                $data = DBManager::query($query);
                 header(HTTP_CODE_200);
-                echo json_encode($data[0]);
+                echo json_encode($data);
             }else {
                 header(HTTP_CODE_409);
             }
