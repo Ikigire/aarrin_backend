@@ -76,7 +76,7 @@ switch ($url[5]) {
                 $params[':roleType'] = $role;
             }
             
-            $query .= " ORDER BY NotificationDate DESC";
+            $query .= " ORDER BY NotificationDate DESC LIMIT 10";
 
 
             $data = DBManager::query($query, $params);
@@ -116,7 +116,7 @@ switch ($url[5]) {
         $idCompany = (int) $url[6];
 
         if (TokenTool::isValid($token)){
-            $query = "SELECT IdNotification, IdEmployee, IdCompany, Role_Type, Message, URL, Viewed, NotificationDate FROM notifications WHERE IdCompany = :idCompany ORDER BY NotificationDate DESC";
+            $query = "SELECT IdNotification, IdEmployee, IdCompany, Role_Type, Message, URL, Viewed, NotificationDate FROM notifications WHERE IdCompany = :idCompany ORDER BY NotificationDate DESC LIMIT 10";
 
             $params = array(':idCompany' => $idCompany);
 

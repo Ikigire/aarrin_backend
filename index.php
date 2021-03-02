@@ -418,6 +418,20 @@ if ($url[3] === 'v1-2') {
             require_once('controller/certification_checklist.controller.php');
             break;
 
+        /**
+         *   ______________________________
+         *  /         CERTIFICADOS         \
+         * |                                |
+         * |  TABLA PARA EL MANEJO DE LOS   |
+         * | CERTIFICADOS EMITIDOS POR ARI  |
+         * |                                |
+         *  \______________________________/
+         * 
+         */
+        case 'certificates':
+            require_once('controller/certificates.controller.php');
+            break;
+
         default:
             header(HTTP_CODE_404);
             break;
