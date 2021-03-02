@@ -301,7 +301,8 @@ switch ($url[5]) {
 
             if (isset($data['LetterStatus'])) {
                 $params[':letterStatus'] = $data['LetterStatus'];
-                $query .= ", LetterStatus = :letterStatus";
+                $initialPart .= ", LetterStatus";
+                $valuesPart  .= ", :letterStatus";
             }
 
             if ($data['IdLetterReviewer']) {
