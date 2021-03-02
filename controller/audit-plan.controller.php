@@ -41,7 +41,7 @@ switch ($url[5]) {
         }
 
         if (TokenTool::isValid($token)) {
-            $query = "SELECT ap.IdAuditPlan, con.IdContract, cl.IdLetter, ap.AuditPlanApproved, ap.AuditPlanReviewDate, ap.AuditPlanCreationDate, ap.AuditPlanStatus, cl.Auditors, cl.TecnicalExperts, comp.*, ser.*, sec.* FROM audit_plan AS ap JOIN confirmation_letters AS cl ON ap.IdLetter = cl.IdLetter JOIN contracts AS con ON cl.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector ORDER BY ap.AuditPlanCreationDate DESC";
+            $query = "SELECT ap.IdAuditPlan, con.IdContract, cl.IdLetter, ap.AuditPlanApproved, ap.AuditPlanReviewDate, ap.AuditPlanCreationDate, ap.AuditPlanRevision, ap.AuditPlanStatus, cl.Auditors, cl.TecnicalExperts, comp.*, ser.*, sec.* FROM audit_plan AS ap JOIN confirmation_letters AS cl ON ap.IdLetter = cl.IdLetter JOIN contracts AS con ON cl.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector ORDER BY ap.AuditPlanCreationDate DESC";
             $data = DBManager::query($query);
 
             if ($data) {
@@ -80,7 +80,7 @@ switch ($url[5]) {
         $idCompany = (int) $url[6];
 
         if (TokenTool::isValid($token)) {
-            $query = "SELECT ap.IdAuditPlan, con.IdContract, cl.IdLetter, ap.AuditPlanApproved, ap.AuditPlanReviewDate, ap.AuditPlanCreationDate, ap.AuditPlanStatus, comp.*, ser.*, sec.* FROM audit_plan AS ap JOIN confirmation_letters AS cl ON ap.IdLetter = cl.IdLetter JOIN contracts AS con ON cl.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector WHERE comp.IdCompany = :idCompany ORDER BY ap.AuditPlanCreationDate DESC";
+            $query = "SELECT ap.IdAuditPlan, con.IdContract, cl.IdLetter, ap.AuditPlanApproved, ap.AuditPlanReviewDate, ap.AuditPlanCreationDate, ap.AuditPlanRevision, ap.AuditPlanStatus, comp.*, ser.*, sec.* FROM audit_plan AS ap JOIN confirmation_letters AS cl ON ap.IdLetter = cl.IdLetter JOIN contracts AS con ON cl.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector WHERE comp.IdCompany = :idCompany ORDER BY ap.AuditPlanCreationDate DESC";
             $data = DBManager::query($query, array(':idCompany' => $idCompany));
 
             if ($data) {
@@ -250,6 +250,13 @@ switch ($url[5]) {
                     $query .= ", AuditPlanApproved = :auditPlanApproved, IdPlanReviewer = null, AuditPlanReviewDate = null";
                 }
 
+                if (isset($data['AuditPlanRevision'])) {
+                    $params[':auditPlanRevision'] = $data['AuditPlanRevision'];
+                    $query .= ", AuditPlanRevision = :auditPlanRevision";
+                } else {
+                    $query .= ", AuditPlanRevision = null";
+                }
+
                 $query .= " WHERE IdAuditPlan = :idAuditPlan";
                 $params[':idAuditPlan'] = $idAuditPlan;
 
@@ -266,6 +273,49 @@ switch ($url[5]) {
             header(HTTP_CODE_401);
         }
 
+        break;
+
+        case 'editRevision':
+            if ($method !== 'PUT') {
+                header('HTTP/1.1 405 Allow: PUT');
+                exit();
+            }
+    
+            if (!isset($url[6])) {
+                header(HTTP_CODE_412);
+                exit();
+            }
+    
+    
+            $idAuditReport = (int) $url[6];
+    
+            $data = json_decode(file_get_contents('php://input'), true);
+    
+            if (!isset($data)) {
+                header(HTTP_CODE_412);
+                exit();
+            }
+    
+            if (TokenTool::isValid($token)) {
+                
+                $params = array(
+                    ':auditPlanRevision' => $data['AuditPlanRevision'],
+                );
+                
+                $query = "UPDATE audit_plan SET AuditPlanRevision = :auditPlanRevision";
+    
+                $query .= " WHERE IdAuditPlan = :idAuditPlan";
+                $params[':idAuditPlan'] = $idAuditPlan;
+                if (DBManager::query($query, $params)) {
+                    header(HTTP_CODE_200);
+                    echo json_encode($data);
+                } else {
+                    header(HTTP_CODE_409);
+                }
+            } else {
+                header(HTTP_CODE_401);
+            }
+    
         break;
 
         case 'delete':

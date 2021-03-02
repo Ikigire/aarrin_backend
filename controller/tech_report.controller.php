@@ -30,7 +30,7 @@ switch ($url[5]) {
         }
 
         if (TokenTool::isValid($token)) {
-            $query = "SELECT tr.IdTechReport, tr.TechReportCreationDate, tr.TechReportStatus, ap.IdAuditPlan, con.IdContract, cl.IdLetter, cl.Auditors, cl.TecnicalExperts, comp.*, ser.*, sec.* FROM audit_plan AS ap JOIN confirmation_letters AS cl ON ap.IdLetter = cl.IdLetter JOIN contracts AS con ON cl.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector JOIN tech_report AS tr on tr.IdContract = con.IdContract ORDER BY ap.AuditPlanCreationDate DESC";
+            $query = "SELECT tr.IdTechReport, tr.TechReportCreationDate, tr.TechReportRevision, tr.TechReportStatus, ap.IdAuditPlan, con.IdContract, cl.IdLetter, cl.Auditors, cl.TecnicalExperts, comp.*, ser.*, sec.* FROM audit_plan AS ap JOIN confirmation_letters AS cl ON ap.IdLetter = cl.IdLetter JOIN contracts AS con ON cl.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector JOIN tech_report AS tr on tr.IdContract = con.IdContract ORDER BY ap.AuditPlanCreationDate DESC";
             $data = DBManager::query($query);
 
             if ($data) {
@@ -76,7 +76,7 @@ switch ($url[5]) {
 
         if (TokenTool::isValid($token)) {
             
-            $query = "SELECT tr.IdTechReport, tr.IdContract, tr.TechReportQuetion, tr.TechReportCreationDate, tr.TechReportFinalizedDate, tr.TechReportApproved, tr.TechReportStatus, ctts.CurrentStage FROM tech_report AS tr INNER JOIN contracts AS ctts on ctts.IdContract = tr.IdContract WHERE tr.IdContract = :idContract";
+            $query = "SELECT tr.IdTechReport, tr.IdContract, tr.TechReportQuetion, tr.TechReportCreationDate, tr.TechReportFinalizedDate, tr.TechReportApproved, tr.TechReportRevision, tr.TechReportStatus, ctts.CurrentStage FROM tech_report AS tr INNER JOIN contracts AS ctts on ctts.IdContract = tr.IdContract WHERE tr.IdContract = :idContract";
             $data = DBManager::query($query, array(':idContract' => $IdContract));
 
             if ($data) {
@@ -115,7 +115,7 @@ switch ($url[5]) {
 
         if (TokenTool::isValid($token)) {
             
-            $query = "SELECT tr.IdTechReport, tr.IdContract, tr.TechReportQuetion, tr.TechReportCreationDate, tr.TechReportFinalizedDate, tr.TechReportApproved, tr.TechReportStatus, ctts.CurrentStage FROM tech_report AS tr INNER JOIN contracts AS ctts on ctts.IdContract = tr.IdContract WHERE tr.IdTechReport = :idTechReport";
+            $query = "SELECT tr.IdTechReport, tr.IdContract, tr.TechReportQuetion, tr.TechReportCreationDate, tr.TechReportFinalizedDate, tr.TechReportApproved, tr.TechReportRevision, tr.TechReportStatus, ctts.CurrentStage FROM tech_report AS tr INNER JOIN contracts AS ctts on ctts.IdContract = tr.IdContract WHERE tr.IdTechReport = :idTechReport";
             $data = DBManager::query($query, array(':idTechReport' => $IdTechReport));
 
             if ($data) {
@@ -149,7 +149,7 @@ switch ($url[5]) {
 
         if (TokenTool::isValid($token)) {
             
-            $query = "SELECT tr.IdTechReport, tr.IdContract, tr.TechReportQuetion, tr.TechReportCreationDate, tr.TechReportFinalizedDate, tr.TechReportApproved, tr.TechReportStatus, ctts.CurrentStage FROM tech_report AS tr INNER JOIN contracts AS ctts on ctts.IdContract = tr.IdContract";
+            $query = "SELECT tr.IdTechReport, tr.IdContract, tr.TechReportQuetion, tr.TechReportCreationDate, tr.TechReportFinalizedDate, tr.TechReportApproved, tr.TechReportRevision, tr.TechReportStatus, ctts.CurrentStage FROM tech_report AS tr INNER JOIN contracts AS ctts on ctts.IdContract = tr.IdContract";
             $data = DBManager::query($query);
 
             if ($data) {
@@ -336,6 +336,11 @@ switch ($url[5]) {
                     $query .= ", TechReportApproved = :techReportApproved";
                 }
 
+                if (isset($data['TechReportRevision'])) {
+                    $params[':techReportRevision'] = json_encode($data['TechReportRevision']);
+                    $query .= ", TechReportRevision = :techReportRevision";
+                }
+
                 $query .= " WHERE IdTechReport = :idTechReport";
                 $params[':idTechReport'] = $IdTechReport;
                 if (DBManager::query($query, $params)) {
@@ -397,7 +402,56 @@ switch ($url[5]) {
             header(HTTP_CODE_401);
         }
 
-break;
+    break;
+    /**
+     * Editar los datos de los registros technical report
+     * url: .../api/v1-2/tech_report/edit/:idTechReport,
+     * metodo: PUT,
+     * datos-solicitados: {tech_report: jsonString}
+     * @return JsonString respuesta de resultado de la acción
+     */
+    case 'editRevision':
+        if ($method !== 'PUT') {
+            header('HTTP/1.1 405 Allow: PUT');
+            exit();
+        }
+
+        if (!isset($url[6])) {
+            header(HTTP_CODE_412);
+            exit();
+        }
+
+
+        $IdTechReport = (int) $url[6];
+
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        if (!isset($data)) {
+            header(HTTP_CODE_412);
+            exit();
+        }
+
+        if (TokenTool::isValid($token)) {
+            
+            $params = array(
+                ':techReportRevision' => $data['TechReportRevision'],
+            );
+            
+            $query = "UPDATE tech_report SET  TechReportRevision = :techReportRevision ";
+
+            $query .= " WHERE IdTechReport = :idTechReport";
+            $params[':idTechReport'] = $IdTechReport;
+            if (DBManager::query($query, $params)) {
+                header(HTTP_CODE_200);
+                echo json_encode($data);
+            } else {
+                header(HTTP_CODE_409);
+            }
+        } else {
+            header(HTTP_CODE_401);
+        }
+
+    break;
     default:
         header(HTTP_CODE_404);
         break;
