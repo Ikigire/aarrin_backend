@@ -30,7 +30,7 @@ switch ($url[5]) {
         }
 
         if (TokenTool::isValid($token)) {
-            $query = "SELECT tr.IdTechReport, tr.TechReportCreationDate, tr.TechReportRevision, tr.TechReportStatus, ap.IdAuditPlan, con.IdContract, cl.IdLetter, cl.Auditors, cl.TecnicalExperts, comp.*, ser.*, sec.* FROM audit_plan AS ap JOIN confirmation_letters AS cl ON ap.IdLetter = cl.IdLetter JOIN contracts AS con ON cl.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector JOIN tech_report AS tr on tr.IdContract = con.IdContract ORDER BY ap.AuditPlanCreationDate DESC";
+            $query = "SELECT tr.IdTechReport, tr.TechReportCreationDate, tr.TechReportRevision, tr.TechReportStatus, con.IdContract, comp.*, ser.*, sec.* FROM contracts AS con JOIN tech_report AS tr ON tr.IdContract = con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app ON dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector ORDER BY con.CertificationCLInitialDate DESC";
             $data = DBManager::query($query);
 
             if ($data) {
@@ -382,6 +382,11 @@ switch ($url[5]) {
             exit();
         }
 
+        if (!isset($data['TechReportStatus'])) {
+            header(HTTP_CODE_412);
+            exit();
+        }
+
         if (TokenTool::isValid($token)) {
             
             $params = array(
@@ -427,6 +432,11 @@ switch ($url[5]) {
         $data = json_decode(file_get_contents('php://input'), true);
 
         if (!isset($data)) {
+            header(HTTP_CODE_412);
+            exit();
+        }
+
+        if (!isset($data['TechReportRevision'])) {
             header(HTTP_CODE_412);
             exit();
         }
