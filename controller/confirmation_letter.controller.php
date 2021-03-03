@@ -335,6 +335,24 @@ switch ($url[5]) {
                 $valuesPart  .= ", :observers";
             }
 
+            if (isset($data['DressCode'])) {
+                $params[':dressCode'] = $data['DressCode'];
+                $initialPart .= ", DressCode";
+                $valuesPart  .= ", :dressCode";
+            } else{
+                $initialPart .= ", DressCode";
+                $valuesPart  .= ", ''";
+            }
+
+            if (isset($data['SpecialEquipment'])) {
+                $params[':specialEquipment'] = $data['SpecialEquipment'];
+                $initialPart .= ", SpecialEquipment";
+                $valuesPart  .= ", :specialEquipment";
+            } else{
+                $initialPart .= ", SpecialEquipment";
+                $valuesPart  .= ", ''";
+            }
+
             #### Sección para el manejo de archivos del cliente
             if(isset($data['ReviewReport'])){
                 $params[':reviewReport'] = strpos($data['ReviewReport'], '://aarrin.com') > 0 ? $data['ReviewReport'] : saveFile($data['ReviewReport'], $folder, base64_encode('Review_Report_by_Admin_'. $data['IdLetter']));
@@ -495,6 +513,20 @@ switch ($url[5]) {
             } else {
                 $params[':isBackToBack'] = (int) $data['IsBackToBack'];
                 $query .= ", IsBackToBack = :isBackToBack";
+            }
+
+            if (isset($data['DressCode'])) {
+                $params[':dressCode'] = $data['DressCode'];
+                $query .= ", DressCode = :dressCode";
+            } else {
+                $query .= ", DressCode = ''";
+            }
+
+            if (isset($data['SpecialEquipment'])) {
+                $params[':specialEquipment'] = $data['SpecialEquipment'];
+                $query .= ", SpecialEquipment = :specialEquipment";
+            } else {
+                $query .= ", SpecialEquipment = ''";
             }
 
             #### Sección para el manejo de archivos del cliente
