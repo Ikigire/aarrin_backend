@@ -258,7 +258,49 @@ switch ($url[5]) {
         } else {
             header(HTTP_CODE_401);
         }
-        break;
+    break;
+    /**
+     * Solicitar la información de una carta de confirmación-> 
+     * url: .../api/v1-2/confirmation_letters/get/:idLetter, 
+     * metodo: GET, 
+     * datos-solicitados: {}
+     * @param int IdLetter ID de la carta de confirmación solicitada, deberá ir al final de la url
+     * @return jsonString|null El contrato con ese ID, 
+     */
+    case 'getIdContract':
+        if ($method !== 'GET') {
+            header('HTTP/1.1 405 Allow; GET');
+            exit();
+        }
+
+        if (!isset($url[6])) {
+            header(HTTP_CODE_412);
+            exit();
+        }
+        $idContract = (int) $url[6];
+
+        if (TokenTool::isValid($token)){
+            $query ="SELECT * FROM confirmation_letters WHERE IdContract = :idContract ORDER BY LetterApprovedDate DESC";
+
+            $params = array(':idContract' => $idContract);
+
+            $data = DBManager::query($query, $params);
+            if ($data) {
+                $letterData = $data[0];
+                $letterData['LetterApproved'] = (bool) $letterData['LetterApproved'];
+                $letterData['LetterClientApprove'] = (bool) $letterData['LetterClientApprove'];
+                $letterData['IsBackToBack'] = (bool) $letterData['IsBackToBack'];
+                $letterData['IsClosureAudit'] = (bool) $letterData['IsClosureAudit'];
+                $letterData['Auditors'] = json_decode($letterData['Auditors'], true);
+                $letterData['TecnicalExperts'] = json_decode($letterData['TecnicalExperts'], true);
+                $letterData['Observers'] = json_decode($letterData['Observers'], true);
+                header(HTTP_CODE_200);
+                echo json_encode($letterData);
+            }
+        } else {
+            header(HTTP_CODE_401);
+        }
+    break;
 
     /**
      * Crear una nueva carta de confirmación-> 

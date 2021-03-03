@@ -253,8 +253,6 @@ switch ($url[5]) {
                 if (isset($data['AuditPlanRevision'])) {
                     $params[':auditPlanRevision'] = $data['AuditPlanRevision'];
                     $query .= ", AuditPlanRevision = :auditPlanRevision";
-                } else {
-                    $query .= ", AuditPlanRevision = null";
                 }
 
                 $query .= " WHERE IdAuditPlan = :idAuditPlan";
