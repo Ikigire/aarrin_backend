@@ -188,7 +188,60 @@ switch ($url[5]) {
         } else {
             header(HTTP_CODE_401);
         }
-        break;
+    break;
+    /**
+     * 
+     * url: .../api/v1-2/
+     * metodo: POST
+     * datos-solicitados. {}
+     */
+    case 'addDraft':
+        if ($method !== 'POST') {
+            header('HTTP/1.1 405 Allow: POST');
+            exit();
+        }
+
+        $data = json_decode(file_get_contents('php://input'), true);
+
+        if (!isset($data)) {
+            header(HTTP_CODE_412);
+            exit();
+        }
+
+        if (TokenTool::isValid($token)) {
+            if (isset($data['IdLetter']) && isset($data['AuditPlanSitesDate']) && isset($data['AuditPlanObjetives']) && isset($data['AuditPlanActivities']) && isset($data['AuditPlanStatus']) ) {
+                $date = new DateTime("now");
+                $currentDate = $date->format('Y-m-d H:i:s');
+
+                $initialPart = "INSERT INTO audit_plan(IdLetter, AuditPlanCreationDate, AuditPlanSitesDate, AuditPlanObjetives, AuditPlanActivities, AuditPlanStatus";
+                $values = "VALUES (:idLetter, :planCreationDate, :auditPlanSitesDate, :auditPlanObjetives, :activities, :auditPlanStatus";
+
+                $params = array(
+                    ':idLetter'           => $data['IdLetter'],
+                    ':planCreationDate'   => $currentDate,
+                    ':auditPlanStatus'    => $data['AuditPlanStatus'],
+                    ':auditPlanSitesDate' => json_encode($data['AuditPlanSitesDate']),
+                    ':auditPlanObjetives' => $data['AuditPlanObjetives'],
+                    ':activities'         => json_encode($data['AuditPlanActivities']),
+                );
+
+                $query = $initialPart .")" .$values .");";
+                $response = DBManager::query($query, $params);
+                if ($response) {
+                    header(HTTP_CODE_201);
+                    echo json_encode(array('IdAuditPlan' => $response));
+                } else {
+                    header(HTTP_CODE_409);
+                }
+                exit();
+            } else {
+                header(HTTP_CODE_412);
+                exit();
+            }
+        } else {
+            header(HTTP_CODE_401);
+        }
+    break;
 
 
         /**
@@ -301,6 +354,53 @@ switch ($url[5]) {
                 );
                 
                 $query = "UPDATE audit_plan SET AuditPlanRevision = :auditPlanRevision";
+    
+                $query .= " WHERE IdAuditPlan = :idAuditPlan";
+                $params[':idAuditPlan'] = $idAuditPlan;
+                if (DBManager::query($query, $params)) {
+                    header(HTTP_CODE_200);
+                    echo json_encode($data);
+                } else {
+                    header(HTTP_CODE_409);
+                }
+            } else {
+                header(HTTP_CODE_401);
+            }
+    
+        break;
+
+        case 'editStatus':
+            if ($method !== 'PUT') {
+                header('HTTP/1.1 405 Allow: PUT');
+                exit();
+            }
+    
+            if (!isset($url[6])) {
+                header(HTTP_CODE_412);
+                exit();
+            }
+    
+    
+            $idAuditReport = (int) $url[6];
+    
+            $data = json_decode(file_get_contents('php://input'), true);
+    
+            if (!isset($data)) {
+                header(HTTP_CODE_412);
+                exit();
+            }
+            if (!isset($data['AuditPlanStatus'])) {
+                header(HTTP_CODE_412);
+                exit();
+            }
+    
+            if (TokenTool::isValid($token)) {
+                
+                $params = array(
+                    ':auditPlanStatus' => $data['AuditPlanStatus'],
+                );
+                
+                $query = "UPDATE audit_plan SET AuditPlanStatus = :auditPlanStatus";
     
                 $query .= " WHERE IdAuditPlan = :idAuditPlan";
                 $params[':idAuditPlan'] = $idAuditPlan;
