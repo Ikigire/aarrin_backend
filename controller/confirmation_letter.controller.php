@@ -402,6 +402,13 @@ switch ($url[5]) {
                 $valuesPart  .= ", :reviewReport";
             }
 
+            
+            if(isset($data['FileBackToBack'])){
+                $params[':fileBackToBack'] = strpos($data['FileBackToBack'], '://aarrin.com') > 0 ? $data['FileBackToBack'] : saveFile($data['FileBackToBack'], $folder, base64_encode('File_BackToBack_'. $data['IdLetter']));
+                $initialPart .= ", FileBackToBack";
+                $valuesPart .= ":fileBackToBack";
+            }
+
             if(isset($data['InternalAuditReport'])){
                 $params[':internalAuditReport'] = strpos($data['InternalAuditReport'], '://aarrin.com') > 0 ? $data['InternalAuditReport'] : saveFile($data['InternalAuditReport'], $folder, base64_encode('Internal_Audit_Report_'. $data['IdLetter']));
                 $initialPart .= ", InternalAuditReport";
@@ -577,6 +584,13 @@ switch ($url[5]) {
                 $query .= ", ReviewReport = :reviewReport";
             } else {
                 $query .= ", ReviewReport = null";
+            }
+
+            if(isset($data['FileBackToBack'])){
+                $params[':fileBackToBack'] = strpos($data['FileBackToBack'], '://aarrin.com') > 0 ? $data['FileBackToBack'] : saveFile($data['FileBackToBack'], $folder, base64_encode('File_BackToBack_'. $data['IdLetter']));
+                $query .= ", FileBackToBack = :fileBackToBack";
+            } else {
+                $query .= ", FileBackToBack = null";
             }
 
             if(isset($data['InternalAuditReport'])){
