@@ -203,7 +203,8 @@ switch ($url[5]) {
             if ($data) {
                 $certificateData = $data[0];
                 $certificateData['CertificateClientApprove'] = (bool) $certificateData['CertificateClientApprove'];
-                $certificateData['CertificateData'] = json_decode($certificateData['CertificateData'], true);
+                $certificateData['CertificateData']          = json_decode($certificateData['CertificateData'], true);
+                $certificateData['CertificateComments']      = json_decode($certificateData['CertificateComments'], true);
                 header(HTTP_CODE_200);
                 echo json_encode($certificateData);
             }
@@ -298,15 +299,23 @@ switch ($url[5]) {
                 $values      .= ", :certificateClientApprove, :certificateClientApproveDate";
             }
 
-                
-                $query .= ", CertificateDraft = :certificateDraft";
 
             if(isset($data['FinalCertificate'])){
                 $params[':finalCertificate'] = strpos($data['FinalCertificate'], '://aarrin.com') > 0 ? $data['FinalCertificate'] : saveFile($data['FinalCertificate'], $folder, base64_encode('Certificate_'. $data['IdContract']. $data['CertificateData']['company_name']));
                 $initialPart .= ", FinalCertificate";
                 $values      .= ", :finalCertificate";
             } else {
-                $query .= ", FinalCertificate = null";
+                $initialPart .= ", FinalCertificate";
+                $values      .= ", null";
+            }
+
+            if(isset($data['CertificateComments'])){
+                $params[':CertificateComments'] = json_encode($data['CertificateComments']);
+                $initialPart .= ", CertificateComments";
+                $values      .= ", :CertificateComments";
+            } else {
+                $initialPart .= ", CertificateComments";
+                $values      .= ", null";
             }
 
             if(isset($data['CertificateStatus'])){
@@ -371,9 +380,10 @@ switch ($url[5]) {
                 ':idCertificate'           => $idCertificate,
                 ':certificateStatus'       => $data['CertificateStatus'],
                 ':certificateData'         => json_encode($data['CertificateData']),
+                ':certificateComments'     => json_encode($data['CertificateComments']),
             );
 
-            $query = "UPDATE certificates SET CertificateData = :certificateData, CertificateStatus = :certificateStatus";
+            $query = "UPDATE certificates SET CertificateData = :certificateData, CertificateStatus = :certificateStatus, CertificateComments = :certificateComments";
 
             if ($data['CertificateClientApprove']) {
                 $params[':certificateClientApprove'] = (int) $data['CertificateClientApprove'];
