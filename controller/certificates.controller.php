@@ -16,6 +16,8 @@
 * Crear un nuevo certificado-> url: .../api/v1-2/certificates/create, metodo: POST, datos-solicitados: {data: jsonString}
 
 * Editar la información de un certificado-> url: .../api/v1-2/certificates/edit/:idCertificate, metodo: PUT, datos-solicitados: {data: jsonString}
+
+* Solicitar la eliminación de un certificado-> url: .../api/v1-2/certificates/delete/:idCertificate, metodo: DELETE, datos-solicitados: {}
 *
 * @author Yael Alejandro Santana Michel
 * @author ya_el1995@hotmail.com
@@ -118,7 +120,7 @@ switch ($url[5]) {
         }
 
         if (TokenTool::isValid($token)){
-            $query = "SELECT cert.IdCertificate, cert.IdContract, cert.CertificateClientApprove, cert.CertificateClientApproveDate, cert.CertificateStatus, comp.*, ser.*, sec.* FROM certificates AS cert JOIN contracts AS con ON cert.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector ORDER BY cert.CertificateCreationDate DESC";
+            $query = "SELECT cert.IdCertificate, cert.IdContract, cert.CertificateCreationDate, cert.CertificateClientApprove, cert.CertificateClientApproveDate, cert.CertificateStatus, comp.*, ser.*, sec.* FROM certificates AS cert JOIN contracts AS con ON cert.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector ORDER BY cert.CertificateCreationDate DESC";
 
             $data = DBManager::query($query);
             if ($data) {
@@ -154,7 +156,7 @@ switch ($url[5]) {
         $idCompany = (int) $url[6];
 
         if (TokenTool::isValid($token)){
-            $query = "SELECT cert.IdCertificate, cert.IdContract, cert.CertificateClientApprove, cert.CertificateClientApproveDate, cert.CertificateStatus, comp.*, ser.*, sec.* FROM certificates AS cert JOIN contracts AS con ON cert.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector WHERE comp.IdCompany = :idCompany ORDER BY cert.CertificateCreationDate DESC";
+            $query = "SELECT cert.IdCertificate, cert.IdContract, cert.CertificateCreationDate, cert.CertificateClientApprove, cert.CertificateClientApproveDate, cert.CertificateStatus, comp.*, ser.*, sec.* FROM certificates AS cert JOIN contracts AS con ON cert.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector WHERE comp.IdCompany = :idCompany ORDER BY cert.CertificateCreationDate DESC";
 
             $params = array(':idCompany' => $idCompany);
 
