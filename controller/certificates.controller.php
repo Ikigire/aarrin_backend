@@ -11,6 +11,8 @@
 
 * Solicitar la información de un certificado-> url: .../api/v1-2/certificates/certificate/:idCertificate, metodo: GET, datos-solicitados: {}
 
+* Solicitar la información de un certificado por su vinculación con el contrato-> url: .../api/v1-2/certificates/contract/:idContract, metodo: GET, datos-solicitados: {}
+
 * Cambiar la plantilla-> url: .../api/v1-2/certificates/upload, metodo: POST, datos-solicitados: {upload: File}
 
 * Crear un nuevo certificado-> url: .../api/v1-2/certificates/create, metodo: POST, datos-solicitados: {data: jsonString}
@@ -120,12 +122,13 @@ switch ($url[5]) {
         }
 
         if (TokenTool::isValid($token)){
-            $query = "SELECT cert.IdCertificate, cert.IdContract, cert.CertificateCreationDate, cert.CertificateClientApprove, cert.CertificateClientApproveDate, cert.CertificateStatus, comp.*, ser.*, sec.* FROM certificates AS cert JOIN contracts AS con ON cert.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector ORDER BY cert.CertificateCreationDate DESC";
+            $query = "SELECT cert.IdCertificate, cert.IdContract, cert.CertificateCreationDate, cert.CertificateClientApprove, cert.CertificateClientApproveDate, cert.CertificateApproved, cert.CertificateApprovedDate, cert.CertificateStatus, comp.*, ser.*, sec.* FROM certificates AS cert JOIN contracts AS con ON cert.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector ORDER BY cert.CertificateCreationDate DESC";
 
             $data = DBManager::query($query);
             if ($data) {
                 for ($i=0; $i < count($data); $i++) { 
                     $data[$i]['CertificateClientApprove'] = (bool) $data[$i]['CertificateClientApprove'];
+                    $data[$i]['CertificateApproved']      = (bool) $data[$i]['CertificateApproved'];
                 }
                 header(HTTP_CODE_200);
                 echo json_encode($data);
@@ -156,7 +159,7 @@ switch ($url[5]) {
         $idCompany = (int) $url[6];
 
         if (TokenTool::isValid($token)){
-            $query = "SELECT cert.IdCertificate, cert.IdContract, cert.CertificateCreationDate, cert.CertificateClientApprove, cert.CertificateClientApproveDate, cert.CertificateStatus, comp.*, ser.*, sec.* FROM certificates AS cert JOIN contracts AS con ON cert.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector WHERE comp.IdCompany = :idCompany ORDER BY cert.CertificateCreationDate DESC";
+            $query = "SELECT cert.IdCertificate, cert.IdContract, cert.CertificateCreationDate, cert.CertificateClientApprove, cert.CertificateClientApproveDate, cert.CertificateApproved, cert.CertificateApprovedDate, cert.CertificateStatus, comp.*, ser.*, sec.* FROM certificates AS cert JOIN contracts AS con ON cert.IdContract=con.IdContract JOIN proposals AS prop ON con.IdProposal = prop.IdProposal JOIN days_calculation AS dc ON prop.IdDayCalculation = dc.IdDayCalculation JOIN applications AS app on dc.IdApp = app.IdApp JOIN companies AS comp ON app.IdCompany = comp.IdCompany JOIN services AS ser ON app.IdService = ser.IdService JOIN sectors AS sec ON app.IdSector = sec.IdSector WHERE comp.IdCompany = :idCompany ORDER BY cert.CertificateCreationDate DESC";
 
             $params = array(':idCompany' => $idCompany);
 
@@ -165,6 +168,7 @@ switch ($url[5]) {
             if ($data) {
                 for ($i=0; $i < count($data); $i++) { 
                     $data[$i]['CertificateClientApprove'] = (bool) $data[$i]['CertificateClientApprove'];
+                    $data[$i]['CertificateApproved']      = (bool) $data[$i]['CertificateApproved'];
                 }
                 header(HTTP_CODE_200);
                 echo json_encode($data);
@@ -203,10 +207,58 @@ switch ($url[5]) {
             if ($data) {
                 $certificateData = $data[0];
                 $certificateData['CertificateClientApprove'] = (bool) $certificateData['CertificateClientApprove'];
+                $certificateData['CertificateApproved']      = (bool) $certificateData['CertificateApproved'];
                 $certificateData['CertificateData']          = json_decode($certificateData['CertificateData'], true);
                 $certificateData['CertificateComments']      = json_decode($certificateData['CertificateComments'], true);
                 header(HTTP_CODE_200);
                 echo json_encode($certificateData);
+            } else {
+                header(HTTP_CODE_404);
+            }
+        } else {
+            header(HTTP_CODE_401);
+        }
+        break;
+
+
+    /**
+     * Solicitar la información de un certificado por su vinculación con el contrato-> 
+     * url: .../api/v1-2/certificates/contract/:idContract, 
+     * metodo: GET, 
+     * datos-solicitados: {}
+     * @param int idContract ID del contrato vinculado, deberá ir al final de la url
+     * @return jsonString|null El certificado con ese ID, 
+     */
+    case 'contract':
+        if ($method !== 'GET') {
+            header('HTTP/1.1 405 Allow; GET');
+            exit();
+        }
+
+        if (!isset($url[6])) {
+            header(HTTP_CODE_412);
+            exit();
+        }
+        $idContract = (int) $url[6];
+
+        if (TokenTool::isValid($token)){
+            $query ="SELECT cert.* FROM certificates AS cert JOIN contracts AS cont ON cert.IdContract = cont.IdContract WHERE cont.IdContract = :idContract;";
+
+            $params = array(':idContract' => $idContract);
+
+            $data = DBManager::query($query, $params);
+            if ($data) {
+                $certificateData = $data;
+                for ($i=0; $i < count($certificateData); $i++) { 
+                    $certificateData[$i]['CertificateClientApprove'] = (bool) $certificateData[$i]['CertificateClientApprove'];
+                    $certificateData[$i]['CertificateApproved']      = (bool) $certificateData[$i]['CertificateApproved'];
+                    $certificateData[$i]['CertificateData']          = json_decode($certificateData[$i]['CertificateData'], true);
+                    $certificateData[$i]['CertificateComments']      = json_decode($certificateData[$i]['CertificateComments'], true);
+                }
+                header(HTTP_CODE_200);
+                echo json_encode($certificateData);
+            } else {
+                header(HTTP_CODE_404);
             }
         } else {
             header(HTTP_CODE_401);
@@ -384,6 +436,16 @@ switch ($url[5]) {
             );
 
             $query = "UPDATE certificates SET CertificateData = :certificateData, CertificateStatus = :certificateStatus, CertificateComments = :certificateComments";
+
+            if ($data['CertificateApproved']) {
+                $params[':certificateApproved'] = (int) $data['CertificateApproved'];
+                $params[':certificateApprovedDate'] = $currentDate;
+                $params[':idReviewer'] = (int) $data['IdReviewer'];
+                $query .= ", CertificateApproved = :certificateApproved, CertificateApprovedDate = :certificateApprovedDate, IdReviewer = :idReviewer";
+            } else {
+                $params[':certificateApproved'] = (int) $data['CertificateApproved'];
+                $query .= ", CertificateApproved = :certificateApproved, CertificateApprovedDate = null, IdReviewer = null";
+            }
 
             if ($data['CertificateClientApprove']) {
                 $params[':certificateClientApprove'] = (int) $data['CertificateClientApprove'];
